@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LESSON TITLE — Interactive Lesson</title>
+<link rel="stylesheet" href="common/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  /* Add any lesson-specific CSS here */
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+
+<!-- ── Progress Bar ── -->
+<div id="progress-bar">
+  <div class="logo">🌌 Lesson Title</div>
+  <div class="progress-steps">
+    <div class="step-dot active" onclick="goTo(0)" title="Introduction"></div>
+    <div class="step-dot" onclick="goTo(1)" title="Concept Check"></div>
+    <div class="step-dot" onclick="goTo(2)" title="Worked Example"></div>
+    <div class="step-dot" onclick="goTo(3)" title="Your Turn"></div>
+    <div class="step-dot" onclick="goTo(4)" title="Quiz"></div>
+    <div class="step-dot" onclick="goTo(5)" title="Homework"></div>
+  </div>
+  <div id="score-badge">⭐ 0 pts</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 0 — Introduction & Core Concepts
+     ═══════════════════════════════════════ -->
+<div class="section active" id="sec-0">
+<div class="container">
+  <div class="section-tag">Section 1 of 6 — Core Concepts</div>
+  <h1>Topic <span style="color:var(--accent)">Title</span></h1>
+  <p>Opening hook — make it engaging!</p>
+
+  <!-- Add concept cards, formula boxes, fun facts, simulators, etc. -->
+  <div class="card glow amber">
+    <h3>💡 The Big Idea</h3>
+    <p style="color:var(--text);">Main concept summary.</p>
+  </div>
+
+  <div class="card">
+    <h2>Key Formula</h2>
+    <div class="formula-box">
+      \[ F = ma \]
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <div></div>
+    <button class="btn btn-primary" onclick="goTo(1)">Check My Understanding →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 1 — Concept Check
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-1">
+<div class="container">
+  <div class="section-tag">Section 2 of 6 — Concept Check</div>
+  <h1>Let's See What <span style="color:var(--accent)">You Know! 🧠</span></h1>
+  <p>Answer these questions before we move to examples.</p>
+
+  <div class="cc-grid" id="cc-container"></div>
+  <!-- Built automatically from window.ccQuestions by common/lesson.js -->
+
+  <div id="cc-feedback" class="feedback info" style="margin-top:10px;"></div>
+  <div id="cc-result" style="display:none;" class="card green">
+    <h3 id="cc-result-title"></h3>
+    <p id="cc-result-msg"></p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(0)">← Review Concepts</button>
+    <button class="btn btn-primary" id="cc-next-btn" onclick="goTo(2)" disabled>See Worked Example →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 2 — Worked Example
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-2">
+<div class="container">
+  <div class="section-tag">Section 3 of 6 — Worked Example</div>
+  <h1>Example: <span style="color:var(--accent)">Problem Title 🔭</span></h1>
+
+  <div class="card amber">
+    <h3>Problem Statement</h3>
+    <p style="color:var(--text);">Describe the problem here.</p>
+  </div>
+
+  <!-- Add step-by-step reveal cards -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+      <div>
+        <strong>Step 1 Title</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Brief description</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('step1')">Show Step</button>
+    </div>
+    <div class="step-block" id="step1">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ \text{Solution here} \]
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(1)">← Concept Check</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Your Turn! 🚀 →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 3 — Student Practice
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-3">
+<div class="container">
+  <div class="section-tag">Section 4 of 6 — Your Turn!</div>
+  <h1>Solve It <span style="color:var(--accent)">Yourself 🚀</span></h1>
+
+  <div class="card amber">
+    <h3>Problem</h3>
+    <p style="color:var(--text);">Problem statement here.</p>
+  </div>
+
+  <!-- Add practice inputs, formula choices, etc. -->
+  <div class="card">
+    <h3>Calculate the Answer</h3>
+    <div class="input-row">
+      <label>Your answer (units):</label>
+      <input type="text" id="ans-practice" placeholder="e.g. 42 or 6*7">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkPractice()">Check ✓</button>
+    </div>
+    <div id="feedback-practice" class="feedback"></div>
+    <div id="expr-hint-practice"></div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(2)">← Worked Example</button>
+    <button class="btn btn-primary" id="practice-next" onclick="goTo(4)" disabled>Take the Quiz →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 4 — Quiz
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-4">
+<div class="container">
+  <div class="section-tag">Section 5 of 6 — Quiz</div>
+  <h1>Quiz Time! <span style="color:var(--accent)">⚡</span></h1>
+  <p>Test your full understanding!</p>
+
+  <div id="quiz-container"></div>
+  <!-- Built automatically from window.quizData by common/lesson.js -->
+
+  <div id="quiz-result" style="display:none;">
+    <div class="card glow">
+      <div class="score-final">
+        <div class="score-circle">
+          <div class="num" id="quiz-score-num">0</div>
+          <div class="den" id="quiz-score-den">/ 0</div>
+        </div>
+        <h2 id="quiz-result-title"></h2>
+        <p id="quiz-result-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(3)">← Practice</button>
+    <button class="btn btn-primary" id="quiz-next-btn" onclick="goTo(5)" disabled>Homework →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 5 — Homework
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-5">
+<div class="container">
+  <div class="section-tag">Section 6 of 6 — Homework</div>
+  <h1>Homework <span style="color:var(--accent)">Problems 📝</span></h1>
+  <p>Work through these problems. Use the step-by-step guide!</p>
+
+  <!-- Add homework items like this: -->
+  <div class="hw-item">
+    <div class="hw-num">Problem 1</div>
+    <p style="color:var(--text);margin-bottom:12px;">Problem text here.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw1')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw1" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw1" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      Full answer here with \(\LaTeX\) formulas.
+    </div>
+  </div>
+
+  <!-- Final score -->
+  <div class="card glow" style="margin-top:30px;text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:8px;">🌌</div>
+    <h2>Lesson Complete!</h2>
+    <p>Total Score: <strong style="color:var(--accent);font-size:1.2rem;" id="final-score-display">—</strong></p>
+    <button class="btn btn-primary" style="margin-top:12px;" onclick="goTo(0)">🔄 Restart Lesson</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(4)">← Quiz</button>
+    <div></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script>
+// ═══════════════════════════════════════════════════════════
+// LESSON DATA — Define your lesson content here
+// ═══════════════════════════════════════════════════════════
+
+// ── Concept Check Questions ───────────────────────────────
+// Each question: { q, opts (array of 4 choices), ans (0-indexed), explain }
+window.ccQuestions = [
+  {
+    q: "Sample question?",
+    opts: ["Wrong answer A", "Correct answer B", "Wrong answer C", "Wrong answer D"],
+    ans: 1,
+    explain: "✅ Explanation of why B is correct."
+  }
+  // Add more questions...
+];
+
+// ── Quiz Questions ────────────────────────────────────────
+// MC: { type:'mc', q, opts, ans, explain }
+// Calc: { type:'calc', q, answer (number), tolerance (fraction), unit, hint, explain }
+window.quizData = [
+  {
+    type: 'mc',
+    q: 'Sample MC question?',
+    opts: ['A', 'B', 'C', 'D'],
+    ans: 0,
+    explain: 'Explanation here.'
+  },
+  {
+    type: 'calc',
+    q: 'Calculate something.',
+    answer: 42,
+    tolerance: 0.05,
+    unit: 'N',
+    hint: 'Try: mass × acceleration',
+    explain: 'F = ma = ... ≈ 42 N'
+  }
+  // Add more questions...
+];
+
+// ── Homework Step-by-Step Data ────────────────────────────
+// Each hw ID maps to an array of { title, body (HTML with \\( LaTeX \\)) }
+window.hwSteps = {
+  hw1: [
+    { title: 'Step 1: Identify the formula',
+      body: 'Use \\(F = ma\\).' },
+    { title: 'Step 2: Substitute values',
+      body: '\\[F = 10 \\times 4.2 = \\boxed{42\\ N}\\]' }
+  ]
+  // Add more homework problems...
+};
+
+// ── Practice Input Config ─────────────────────────────────
+// [inputElementId, checkFunctionName] pairs for Enter-key wiring
+window.practiceInputs = [['ans-practice', 'checkPractice']];
+window.practiceHints  = ['expr-hint-practice'];
+
+// ═══════════════════════════════════════════════════════════
+// LESSON-SPECIFIC FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+
+// Add any lesson-specific animations, simulators, or check functions here.
+// You can use: parseAnswer(), addScore(), sectionDone[], revealStep(), goTo()
+// (all provided by common/lesson.js)
+
+function checkPractice() {
+  var ans = parseAnswer(document.getElementById('ans-practice').value);
+  var fb = document.getElementById('feedback-practice');
+  var expected = 42; // ← your expected answer
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression.'; return; }
+  if (Math.abs(ans - expected) / expected < 0.05) {
+    document.getElementById('ans-practice').className = 'correct-ans';
+    fb.className = 'feedback ok show'; fb.textContent = '🎉 Correct!';
+    addScore(10);
+    document.getElementById('practice-next').disabled = false;
+    sectionDone[3] = true;
+  } else {
+    document.getElementById('ans-practice').className = 'wrong-ans';
+    fb.className = 'feedback bad show'; fb.textContent = '❌ Not quite. Try again!';
+  }
+}
+</script>
+<script src="common/lesson.js"></script>
+</body>
+</html>
