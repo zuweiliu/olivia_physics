@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Olivia's Physics Lessons</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Inter',sans-serif;
+    background:#050a18;
+    color:#e2e8f0;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:60px 20px;
+  }
+  h1 {
+    font-size:2.4rem;
+    font-weight:800;
+    background:linear-gradient(135deg,#818cf8,#6ee7b7);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    margin-bottom:8px;
+  }
+  .subtitle {
+    color:#94a3b8;
+    font-size:1rem;
+    margin-bottom:48px;
+  }
+  .lessons {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:20px;
+    width:100%;
+    max-width:900px;
+  }
+  .lesson-card {
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px;
+    padding:28px 24px;
+    text-decoration:none;
+    color:inherit;
+    transition:all 0.25s ease;
+    display:block;
+  }
+  .lesson-card:hover {
+    background:rgba(129,140,248,0.08);
+    border-color:rgba(129,140,248,0.3);
+    transform:translateY(-4px);
+    box-shadow:0 12px 40px rgba(129,140,248,0.12);
+  }
+  .lesson-icon {
+    font-size:2.2rem;
+    margin-bottom:12px;
+  }
+  .lesson-title {
+    font-size:1.15rem;
+    font-weight:700;
+    color:#e2e8f0;
+    margin-bottom:6px;
+  }
+  .lesson-desc {
+    font-size:0.88rem;
+    color:#94a3b8;
+    line-height:1.5;
+  }
+  .lesson-tag {
+    display:inline-block;
+    margin-top:12px;
+    padding:3px 10px;
+    border-radius:6px;
+    font-size:0.75rem;
+    font-weight:600;
+    background:rgba(129,140,248,0.15);
+    color:#818cf8;
+  }
+  footer {
+    margin-top:60px;
+    color:#475569;
+    font-size:0.82rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>Olivia's Physics Lessons</h1>
+<p class="subtitle">Interactive lessons to explore the laws of the universe</p>
+
+<div class="lessons">
+
+  <a class="lesson-card" href="gravitation_lesson.html">
+    <div class="lesson-icon">🌍</div>
+    <div class="lesson-title">Universal Gravitation</div>
+    <div class="lesson-desc">
+      Newton's Law of Universal Gravitation, gravitational constant G,
+      acceleration due to gravity, and weight at different altitudes.
+      Includes interactive simulator, quiz, and guided homework.
+    </div>
+    <span class="lesson-tag">Chapter 20</span>
+  </a>
+
+  <!-- Add more lessons here -->
+
+</div>
+
+<footer>Keep exploring — more lessons coming soon!</footer>
+
+</body>
+</html>
