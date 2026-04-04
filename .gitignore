@@ -1,0 +1,8 @@
+# Source document (large binary)
+20CN_Gravitation.docx
+
+# macOS
+.DS_Store
+
+# Editor
+.windsurf/

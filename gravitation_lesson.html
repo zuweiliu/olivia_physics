@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Universal Gravitation — Interactive Lesson</title>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  :root {
+    --space: #050a18;
+    --deep: #0a1628;
+    --card: #0f1f3d;
+    --accent: #3b82f6;
+    --accent2: #f59e0b;
+    --green: #22c55e;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #1e3a5f;
+    --glow: rgba(59,130,246,0.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--space);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Stars ── */
+  #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+  /* ── Progress bar ── */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(5,10,24,0.85); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border); padding: 10px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  #progress-bar .logo { font-weight: 700; font-size: 0.9rem; color: var(--accent); white-space: nowrap; }
+  .progress-steps { display: flex; gap: 6px; flex: 1; }
+  .step-dot {
+    flex: 1; height: 6px; border-radius: 99px;
+    background: var(--border); transition: background 0.4s;
+    cursor: pointer;
+  }
+  .step-dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .step-dot.done { background: var(--green); }
+  #score-badge {
+    background: var(--card); border: 1px solid var(--accent);
+    border-radius: 20px; padding: 3px 12px; font-size: 0.8rem;
+    font-weight: 600; color: var(--accent); white-space: nowrap;
+  }
+
+  /* ── Sections ── */
+  .section {
+    position: relative; z-index: 1;
+    min-height: 100vh; padding: 90px 20px 60px;
+    display: none; flex-direction: column; align-items: center;
+  }
+  .section.active { display: flex; }
+
+  .container { width: 100%; max-width: 820px; }
+
+  /* ── Headings ── */
+  .section-tag {
+    display: inline-block; background: rgba(59,130,246,0.15);
+    border: 1px solid var(--accent); color: var(--accent);
+    border-radius: 20px; padding: 4px 14px; font-size: 0.78rem;
+    font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  h1 { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+  h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; }
+  h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 8px; color: var(--accent2); }
+  p  { line-height: 1.75; color: var(--muted); margin-bottom: 14px; }
+  p strong { color: var(--text); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px 28px; margin-bottom: 20px;
+  }
+  .card.glow { box-shadow: 0 0 30px var(--glow); }
+  .card.green { border-color: var(--green); background: rgba(34,197,94,0.07); }
+  .card.amber { border-color: var(--accent2); background: rgba(245,158,11,0.07); }
+  .card.red-c  { border-color: var(--red);  background: rgba(239,68,68,0.07); }
+
+  /* ── Formula box ── */
+  .formula-box {
+    background: rgba(59,130,246,0.1); border: 2px solid var(--accent);
+    border-radius: 12px; padding: 20px 24px; text-align: center;
+    font-size: 1.15rem; margin: 16px 0;
+  }
+
+  /* ── Fact box ── */
+  .fun-fact {
+    background: rgba(245,158,11,0.08); border-left: 4px solid var(--accent2);
+    border-radius: 0 10px 10px 0; padding: 14px 18px; margin: 14px 0;
+  }
+  .fun-fact::before { content: "⚡ Fun Fact: "; font-weight: 700; color: var(--accent2); }
+
+  /* ── Quiz options ── */
+  .options { display: grid; gap: 10px; margin-top: 12px; }
+  .option-btn {
+    background: var(--deep); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 13px 18px; text-align: left;
+    color: var(--text); font-size: 0.95rem; cursor: pointer;
+    transition: all 0.2s; display: flex; align-items: center; gap: 10px;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(59,130,246,0.1); }
+  .option-btn.correct { border-color: var(--green); background: rgba(34,197,94,0.12); color: #86efac; }
+  .option-btn.wrong   { border-color: var(--red);   background: rgba(239,68,68,0.12);  color: #fca5a5; }
+  .option-btn .icon   { font-size: 1.1rem; }
+
+  /* ── Input fields ── */
+  .input-row { display: flex; gap: 10px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
+  .input-row label { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+  input[type=number], input[type=text] {
+    background: var(--deep); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 0.95rem;
+    width: 160px; outline: none; transition: border-color 0.2s;
+  }
+  input:focus { border-color: var(--accent); }
+  input.correct-ans { border-color: var(--green); background: rgba(34,197,94,0.08); }
+  input.wrong-ans   { border-color: var(--red);   background: rgba(239,68,68,0.08); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px; border-radius: 10px; font-size: 0.95rem;
+    font-weight: 600; cursor: pointer; transition: all 0.2s; border: none;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
+  .btn-secondary { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); }
+  .btn-secondary:hover { background: rgba(59,130,246,0.12); }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover { background: #16a34a; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+  /* ── Navigation row ── */
+  .nav-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border);
+  }
+
+  /* ── Feedback banner ── */
+  .feedback {
+    border-radius: 10px; padding: 14px 18px; margin-top: 14px;
+    font-weight: 600; display: none; align-items: center; gap: 10px;
+    font-size: 0.95rem;
+  }
+  .feedback.show { display: flex; }
+  .feedback.ok  { background: rgba(34,197,94,0.12);  border: 1px solid var(--green); color: #86efac; }
+  .feedback.bad { background: rgba(239,68,68,0.12);  border: 1px solid var(--red);   color: #fca5a5; }
+  .feedback.info{ background: rgba(59,130,246,0.12); border: 1px solid var(--accent); color: #93c5fd; }
+
+  /* ── Step reveal ── */
+  .step-block { display: none; margin-top: 14px; animation: fadeUp 0.4s ease; }
+  .step-block.visible { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Canvas gravity sim ── */
+  #gravity-canvas {
+    width: 100%; max-width: 600px; height: 240px;
+    border-radius: 12px; border: 1px solid var(--border);
+    margin: 16px auto; display: block;
+  }
+
+  /* ── Progress ring ── */
+  .ring-wrap { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; margin-bottom: 20px; }
+  .ring { position: relative; width: 80px; height: 80px; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring-val { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; }
+
+  /* ── Slider sim ── */
+  .sim-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 10px 0; }
+  input[type=range] { flex: 1; min-width: 120px; accent-color: var(--accent); }
+  .sim-val { color: var(--accent); font-weight: 700; min-width: 80px; }
+
+  /* ── Planet icon ── */
+  .planet-row { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 16px 0; }
+  .planet { border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 700; color: #fff; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+  .force-arrow { color: var(--accent); font-size: 1.4rem; font-weight: 700; }
+
+  /* ── HW list ── */
+  .hw-item {
+    background: var(--deep); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 22px; margin-bottom: 14px;
+  }
+  .hw-num { background: var(--accent); color: #fff; border-radius: 6px; padding: 2px 10px;
+            font-size: 0.8rem; font-weight: 700; display: inline-block; margin-bottom: 8px; }
+
+  /* ── Score final ── */
+  .score-final {
+    text-align: center; padding: 40px 20px;
+  }
+  .score-circle {
+    width: 140px; height: 140px; border-radius: 50%;
+    border: 5px solid var(--accent); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; margin: 0 auto 20px;
+    box-shadow: 0 0 40px var(--glow);
+  }
+  .score-circle .num { font-size: 2.2rem; font-weight: 800; }
+  .score-circle .den { font-size: 0.9rem; color: var(--muted); }
+
+  /* ── Concept check grid ── */
+  .cc-grid { display: grid; gap: 16px; }
+  .cc-q { background: var(--deep); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .cc-q p { color: var(--text); font-weight: 600; margin-bottom: 10px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .card { padding: 18px; }
+    h1 { font-size: 1.6rem; }
+    .progress-steps { gap: 3px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+
+<!-- ── Progress Bar ── -->
+<div id="progress-bar">
+  <div class="logo">🌌 Gravitation</div>
+  <div class="progress-steps">
+    <div class="step-dot active" onclick="goTo(0)" title="Introduction"></div>
+    <div class="step-dot" onclick="goTo(1)" title="Concept Check"></div>
+    <div class="step-dot" onclick="goTo(2)" title="Worked Example"></div>
+    <div class="step-dot" onclick="goTo(3)" title="Your Turn"></div>
+    <div class="step-dot" onclick="goTo(4)" title="Quiz"></div>
+    <div class="step-dot" onclick="goTo(5)" title="Homework"></div>
+  </div>
+  <div id="score-badge">⭐ 0 pts</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 0 — Introduction & Core Concepts
+     ════════════════════════════════════════════ -->
+<div class="section active" id="sec-0">
+<div class="container">
+  <div class="section-tag">Section 1 of 6 — Core Concepts</div>
+  <h1>Newton's Universal<br><span style="color:var(--accent)">Law of Gravitation</span></h1>
+  <p>What do <strong>aching feet</strong>, a <strong>falling apple</strong>, and the <strong>Moon's orbit</strong> have in common?
+     They are all caused by the same force — <strong>gravity</strong>. 🍎🌙</p>
+
+  <div class="fun-fact">
+    In 1687, Isaac Newton was the first to write an <em>exact</em> mathematical law for gravity — and it works everywhere in the universe!
+  </div>
+
+  <!-- Gravity simulation canvas -->
+  <canvas id="gravity-canvas" width="600" height="240"></canvas>
+  <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-top:-8px;">
+    🎮 Watch gravity keep the moon in orbit. The gravitational force = centripetal force!
+  </p>
+
+  <!-- The Big Idea -->
+  <div class="card glow amber" style="margin-top:24px;">
+    <h3>💡 The Big Idea</h3>
+    <p style="color:var(--text);font-size:1.05rem;"><strong>Everything pulls on everything else.</strong>
+       Every particle in the universe attracts every other particle with a gravitational force.</p>
+  </div>
+
+  <!-- Newton's Law formula -->
+  <div class="card">
+    <h2>Newton's Law of Universal Gravitation</h2>
+    <p>The force between two masses \(m_1\) and \(m_2\) separated by distance \(r\):</p>
+    <div class="formula-box">
+      \[ F = G \frac{m_1 m_2}{r^2} \]
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px;">
+      <div class="card" style="padding:14px;margin:0;">
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:6px;">Gravitational Constant</div>
+        <div style="color:var(--accent);font-weight:700;">\(G = 6.674 \times 10^{-11}\ \frac{N \cdot m^2}{kg^2}\)</div>
+      </div>
+      <div class="card" style="padding:14px;margin:0;">
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:6px;">Direction</div>
+        <div style="color:var(--text);font-size:0.9rem;">Always <strong>attractive</strong>, directed along the line joining the two masses</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Force simulator -->
+  <div class="card">
+    <h3>🎛️ Interactive: How Force Changes with Distance</h3>
+    <p>Drag the slider to see how gravitational force changes as two 1000 kg masses move apart.</p>
+    <div class="sim-row">
+      <span style="font-size:1.5rem;">🔵</span>
+      <input type="range" id="dist-slider" min="1" max="10" step="0.1" value="2" oninput="updateSim()">
+      <span style="font-size:1.5rem;">🔵</span>
+    </div>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;">Distance:</span>
+      <span class="sim-val" id="sim-dist">2.0 m</span>
+      <span style="color:var(--muted);font-size:0.9rem;margin-left:20px;">Force:</span>
+      <span class="sim-val" id="sim-force">1.67 × 10⁻⁵ N</span>
+    </div>
+    <div style="height:8px;background:var(--deep);border-radius:4px;margin-top:8px;overflow:hidden;">
+      <div id="force-bar" style="height:100%;background:var(--accent);border-radius:4px;transition:width 0.2s;width:50%;"></div>
+    </div>
+    <div id="sim-note" style="margin-top:8px;font-size:0.85rem;color:var(--muted);"></div>
+  </div>
+
+  <!-- Weight & g -->
+  <div class="card">
+    <h2>Weight vs. Gravitational Constant</h2>
+    <p>Near Earth's surface, weight \(W = mg\). But where does \(g = 9.80\ m/s^2\) come from?
+       Set \(F = mg\) and solve:</p>
+    <div class="formula-box">
+      \[ g = G\frac{M_E}{r^2} \]
+    </div>
+    <p>Plug in \(M_E = 5.98 \times 10^{24}\ kg\) and \(r_E = 6.37 \times 10^6\ m\):</p>
+    <div class="formula-box" style="font-size:0.95rem;">
+      \[ g = \left(6.674 \times 10^{-11}\right) \times \frac{5.98 \times 10^{24}}{(6.37 \times 10^6)^2} = 9.80\ m/s^2 \checkmark \]
+    </div>
+    <div class="card amber" style="padding:14px;margin:14px 0 0;">
+      <strong>⚠️ Key Insight:</strong>
+      <p style="margin:6px 0 0; color:var(--text);">For objects <em>near Earth's surface</em>, use \(W = mg\).
+         For objects <em>far from Earth</em>, always use \(W = G\dfrac{M_E\, m}{r^2}\).</p>
+    </div>
+  </div>
+
+  <!-- Key numbers reference card -->
+  <div class="card">
+    <h3>📋 Useful Constants (keep handy!)</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.88rem;">
+      <div style="color:var(--muted);">\(G\)</div><div>\(6.674 \times 10^{-11}\ N\cdot m^2/kg^2\)</div>
+      <div style="color:var(--muted);">\(M_{Earth}\)</div><div>\(5.98 \times 10^{24}\ kg\)</div>
+      <div style="color:var(--muted);">\(r_{Earth}\)</div><div>\(6.37 \times 10^6\ m\)</div>
+      <div style="color:var(--muted);">\(M_{Moon}\)</div><div>\(7.4 \times 10^{22}\ kg\)</div>
+      <div style="color:var(--muted);">\(r_{Moon}\)</div><div>\(1.74 \times 10^6\ m\)</div>
+      <div style="color:var(--muted);">\(r_{Moon\,orbit}\)</div><div>\(3.8 \times 10^8\ m\)</div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <div></div>
+    <button class="btn btn-primary" onclick="goTo(1)">Check My Understanding →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 1 — Concept Check
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-1">
+<div class="container">
+  <div class="section-tag">Section 2 of 6 — Concept Check</div>
+  <h1>Let's See What <span style="color:var(--accent)">You Know! 🧠</span></h1>
+  <p>Answer these 4 questions before we move to examples. Don't worry — hints are available!</p>
+
+  <div class="cc-grid" id="cc-container"></div>
+
+  <div id="cc-feedback" class="feedback info" style="margin-top:10px;"></div>
+  <div id="cc-result" style="display:none;" class="card green" style="margin-top:16px;">
+    <h3 id="cc-result-title"></h3>
+    <p id="cc-result-msg"></p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(0)">← Review Concepts</button>
+    <button class="btn btn-primary" id="cc-next-btn" onclick="goTo(2)" disabled>See Worked Example →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 2 — Worked Example
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-2">
+<div class="container">
+  <div class="section-tag">Section 3 of 6 — Worked Example</div>
+  <h1>Example: <span style="color:var(--accent)">Hubble Space Telescope 🔭</span></h1>
+
+  <div class="card amber">
+    <h3>Problem Statement</h3>
+    <p style="color:var(--text);">The Hubble Space Telescope has a mass of <strong>11,600 kg</strong> and orbits Earth at an altitude of <strong>598 km</strong> above Earth's surface.</p>
+    <p style="color:var(--text);margin:0;">(a) What is its weight when resting on Earth?<br>
+    (b) What is its weight while in orbit?</p>
+  </div>
+
+  <p>Work through each step by clicking the buttons below 👇</p>
+
+  <!-- Step 1 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+      <div>
+        <strong>Part (a): Weight on Earth's surface</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Near Earth, use W = mg</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('step1')">Show Step</button>
+    </div>
+    <div class="step-block" id="step1">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ W = mg = 11600\ kg \times 9.80\ m/s^2 \]
+        \[ \boxed{W = 113{,}680\ N \approx 1.14 \times 10^5\ N} \]
+      </div>
+      <p style="font-size:0.88rem;">💡 On Earth, Hubble weighs about as much as a fully-loaded semi-truck!</p>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+      <div>
+        <strong>Part (b): Find the orbital radius r</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">r = Earth's radius + altitude above surface</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('step2')">Show Step</button>
+    </div>
+    <div class="step-block" id="step2">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ r = r_E + h = 6.37 \times 10^6\ m + 598 \times 10^3\ m \]
+        \[ r = 6.37 \times 10^6 + 0.598 \times 10^6 = \boxed{6.968 \times 10^6\ m} \]
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+      <div>
+        <strong>Part (b): Apply Newton's Law of Gravitation</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Far from surface → use \(W = G M_E m / r^2\)</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('step3')">Show Step</button>
+    </div>
+    <div class="step-block" id="step3">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ W = G\frac{M_E\, m}{r^2} = (6.674 \times 10^{-11}) \times \frac{(5.98 \times 10^{24})(11600)}{(6.968 \times 10^6)^2} \]
+        \[ = \frac{6.674 \times 10^{-11} \times 6.937 \times 10^{28}}{4.855 \times 10^{13}} \]
+        \[ \boxed{W \approx 9.53 \times 10^4\ N} \]
+      </div>
+      <div class="card green" style="padding:14px;margin-top:12px;">
+        <strong>✅ Compare:</strong> On Earth: 113,680 N &nbsp;|&nbsp; In orbit: 95,300 N
+        <p style="margin:6px 0 0;font-size:0.88rem;">Gravity in orbit is <em>still significant</em> — it's what keeps Hubble orbiting! (~84% of surface weight)</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card amber">
+    <h3>🤔 Thinking Question</h3>
+    <p style="color:var(--text);">Why is astronauts' apparent weight (what they feel) zero in orbit, even though gravity is still pulling them?</p>
+    <button class="btn btn-secondary" style="padding:8px 16px;font-size:0.85rem;" onclick="revealStep('orbit-answer')">Reveal Answer</button>
+    <div class="step-block" id="orbit-answer">
+      <p style="color:var(--text);margin-top:10px;">Because the astronaut <em>and</em> the spacecraft are both in <strong>free fall</strong> together around Earth.
+         There's no normal force — they are in continuous free fall, which creates the sensation of weightlessness!</p>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(1)">← Concept Check</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Your Turn! 🚀 →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 3 — Student Practice
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-3">
+<div class="container">
+  <div class="section-tag">Section 4 of 6 — Your Turn!</div>
+  <h1>Solve It <span style="color:var(--accent)">Yourself 🚀</span></h1>
+
+  <div class="card amber">
+    <h3>Problem: The International Space Station (ISS)</h3>
+    <p style="color:var(--text);">The ISS has a mass of <strong>500 kg</strong> (simplified) and orbits Earth at an altitude of <strong>200 km</strong>.</p>
+    <p style="color:var(--text);margin:0;">
+      <strong>(a)</strong> What is the weight of the ISS on Earth's surface? (use \(g = 9.80\ m/s^2\))<br>
+      <strong>(b)</strong> What is the gravitational force on the ISS in orbit?
+    </p>
+  </div>
+
+  <!-- Part (a) -->
+  <div class="card">
+    <h3>Part (a): Weight on Earth</h3>
+    <p>Choose the correct formula:</p>
+    <div class="options" id="formula-choice">
+      <button class="option-btn" onclick="checkFormulaChoice(this,'wrong')"><span class="icon">📐</span> \(W = G M_E m / r^2\)</button>
+      <button class="option-btn" onclick="checkFormulaChoice(this,'correct')"><span class="icon">📐</span> \(W = mg\)&nbsp;&nbsp;(near Earth's surface)</button>
+      <button class="option-btn" onclick="checkFormulaChoice(this,'wrong')"><span class="icon">📐</span> \(F = m_1 m_2 / r\)</button>
+    </div>
+    <div id="formula-feedback" class="feedback"></div>
+
+    <div id="partA-calc" class="step-block" style="margin-top:16px;">
+      <p>Now calculate: \(W = m \times g\)</p>
+      <div class="input-row">
+        <label>Your answer (N):</label>
+        <input type="text" id="ans-a" placeholder="e.g. 4900 or 500*g">
+        <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkAnsA()">Check ✓</button>
+        <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintA()">Hint 💡</button>
+      </div>
+      <div id="feedback-a" class="feedback"></div>
+      <div id="expr-hint-a"></div>
+      <div id="hint-a" class="step-block"></div>
+    </div>
+  </div>
+
+  <!-- Part (b) -->
+  <div id="partB-section" style="display:none;">
+  <div class="card">
+    <h3>Part (b): Gravitational Force in Orbit</h3>
+
+    <p><strong>Step 1:</strong> Find the orbital radius \(r\)</p>
+    <div class="input-row">
+      <label>\(r\) (m):</label>
+      <input type="text" id="ans-r" placeholder="e.g. 6.57e6 or RE+200e3">
+      <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="checkRadius()">Check ✓</button>
+      <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintR()">Hint 💡</button>
+    </div>
+    <div id="feedback-r" class="feedback"></div>
+    <div id="expr-hint-r"></div>
+    <div id="hint-r" class="step-block"></div>
+
+    <div id="step-force" class="step-block" style="margin-top:16px;">
+      <p><strong>Step 2:</strong> Use \(F = G M_E m / r^2\) — calculate the force in Newtons</p>
+      <div class="input-row">
+        <label>\(F\) (N):</label>
+        <input type="text" id="ans-b" placeholder="e.g. 4600 or G*ME*500/(6.57e6)^2">
+        <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkAnsB()">Check ✓</button>
+        <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintB()">Hint 💡</button>
+      </div>
+      <div id="feedback-b" class="feedback"></div>
+      <div id="expr-hint-b"></div>
+      <div id="hint-b" class="step-block"></div>
+    </div>
+  </div>
+  </div>
+
+  <div id="practice-done" style="display:none;" class="card green">
+    <h3>🎉 Practice Complete!</h3>
+    <p style="color:var(--text);">Excellent work! Notice that the ISS weight dropped from 4900 N on Earth to ~4624 N in orbit — gravity is still 94% as strong at 200 km altitude!</p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(2)">← Worked Example</button>
+    <button class="btn btn-primary" id="practice-next" onclick="goTo(4)" disabled>Take the Quiz →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 4 — Quiz
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-4">
+<div class="container">
+  <div class="section-tag">Section 5 of 6 — Quiz</div>
+  <h1>Quiz Time! <span style="color:var(--accent)">⚡ 6 Questions</span></h1>
+  <p>Test your full understanding. You'll earn points for each correct answer!</p>
+
+  <div id="quiz-container"></div>
+
+  <div id="quiz-result" style="display:none;">
+    <div class="card glow">
+      <div class="score-final">
+        <div class="score-circle">
+          <div class="num" id="quiz-score-num">0</div>
+          <div class="den" id="quiz-score-den">/ 6</div>
+        </div>
+        <h2 id="quiz-result-title"></h2>
+        <p id="quiz-result-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(3)">← Practice</button>
+    <button class="btn btn-primary" id="quiz-next-btn" onclick="goTo(5)" disabled>Homework →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 5 — Homework
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-5">
+<div class="container">
+  <div class="section-tag">Section 6 of 6 — Homework</div>
+  <h1>Homework <span style="color:var(--accent)">Problems 📝</span></h1>
+  <p>Work through these problems on paper. Use the constants table and Newton's law. Show all steps!</p>
+
+  <div class="card amber" style="margin-bottom:20px;">
+    <h3>📋 Constants Reference</h3>
+    <p style="color:var(--text);font-size:0.88rem;margin:0;">
+      \(G = 6.674 \times 10^{-11}\ N\cdot m^2/kg^2\) &nbsp;|&nbsp;
+      \(M_E = 5.98 \times 10^{24}\ kg\) &nbsp;|&nbsp; \(r_E = 6.37 \times 10^6\ m\)<br>
+      \(M_{moon} = 7.4 \times 10^{22}\ kg\) &nbsp;|&nbsp; \(r_{moon} = 1.74 \times 10^6\ m\) &nbsp;|&nbsp;
+      \(r_{moon,orbit} = 3.8 \times 10^8\ m\)
+    </p>
+  </div>
+
+  <h2 style="margin-bottom:14px;">Group A — Newton's Universal Gravitation</h2>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 1</div>
+    <p style="color:var(--text);margin-bottom:12px;">What gravitational force does the Earth exert on the Moon, which orbits at a distance of \(3.8 \times 10^8\ m\)?
+    What force does the Moon exert on the Earth? Explain.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw1')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw1" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw1" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      \(F = G\dfrac{M_E M_m}{r^2} = 6.674\!\times\!10^{-11} \times \dfrac{5.98\!\times\!10^{24} \times 7.4\!\times\!10^{22}}{(3.8\!\times\!10^8)^2} \approx \boxed{2.05 \times 10^{20}\ N}\)<br><br>
+      <span style="color:var(--muted);">By Newton's 3rd Law, the Moon exerts the same magnitude force (2.05×10²⁰ N) back on Earth — forces always come in equal-and-opposite pairs.</span>
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 2</div>
+    <p style="color:var(--text);margin-bottom:12px;">A 2.0 kg meteor is attracted to the Earth with a force of 15.0 N.<br>
+    (a) Find its distance from the center of the Earth.<br>
+    (b) Find its altitude above the Earth's surface, in kilometers.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw2')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw2" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw2" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(r = \sqrt{G M_E m / F} = \sqrt{6.674\!\times\!10^{-11} \times 5.98\!\times\!10^{24} \times 2.0\,/\,15.0} \approx \boxed{7.28 \times 10^6\ m}\)<br>
+      (b) altitude \(= r - r_E = 7.28\!\times\!10^6 - 6.37\!\times\!10^6 = 9.1\!\times\!10^5\ m \approx \boxed{910\ km}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 3</div>
+    <p style="color:var(--text);margin-bottom:12px;">Two identical space shuttles docked 90.0 meters apart are attracted to each other with a force of \(9.20 \times 10^{-7}\ N\). Find their masses.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw3')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw3" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw3" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      Since \(m_1 = m_2 = m\): \(F = Gm^2/r^2\), so \(m = r\sqrt{F/G}\)<br>
+      \(m = 90.0 \times \sqrt{9.20\!\times\!10^{-7}\,/\,6.674\!\times\!10^{-11}} = 90.0 \times 117.4 \approx \boxed{1.06 \times 10^4\ kg}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 5</div>
+    <p style="color:var(--text);margin-bottom:12px;">
+      A 120 g ball is located at the center of a 8000 kg hollow sphere 100.0 m in radius.
+      The ball is also 50.0 m from the center of a solid, 50.0 kg sphere, 25.0 m in radius.
+      What is the net gravitational force the two spheres exert on the ball?
+    </p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw5')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw5" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw5" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      Hollow sphere → Shell Theorem → <strong>0 N</strong> on ball inside it.<br>
+      Solid sphere: \(F = G\dfrac{m_\text{ball}\,m_\text{solid}}{r^2} = 6.674\!\times\!10^{-11}\times\dfrac{0.120\times50.0}{(50.0)^2} \approx \boxed{1.60\times10^{-13}\ N}\)<br>
+      Net force = \(1.60\times10^{-13}\ N\) toward the solid sphere.
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 6</div>
+    <p style="color:var(--text);margin-bottom:12px;">
+      Three lead balls in a line — net force on the middle ball is zero.
+      A 20.0 kg ball is 4.0 m to the left; an unknown mass \(m\) is 2.0 m to the right.
+      Find \(m\).
+    </p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw6')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw6" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw6" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      Set \(F_\text{left}=F_\text{right}\): \(\dfrac{G\cdot20.0\cdot M}{(4.0)^2} = \dfrac{G\cdot m\cdot M}{(2.0)^2}\)<br>
+      Cancel \(G\) and \(M\): \(\dfrac{20.0}{16} = \dfrac{m}{4.0}\) → \(m = \boxed{5.0\ kg}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 7</div>
+    <p style="color:var(--text);margin-bottom:12px;">
+      Three identical spheres of mass \(m\) at vertices of an equilateral triangle (side \(L\)).
+      Write an expression for the net gravitational force on one sphere due to the other two.
+    </p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw7')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw7" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw7" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      Each of the other two exerts \(F=Gm^2/L^2\); angle between them = 60°.<br>
+      \(F_\text{net}=\sqrt{F^2+F^2+2F^2\cos60°}=F\sqrt{3}\)<br>
+      \[\boxed{F_\text{net}=\frac{\sqrt{3}\,Gm^2}{L^2}}\] directed toward the centroid.
+    </div>
+  </div>
+
+  <h2 style="margin-bottom:14px;margin-top:30px;">Group B — Acceleration Due to Gravity</h2>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem B1</div>
+    <p style="color:var(--text);margin-bottom:12px;">An astronaut on the Moon holds a feather.<br>
+    (a) Find \(g\) on the Moon.<br>
+    (b) Drop the feather from 2.0 m — how long to hit the ground?<br>
+    (c) The feather weighs 0.020 N on Earth. What is its weight on the Moon?</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hwB1')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hwB1" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hwB1" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(g_\text{moon}=G M_m/r_m^2=6.674\!\times\!10^{-11}\times7.4\!\times\!10^{22}/(1.74\!\times\!10^6)^2\approx\boxed{1.63\ m/s^2}\)<br>
+      (b) \(t=\sqrt{2h/g}=\sqrt{4.0/1.63}\approx\boxed{1.57\ s}\)<br>
+      (c) \(W_\text{moon}=0.020\times(1.63/9.80)\approx\boxed{3.3\times10^{-3}\ N}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem B2</div>
+    <p style="color:var(--text);margin-bottom:12px;">A space shuttle (\(9.3\times10^4\ kg\)) orbits at 350 km altitude.<br>
+    (a) Distance from Earth's center?<br>
+    (b) Centripetal acceleration?<br>
+    (c) Weight of an 85 kg astronaut if at rest at that altitude?</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hwB2')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hwB2" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hwB2" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(r=6.37\!\times\!10^6+350\!\times\!10^3=\boxed{6.72\times10^6\ m}\)<br>
+      (b) \(g=GM_E/r^2=6.674\!\times\!10^{-11}\times5.98\!\times\!10^{24}/(6.72\!\times\!10^6)^2\approx\boxed{8.83\ m/s^2}\)<br>
+      (c) \(W=85\times8.83\approx\boxed{750\ N}\)
+    </div>
+  </div>
+
+  <!-- Final score summary -->
+  <div class="card glow" style="margin-top:30px;text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:8px;">🌌</div>
+    <h2>Lesson Complete!</h2>
+    <p>Total Score: <strong style="color:var(--accent);font-size:1.2rem;" id="final-score-display">—</strong></p>
+    <p style="margin-top:8px;">Remember: <em>"Everything pulls on everything else."</em> — That's the power of gravity!</p>
+    <button class="btn btn-primary" style="margin-top:12px;" onclick="goTo(0)">🔄 Restart Lesson</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(4)">← Quiz</button>
+    <div></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script>
+// ── Stars background ──────────────────────────────────────
+const sc = document.getElementById('stars');
+const sctx = sc.getContext('2d');
+let stars = [];
+function initStars() {
+  sc.width = window.innerWidth; sc.height = window.innerHeight;
+  stars = Array.from({length:200}, () => ({
+    x: Math.random()*sc.width, y: Math.random()*sc.height,
+    r: Math.random()*1.4+0.3, a: Math.random(), da: (Math.random()-0.5)*0.005
+  }));
+}
+function drawStars() {
+  sctx.clearRect(0,0,sc.width,sc.height);
+  stars.forEach(s => {
+    s.a = Math.max(0.1, Math.min(1, s.a+s.da));
+    if (s.a<=0.1||s.a>=1) s.da*=-1;
+    sctx.beginPath(); sctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    sctx.fillStyle = `rgba(255,255,255,${s.a})`; sctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+initStars(); drawStars();
+window.addEventListener('resize', initStars);
+
+// ── Gravity orbit simulation ──────────────────────────────
+const gc = document.getElementById('gravity-canvas');
+const gctx = gc.getContext('2d');
+let angle = 0;
+function drawOrbit() {
+  gc.width = gc.offsetWidth; gc.height = gc.offsetHeight;
+  const cx=gc.width/2, cy=gc.height/2;
+  const or = Math.min(cx,cy)*0.72;
+  gctx.clearRect(0,0,gc.width,gc.height);
+
+  // orbit path
+  gctx.beginPath(); gctx.arc(cx,cy,or,0,Math.PI*2);
+  gctx.strokeStyle='rgba(59,130,246,0.25)'; gctx.lineWidth=1.5; gctx.stroke();
+
+  // Earth
+  const eg = gctx.createRadialGradient(cx,cy,2,cx,cy,22);
+  eg.addColorStop(0,'#60a5fa'); eg.addColorStop(1,'#1d4ed8');
+  gctx.beginPath(); gctx.arc(cx,cy,22,0,Math.PI*2);
+  gctx.fillStyle=eg; gctx.fill();
+  gctx.fillStyle='rgba(34,197,94,0.55)'; gctx.beginPath();
+  gctx.ellipse(cx-4,cy,7,10,0.5,0,Math.PI*2); gctx.fill();
+
+  // Moon
+  const mx=cx+or*Math.cos(angle), my=cy+or*Math.sin(angle);
+  gctx.beginPath(); gctx.arc(mx,my,10,0,Math.PI*2);
+  gctx.fillStyle='#94a3b8'; gctx.fill();
+
+  // Gravity force arrow
+  const dx=cx-mx, dy=cy-my, len=Math.sqrt(dx*dx+dy*dy);
+  const ux=dx/len, uy=dy/len;
+  const ax=mx+ux*18, ay=my+uy*18, bx=mx+ux*42, by=my+uy*42;
+  gctx.beginPath(); gctx.moveTo(ax,ay); gctx.lineTo(bx,by);
+  gctx.strokeStyle='#f59e0b'; gctx.lineWidth=2.5; gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(bx,by); gctx.lineTo(bx-uy*6-ux*6,by+ux*6-uy*6);
+  gctx.lineTo(bx+uy*6-ux*6,by-ux*6-uy*6); gctx.closePath();
+  gctx.fillStyle='#f59e0b'; gctx.fill();
+
+  // Labels
+  gctx.font='bold 11px system-ui'; gctx.fillStyle='#93c5fd';
+  gctx.fillText('Earth',cx-14,cy+36);
+  gctx.fillStyle='#cbd5e1'; gctx.fillText('Moon',mx+14,my+5);
+  gctx.fillStyle='#fcd34d'; gctx.fillText('Fg',bx+6,by-4);
+
+  angle += 0.012;
+  requestAnimationFrame(drawOrbit);
+}
+drawOrbit();
+
+// ── Force simulator ───────────────────────────────────────
+function updateSim() {
+  const r = parseFloat(document.getElementById('dist-slider').value);
+  const m1=1000, m2=1000, G=6.674e-11;
+  const F = G*m1*m2/(r*r);
+  document.getElementById('sim-dist').textContent = r.toFixed(1)+' m';
+  document.getElementById('sim-force').innerHTML = formatSci(F)+' N';
+  const pct = Math.min(100, (6.674e-11*1e6/(r*r))/6.674e-5*100);
+  document.getElementById('force-bar').style.width = Math.max(2,pct)+'%';
+  const baseF = G*m1*m2/(1*1);
+  const ratio = F/baseF;
+  document.getElementById('sim-note').textContent =
+    `At ${r.toFixed(1)} m, the force is ${ratio.toExponential(2)} × the force at 1 m — that's ${(1/(r*r)).toFixed(3)}× the reference.`;
+}
+function formatSci(n) {
+  const e = Math.floor(Math.log10(Math.abs(n)));
+  const m = (n/Math.pow(10,e)).toFixed(2);
+  return `${m} × 10<sup>${e}</sup>`;
+}
+updateSim();
+
+// ── Section navigation ────────────────────────────────────
+let currentSection = 0;
+const sections = document.querySelectorAll('.section');
+const dots = document.querySelectorAll('.step-dot');
+let totalScore = 0;
+const sectionDone = [false,false,false,false,false,false];
+
+function goTo(n) {
+  sections[currentSection].classList.remove('active');
+  dots[currentSection].classList.remove('active');
+  if (!dots[currentSection].classList.contains('done') && sectionDone[currentSection])
+    dots[currentSection].classList.add('done');
+  currentSection = n;
+  sections[n].classList.add('active');
+  dots[n].classList.add('active');
+  dots[n].classList.remove('done');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (n===5) document.getElementById('final-score-display').textContent = totalScore + ' pts';
+}
+
+function addScore(pts) {
+  totalScore += pts;
+  document.getElementById('score-badge').textContent = '⭐ '+totalScore+' pts';
+}
+
+// ── Expression evaluator ──────────────────────────────────
+// Accepts plain numbers OR physics expressions like: G*ME*500/(6.57e6)^2
+// Built-in constants: G, ME, RE, Mm, Rm, g, pi, sqrt()
+function parseAnswer(raw) {
+  if (raw == null) return NaN;
+  const s0 = String(raw).trim();
+  if (s0 === '') return NaN;
+  // Block dangerous patterns
+  if (/[;=\[\]{}\\`$@]/.test(s0)) return NaN;
+  if (/\b(window|document|eval|fetch|import|require|process|global|alert|this)\b/i.test(s0)) return NaN;
+  let s = s0;
+  // Substitute physics constants (longer names first to avoid partial matches)
+  s = s.replace(/\bME\b/g,  '(5.98e24)');
+  s = s.replace(/\bRE\b/g,  '(6.37e6)');
+  s = s.replace(/\bMm\b/g,  '(7.4e22)');
+  s = s.replace(/\bRm\b/g,  '(1.74e6)');
+  s = s.replace(/\bG\b/g,   '(6.674e-11)');
+  s = s.replace(/\bg\b/g,   '9.80');
+  s = s.replace(/\bsqrt\b/g,'Math.sqrt');
+  s = s.replace(/\bpi\b/gi, 'Math.PI');
+  s = s.replace(/\^/g,      '**');
+  try {
+    const result = Function('"use strict"; return (' + s + ')')();
+    return (typeof result === 'number' && isFinite(result)) ? result : NaN;
+  } catch(e) { return NaN; }
+}
+const EXPR_HINT = '<span style="font-size:0.78rem;color:var(--muted);margin-top:4px;display:block;">✏️ You can type expressions: <code style="color:var(--accent2);">G, ME, RE, Mm, Rm, g, sqrt(), ^</code></span>';
+
+// ── Step reveal ───────────────────────────────────────────
+function revealStep(id) {
+  document.getElementById(id).classList.add('visible');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// ── Concept Check ─────────────────────────────────────────
+const ccQuestions = [
+  {
+    q: "What does Newton's Universal Law of Gravitation state?",
+    opts: [
+      "Every object falls at the same speed regardless of mass.",
+      "Every particle attracts every other particle with a force proportional to their masses and inversely proportional to the square of the distance between them.",
+      "Gravity only acts between very large objects like planets.",
+      "The gravitational force is proportional to the distance between objects."
+    ],
+    ans: 1,
+    explain: "✅ The force is F = G·m₁m₂/r² — proportional to masses, inversely proportional to distance squared."
+  },
+  {
+    q: "If the distance between two masses is doubled, what happens to the gravitational force?",
+    opts: [
+      "It doubles.",
+      "It halves.",
+      "It becomes four times smaller.",
+      "It stays the same."
+    ],
+    ans: 2,
+    explain: "✅ Since F ∝ 1/r², doubling r means F becomes 1/(2r)² = 1/4 of original — four times smaller!"
+  },
+  {
+    q: "An object is very far from Earth. Which formula should you use for its weight?",
+    opts: [
+      "W = mg (using g = 9.80 m/s²)",
+      "W = G·M_E·m / r²",
+      "W = m·r²",
+      "W = G·m / r"
+    ],
+    ans: 1,
+    explain: "✅ Far from Earth, g changes with altitude. Always use W = G·M_E·m/r² for objects not near the surface."
+  },
+  {
+    q: "The gravitational constant G is approximately:",
+    opts: [
+      "9.80 N·m²/kg²",
+      "6.674 × 10⁻¹¹ N·m²/kg²",
+      "3.0 × 10⁸ m/s",
+      "6.674 × 10¹¹ N·m²/kg²"
+    ],
+    ans: 1,
+    explain: "✅ G = 6.674 × 10⁻¹¹ N·m²/kg² — it's a universal constant measured experimentally. Note: g ≠ G!"
+  }
+];
+
+let ccAnswered = [false,false,false,false];
+let ccCorrect = 0;
+
+function buildCC() {
+  const cont = document.getElementById('cc-container');
+  cont.innerHTML = '';
+  ccQuestions.forEach((q,i) => {
+    const div = document.createElement('div');
+    div.className='cc-q'; div.id='cc-q'+i;
+    div.innerHTML = `<p>Q${i+1}. ${q.q}</p>
+      <div class="options">
+        ${q.opts.map((o,j)=>`<button class="option-btn" onclick="answerCC(${i},${j},this)">${String.fromCharCode(65+j)}. ${o}</button>`).join('')}
+      </div>
+      <div id="cc-exp-${i}" class="feedback" style="margin-top:8px;"></div>`;
+    cont.appendChild(div);
+  });
+}
+buildCC();
+
+function answerCC(qi, chosen, btn) {
+  if (ccAnswered[qi]) return;
+  ccAnswered[qi] = true;
+  const q = ccQuestions[qi];
+  const container = document.querySelectorAll(`#cc-q${qi} .option-btn`);
+  container.forEach((b,j) => {
+    b.disabled=true;
+    if (j===q.ans) b.classList.add('correct');
+    else if (j===chosen) b.classList.add('wrong');
+  });
+  const expEl = document.getElementById('cc-exp-'+qi);
+  if (chosen===q.ans) {
+    ccCorrect++; addScore(5);
+    expEl.className='feedback ok show'; expEl.textContent=q.explain;
+  } else {
+    expEl.className='feedback bad show'; expEl.textContent='❌ Not quite. '+q.explain;
+  }
+  if (window.MathJax) MathJax.typesetPromise();
+  checkCCDone();
+}
+
+function checkCCDone() {
+  if (ccAnswered.every(Boolean)) {
+    sectionDone[1]=true;
+    const resDiv=document.getElementById('cc-result');
+    resDiv.style.display='block';
+    document.getElementById('cc-result-title').textContent = `You got ${ccCorrect}/4 correct!`;
+    const msgs = ['Keep reviewing the concepts and try again!','Good start! Review the ones you missed.','Nice work! You have a solid understanding.','Perfect score! You\'re a gravity expert! 🚀'];
+    document.getElementById('cc-result-msg').textContent = msgs[ccCorrect] || msgs[3];
+    resDiv.className = ccCorrect>=3 ? 'card green' : 'card amber';
+    document.getElementById('cc-next-btn').disabled = false;
+  }
+}
+
+// ── Practice Problem ──────────────────────────────────────
+let partADone=false, partBDone=false;
+
+function checkFormulaChoice(btn, type) {
+  const btns=document.querySelectorAll('#formula-choice .option-btn');
+  btns.forEach(b=>b.disabled=true);
+  const fb=document.getElementById('formula-feedback');
+  if(type==='correct'){
+    btn.classList.add('correct');
+    fb.className='feedback ok show'; fb.textContent='✅ Correct! Near Earth\'s surface use W = mg.';
+    document.getElementById('partA-calc').classList.add('visible');
+    if (window.MathJax) MathJax.typesetPromise();
+  } else {
+    btn.classList.add('wrong');
+    const correct=document.querySelectorAll('#formula-choice .option-btn')[1];
+    correct.classList.add('correct');
+    fb.className='feedback bad show'; fb.textContent='❌ Not quite. On Earth\'s surface always use W = mg.';
+    document.getElementById('partA-calc').classList.add('visible');
+    if (window.MathJax) MathJax.typesetPromise();
+  }
+}
+
+function checkAnsA() {
+  const ans=parseAnswer(document.getElementById('ans-a').value);
+  const fb=document.getElementById('feedback-a');
+  const expected=500*9.80;
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try: 500*9.80 or 500*g'; return; }
+  if (Math.abs(ans-expected)/expected<0.02) {
+    document.getElementById('ans-a').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! W = 500 × 9.80 = 4900 N';
+    if (!partADone) { partADone=true; addScore(10); }
+    document.getElementById('partB-section').style.display='block';
+    if (window.MathJax) MathJax.typesetPromise();
+  } else {
+    document.getElementById('ans-a').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent=`❌ Not quite. Check: W = mass × g = 500 × 9.80`;
+  }
+}
+
+function hintA() {
+  const h=document.getElementById('hint-a');
+  h.classList.add('visible');
+  h.innerHTML='<div class="formula-box" style="font-size:0.9rem;text-align:left;">W = m × g = 500 kg × 9.80 m/s²</div>';
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+function checkRadius() {
+  const ans=parseAnswer(document.getElementById('ans-r').value);
+  const expected=6.37e6+200e3;
+  const fb=document.getElementById('feedback-r');
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try: RE+200e3 or 6.37e6+200e3'; return; }
+  if (Math.abs(ans-expected)/expected<0.015) {
+    document.getElementById('ans-r').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='✅ r = 6.37×10⁶ + 200×10³ = 6.57×10⁶ m';
+    document.getElementById('step-force').classList.add('visible');
+    if (window.MathJax) MathJax.typesetPromise();
+  } else {
+    document.getElementById('ans-r').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ r = Earth radius + altitude = 6.37×10⁶ + 0.2×10⁶';
+  }
+}
+
+function hintR() {
+  const h=document.getElementById('hint-r');
+  h.classList.add('visible');
+  h.innerHTML='<p style="font-size:0.88rem;">r = r_Earth + altitude = 6.37×10⁶ m + 200×10³ m = 6.57×10⁶ m</p>';
+}
+
+function checkAnsB() {
+  const ans=parseAnswer(document.getElementById('ans-b').value);
+  const r=6.57e6, _G=6.674e-11, _ME=5.98e24, _m=500;
+  const expected=_G*_ME*_m/(r*r);
+  const fb=document.getElementById('feedback-b');
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try: G*ME*500/(6.57e6)^2'; return; }
+  if (Math.abs(ans-expected)/expected<0.05) {
+    document.getElementById('ans-b').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent=`🎉 Correct! F ≈ ${expected.toFixed(0)} N`;
+    if (!partBDone) { partBDone=true; addScore(15); }
+    document.getElementById('practice-done').style.display='block';
+    document.getElementById('practice-next').disabled=false;
+    sectionDone[3]=true;
+  } else {
+    document.getElementById('ans-b').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent=`❌ Try: F = G × M_E × m / r² with r = 6.57×10⁶ m`;
+  }
+}
+
+function hintB() {
+  const h=document.getElementById('hint-b');
+  h.classList.add('visible');
+  h.innerHTML='<p style="font-size:0.88rem;">F = (6.674×10⁻¹¹ × 5.98×10²⁴ × 500) / (6.57×10⁶)²<br>= 3.991×10¹⁴ × 500 / 4.316×10¹³</p>';
+}
+
+// ── Quiz ──────────────────────────────────────────────────
+const quizData = [
+  {
+    type:'mc',
+    q:'Two planets have masses M and 2M. Planet A has radius R, Planet B has radius 2R. On which planet would you weigh more?',
+    opts:['Planet A','Planet B','They would be the same.','It depends on your mass.'],
+    ans:0,
+    explain:'g_A = GM/R², g_B = G(2M)/(2R)² = 2GM/4R² = GM/2R². So g_A > g_B — you\'re heavier on Planet A!'
+  },
+  {
+    type:'mc',
+    q:'The gravitational force between two masses is F. If both masses are tripled and the distance is halved, what is the new force?',
+    opts:['F/9','3F','36F','9F/4'],
+    ans:2,
+    explain:'New F = G(3m₁)(3m₂)/(r/2)² = 9G·m₁m₂/(r²/4) = 36·F. The answer is 36F!'
+  },
+  {
+    type:'mc',
+    q:'Which correctly describes the relationship between g (acceleration due to gravity) and G (gravitational constant)?',
+    opts:[
+      'g and G are the same constant.',
+      'g = G × M_E / r², so g depends on location but G is universal.',
+      'G changes with altitude but g is always 9.80 m/s².',
+      'G is larger than g.'
+    ],
+    ans:1,
+    explain:'G is a universal constant. g = G·M_E/r² — it changes depending on where you are (altitude, planet).'
+  },
+  {
+    type:'mc',
+    q:'The Moon orbits Earth because:',
+    opts:[
+      'The Moon has no gravity acting on it.',
+      'Earth\'s gravity provides exactly the centripetal force needed to keep the Moon in orbit.',
+      'The Moon is moving too fast to fall toward Earth.',
+      'There is no force acting on the Moon in space.'
+    ],
+    ans:1,
+    explain:'The gravitational force F_G = centripetal force F_c. This is exactly what keeps the Moon in circular orbit!'
+  },
+  {
+    type:'calc',
+    q:'Calculate the gravitational force between two 80 kg students sitting 1.5 m apart.',
+    answer:1.189e-7,
+    tolerance:0.05,
+    unit:'N',
+    hint:'F = G × m₁ × m₂ / r² = 6.674×10⁻¹¹ × 80 × 80 / (1.5)²',
+    explain:'F = 6.674×10⁻¹¹ × 80 × 80 / 2.25 ≈ 1.19×10⁻⁷ N — tiny but real!'
+  },
+  {
+    type:'calc',
+    q:'Find g on Mars. Mars has mass = 6.42×10²³ kg and radius = 3.39×10⁶ m.',
+    answer:3.73,
+    tolerance:0.05,
+    unit:'m/s²',
+    hint:'g = G × M_Mars / r² = 6.674×10⁻¹¹ × 6.42×10²³ / (3.39×10⁶)²',
+    explain:'g_Mars = 6.674×10⁻¹¹ × 6.42×10²³ / (3.39×10⁶)² ≈ 3.73 m/s² (about 38% of Earth\'s g!)'
+  }
+];
+
+let quizAnswers = new Array(quizData.length).fill(null);
+let quizScore = 0;
+
+function buildQuiz() {
+  const cont=document.getElementById('quiz-container');
+  cont.innerHTML='';
+  quizData.forEach((q,i)=>{
+    const div=document.createElement('div');
+    div.className='card'; div.id='quiz-q'+i;
+    let inner=`<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:8px;padding:3px 10px;font-weight:700;font-size:0.85rem;flex-shrink:0;">Q${i+1}</div>
+      <p style="color:var(--text);font-weight:500;margin:0;">${q.q}</p></div>`;
+    if (q.type==='mc') {
+      inner+=`<div class="options">${q.opts.map((o,j)=>`<button class="option-btn" onclick="answerQuiz(${i},${j},this)">${String.fromCharCode(65+j)}. ${o}</button>`).join('')}</div>`;
+    } else {
+      inner+=`<div class="input-row">
+        <label>Answer (${q.unit}):</label>
+        <input type="text" id="qi-${i}" placeholder="number or expression, e.g. G*80*80/(1.5)^2" onkeydown="if(event.key==='Enter')answerCalcQuiz(${i})">
+        <button class="btn btn-primary" style="padding:9px 16px;font-size:0.85rem;" onclick="answerCalcQuiz(${i})">Check ✓</button>
+        <button class="btn btn-secondary" style="padding:9px 14px;font-size:0.82rem;" onclick="showQuizHint(${i})">Hint 💡</button>
+      </div>
+      ${EXPR_HINT}
+      <div id="qi-hint-${i}" class="step-block"></div>`;
+    }
+    inner+=`<div id="qfb-${i}" class="feedback" style="margin-top:10px;"></div>`;
+    div.innerHTML=inner;
+    cont.appendChild(div);
+  });
+  if (window.MathJax) MathJax.typesetPromise();
+}
+buildQuiz();
+
+function answerQuiz(qi,chosen,btn) {
+  if (quizAnswers[qi]!==null) return;
+  quizAnswers[qi]=chosen;
+  const q=quizData[qi];
+  const btns=document.querySelectorAll(`#quiz-q${qi} .option-btn`);
+  btns.forEach((b,j)=>{ b.disabled=true; if(j===q.ans)b.classList.add('correct'); else if(j===chosen)b.classList.add('wrong'); });
+  const fb=document.getElementById('qfb-'+qi);
+  if(chosen===q.ans){ quizScore++; addScore(10); fb.className='feedback ok show'; fb.textContent='✅ '+q.explain; }
+  else { fb.className='feedback bad show'; fb.textContent='❌ '+q.explain; }
+  checkQuizDone();
+}
+
+function answerCalcQuiz(qi) {
+  if (quizAnswers[qi]!==null) return;
+  const inp=document.getElementById('qi-'+qi);
+  const ans=parseAnswer(inp.value);
+  const q=quizData[qi];
+  const fb=document.getElementById('qfb-'+qi);
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try a number or formula like G*80*80/(1.5)^2'; return; }
+  quizAnswers[qi]=ans;
+  inp.disabled=true;
+  if (Math.abs(ans-q.answer)/Math.abs(q.answer)<q.tolerance) {
+    inp.className='correct-ans'; quizScore++; addScore(10);
+    fb.className='feedback ok show'; fb.textContent='✅ '+q.explain;
+  } else {
+    inp.className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ '+q.explain;
+  }
+  checkQuizDone();
+}
+
+function showQuizHint(qi) {
+  const h=document.getElementById('qi-hint-'+qi);
+  h.classList.add('visible');
+  h.innerHTML=`<p style="font-size:0.85rem;color:var(--muted);">💡 ${quizData[qi].hint}</p>`;
+}
+
+function checkQuizDone() {
+  if (quizAnswers.every(a=>a!==null)) {
+    sectionDone[4]=true;
+    const res=document.getElementById('quiz-result'); res.style.display='block';
+    document.getElementById('quiz-score-num').textContent=quizScore;
+    document.getElementById('quiz-score-den').textContent='/ '+quizData.length;
+    const titles=['Keep studying!','Not bad!','Good job!','Great work!','Almost perfect!','Excellent!','🏆 Perfect Score!'];
+    document.getElementById('quiz-result-title').textContent=titles[Math.min(quizScore,6)];
+    const pct=Math.round(quizScore/quizData.length*100);
+    document.getElementById('quiz-result-msg').textContent=`You answered ${quizScore} out of ${quizData.length} correctly (${pct}%). ${pct>=80?'You\'re ready for the homework!':'Review the worked example and try again!'}`;
+    document.getElementById('quiz-next-btn').disabled=false;
+    res.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+}
+
+// ── Homework step-by-step engine ──────────────────────────
+var hwSteps = {
+  hw1: [
+    { title: 'Identify the formula',
+      body: 'We need the force between two masses separated by distance \\(r\\). Use Newton\'s Universal Law: \\[F = G\\frac{M_E\\, M_m}{r^2}\\]' },
+    { title: 'List the known values',
+      body: '\\(G = 6.674\\times10^{-11}\\ N\\cdot m^2/kg^2\\)<br>\\(M_E = 5.98\\times10^{24}\\ kg\\)<br>\\(M_m = 7.4\\times10^{22}\\ kg\\)<br>\\(r = 3.8\\times10^8\\ m\\)' },
+    { title: 'Substitute and calculate',
+      body: '\\[F = 6.674\\times10^{-11}\\times\\frac{5.98\\times10^{24}\\times7.4\\times10^{22}}{(3.8\\times10^8)^2}\\approx\\boxed{2.05\\times10^{20}\\ N}\\]' },
+    { title: 'Moon\'s force on Earth?',
+      body: 'By <strong>Newton\'s 3rd Law</strong>, the Moon pulls on Earth with an equal and opposite force: also <strong>\\(2.05\\times10^{20}\\ N\\)</strong>. Gravity always comes in pairs! 🌍🌕' }
+  ],
+  hw2: [
+    { title: 'We know F — solve for r',
+      body: 'Start from \\(F = G\\dfrac{M_E\\,m}{r^2}\\). Rearrange for \\(r^2\\): \\[r^2 = \\frac{G\\,M_E\\,m}{F}\\]' },
+    { title: 'Take the square root',
+      body: '\\[r = \\sqrt{\\frac{G\\,M_E\\,m}{F}}\\]<br>Note: this gives distance from Earth\'s <em>center</em>, not the surface.' },
+    { title: 'Substitute values',
+      body: '\\[r = \\sqrt{\\frac{6.674\\times10^{-11}\\times5.98\\times10^{24}\\times2.0}{15.0}}\\]' },
+    { title: 'Calculate r (part a)',
+      body: '\\[r \\approx \\boxed{7.28\\times10^6\\ m}\\] from Earth\'s center.' },
+    { title: 'Find altitude above surface (part b)',
+      body: 'Altitude \\(= r - r_E = 7.28\\times10^6 - 6.37\\times10^6 = 9.1\\times10^5\\ m\\approx\\boxed{910\\ km}\\)' }
+  ],
+  hw3: [
+    { title: 'Use symmetry: both masses are equal',
+      body: 'Since \\(m_1 = m_2 = m\\), the law simplifies: \\[F = G\\frac{m^2}{r^2}\\]' },
+    { title: 'Solve for m²',
+      body: '\\[m^2 = \\frac{F\\,r^2}{G}\\]' },
+    { title: 'Take the square root',
+      body: '\\[m = r\\sqrt{\\frac{F}{G}}\\]' },
+    { title: 'Substitute and calculate',
+      body: '\\[m = 90.0\\times\\sqrt{\\frac{9.20\\times10^{-7}}{6.674\\times10^{-11}}} = 90.0\\times117.4 \\approx\\boxed{1.06\\times10^4\\ kg}\\]' }
+  ],
+  hw5: [
+    { title: 'Handle the hollow sphere first',
+      body: '<strong>Shell Theorem:</strong> A uniform hollow sphere exerts <em>zero</em> net gravitational force on any object located <em>inside</em> it. So the 8000 kg sphere contributes <strong>0 N</strong>.' },
+    { title: 'Check position relative to solid sphere',
+      body: 'The ball is 50.0 m from the solid sphere\'s center. The solid sphere\'s radius is 25.0 m.<br>Since 50.0 m > 25.0 m, the ball is <em>outside</em> the sphere → treat it as a point mass. ✅' },
+    { title: 'Write the force formula',
+      body: '\\[F = G\\frac{m_\\text{ball}\\,m_\\text{solid}}{r^2} = 6.674\\times10^{-11}\\times\\frac{0.120\\times50.0}{(50.0)^2}\\]' },
+    { title: 'Calculate the net force',
+      body: '\\[F = 6.674\\times10^{-11}\\times\\frac{6.0}{2500}\\approx\\boxed{1.60\\times10^{-13}\\ N}\\]<br>directed toward the solid sphere.' }
+  ],
+  hw6: [
+    { title: 'Set up the equilibrium condition',
+      body: 'For zero net force on the middle ball, the leftward pull must equal the rightward pull: \\[F_\\text{left} = F_\\text{right}\\]' },
+    { title: 'Write both forces explicitly',
+      body: '\\[\\frac{G\\times20.0\\times M}{(4.0)^2} = \\frac{G\\times m\\times M}{(2.0)^2}\\]<br>where \\(M\\) = mass of the middle ball.' },
+    { title: 'Cancel G and M — they\'re on both sides!',
+      body: '\\[\\frac{20.0}{16} = \\frac{m}{4.0}\\]<br>This is why the middle ball\'s mass doesn\'t matter.' },
+    { title: 'Solve for m',
+      body: '\\[m = 20.0\\times\\frac{4.0}{16} = \\boxed{5.0\\ kg}\\]' }
+  ],
+  hw7: [
+    { title: 'Identify the forces on one sphere',
+      body: 'Pick sphere A. The other two spheres (B and C) each pull on A with equal force: \\[F = \\frac{Gm^2}{L^2}\\]' },
+    { title: 'Find the angle between the two force vectors',
+      body: 'Force from B pulls A toward B, force from C pulls A toward C. The angle between those two directions equals the interior angle of the equilateral triangle = <strong>60°</strong>.' },
+    { title: 'Add the vectors',
+      body: 'Resultant of two equal forces \\(F\\) at 60°: \\[F_\\text{net}=\\sqrt{F^2+F^2+2F^2\\cos60°}=\\sqrt{2F^2+F^2}=F\\sqrt{3}\\]' },
+    { title: 'Write the final expression',
+      body: '\\[\\boxed{F_\\text{net}=\\frac{\\sqrt{3}\\,Gm^2}{L^2}}\\]<br>Direction: toward the <strong>centroid</strong> (geometric center) of the triangle.' }
+  ],
+  hwB1: [
+    { title: 'Part (a): Find g on the Moon',
+      body: 'Use \\(g=G M_m/r_m^2\\) with Moon\'s mass \\(M_m=7.4\\times10^{22}\\) kg and radius \\(r_m=1.74\\times10^6\\) m.' },
+    { title: 'Calculate g_moon',
+      body: '\\[g_\\text{moon}=\\frac{6.674\\times10^{-11}\\times7.4\\times10^{22}}{(1.74\\times10^6)^2}\\approx\\boxed{1.63\\ m/s^2}\\]<br>That\'s only 1/6 of Earth\'s gravity! 🌕' },
+    { title: 'Part (b): Time to fall 2.0 m',
+      body: 'Use kinematics with zero initial velocity: \\(h=\\tfrac{1}{2}g t^2\\), so \\(t=\\sqrt{2h/g}\\).<br>\\[t=\\sqrt{\\frac{2\\times2.0}{1.63}}=\\sqrt{2.45}\\approx\\boxed{1.57\\ s}\\]' },
+    { title: 'Part (c): Weight on the Moon',
+      body: '\\[W_\\text{moon}=W_\\text{Earth}\\times\\frac{g_\\text{moon}}{g_\\text{Earth}}=0.020\\times\\frac{1.63}{9.80}\\approx\\boxed{3.3\\times10^{-3}\\ N}\\]' }
+  ],
+  hwB2: [
+    { title: 'Part (a): Find r from Earth\'s center',
+      body: '\\[r = r_E + h = 6.37\\times10^6 + 350\\times10^3 = \\boxed{6.72\\times10^6\\ m}\\]' },
+    { title: 'Part (b): Centripetal acceleration = g at that altitude',
+      body: '\\[g=\\frac{GM_E}{r^2}=\\frac{6.674\\times10^{-11}\\times5.98\\times10^{24}}{(6.72\\times10^6)^2}\\approx\\boxed{8.83\\ m/s^2}\\]' },
+    { title: 'Part (c): Astronaut\'s weight',
+      body: '\\[W=mg=85\\times8.83\\approx\\boxed{750\\ N}\\]<br>Compare to \\(85\\times9.80=833\\ N\\) on Earth\'s surface — about 90% as heavy.' }
+  ]
+};
+
+var hwProgress = {};
+
+window.startHW = function(id) {
+  var stepsEl = document.getElementById('hw-steps-'+id);
+  var ansEl   = document.getElementById('hw-ans-'+id);
+  if (!stepsEl || !hwSteps[id]) return;
+  hwProgress[id] = 0;
+  if (ansEl) ansEl.style.display = 'none';
+  stepsEl.style.display = 'block';
+  window.renderHWStep(id);
+};
+
+window.renderHWStep = function(id) {
+  var steps = hwSteps[id];
+  var i = hwProgress[id];
+  var isLast = (i === steps.length - 1);
+  var stepsEl = document.getElementById('hw-steps-'+id);
+  var html = '';
+  for (var j = 0; j <= i; j++) {
+    var s = steps[j];
+    var isNew = (j === i);
+    var accent = isNew ? 'var(--accent)' : 'var(--border)';
+    var textCol = isNew ? 'var(--accent)' : 'var(--muted)';
+    html += '<div style="display:flex;gap:12px;margin-bottom:12px">';
+    html += '<div style="background:' + accent + ';color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.82rem;flex-shrink:0;">' + (j+1) + '</div>';
+    html += '<div style="background:var(--deep);border:1px solid ' + accent + ';border-radius:10px;padding:12px 16px;flex:1;">';
+    html += '<div style="font-weight:700;color:' + textCol + ';margin-bottom:6px;font-size:0.88rem;">' + s.title + '</div>';
+    html += '<div style="font-size:0.9rem;color:var(--text);line-height:1.7;">' + s.body + '</div>';
+    html += '</div></div>';
+  }
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-top:4px;">';
+  if (!isLast) {
+    html += '<button class="btn btn-primary" style="padding:7px 18px;font-size:0.85rem;" onclick="nextHW(\'' + id + '\')">Next Step →</button>';
+  } else {
+    html += '<div style="color:var(--green);font-weight:700;font-size:0.9rem;">✅ All steps complete!</div>';
+  }
+  html += '<span style="color:var(--muted);font-size:0.82rem;">Step ' + (i+1) + ' of ' + steps.length + '</span>';
+  html += '<button class="btn btn-secondary" style="padding:7px 14px;font-size:0.82rem;margin-left:auto;" onclick="skipHW(\'' + id + '\')">Show Full Answer</button>';
+  html += '</div>';
+  stepsEl.innerHTML = html;
+  if (window.MathJax) MathJax.typesetPromise([stepsEl]);
+};
+
+window.nextHW = function(id) {
+  if (hwProgress[id] < hwSteps[id].length - 1) {
+    hwProgress[id]++;
+    window.renderHWStep(id);
+  }
+};
+
+window.skipHW = function(id) {
+  var stepsEl = document.getElementById('hw-steps-'+id);
+  var ansEl   = document.getElementById('hw-ans-'+id);
+  if (stepsEl) stepsEl.style.display = 'none';
+  if (ansEl) { ansEl.style.display = 'block'; if (window.MathJax) MathJax.typesetPromise([ansEl]); }
+};
+
+// ── Wire Enter key on practice inputs & show expression hints ───
+document.addEventListener('DOMContentLoaded', () => {
+  [['ans-a','checkAnsA'],['ans-r','checkRadius'],['ans-b','checkAnsB']].forEach(([id,fn]) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', e => { if(e.key==='Enter') window[fn](); });
+  });
+  ['expr-hint-a','expr-hint-r','expr-hint-b'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = EXPR_HINT;
+  });
+});
+
+// ── Secret teacher shortcut: Cmd+Arrow to navigate sections ──
+document.addEventListener('keydown', e => {
+  if (!e.metaKey) return;
+  if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    if (currentSection < sections.length - 1) window.goTo(currentSection + 1);
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    if (currentSection > 0) window.goTo(currentSection - 1);
+  }
+});
+
+// ── MathJax rerender on section change ───────────────────
+const _origGoTo = goTo;
+window.goTo = function(n) {
+  _origGoTo(n);
+  setTimeout(()=>{ if(window.MathJax) MathJax.typesetPromise(); }, 100);
+};
+</script>
+</body>
+</html>
