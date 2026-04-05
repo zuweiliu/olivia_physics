@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kepler's Laws — Interactive Lesson</title>
+<link rel="stylesheet" href="../common/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  /* Lesson-specific styles */
+  #orbit-canvas {
+    width: 100%; max-width: 620px; height: 380px;
+    border-radius: 12px; border: 1px solid var(--border);
+    margin: 16px auto; display: block;
+  }
+  .law-badge {
+    display: inline-block; padding: 4px 14px; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .law-badge.one   { background: rgba(168,85,247,0.15); color: #c084fc; border: 1px solid #c084fc; }
+  .law-badge.two   { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid #fbbf24; }
+  .law-badge.three { background: rgba(34,197,94,0.15);  color: #4ade80; border: 1px solid #4ade80; }
+  .planet-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px; margin: 16px 0;
+  }
+  .planet-item {
+    background: var(--deep); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 8px; text-align: center;
+  }
+  .planet-item .emoji { font-size: 1.6rem; margin-bottom: 4px; }
+  .planet-item .label { font-size: 0.72rem; color: var(--muted); margin-bottom: 2px; }
+  .planet-item .value { font-weight: 700; font-size: 0.85rem; }
+  .planet-item .value.accent { color: var(--accent); }
+  .planet-item .value.green  { color: var(--green); }
+  .derivation-flow {
+    display: flex; flex-direction: column; gap: 0; margin: 20px 0;
+  }
+  .derivation-step {
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .derivation-step .d-num {
+    background: var(--accent); color: #fff; border-radius: 50%;
+    width: 30px; height: 30px; display: flex; align-items: center;
+    justify-content: center; font-weight: 700; font-size: 0.82rem; flex-shrink: 0;
+  }
+  .derivation-step .d-body {
+    flex: 1; padding-bottom: 18px; border-left: 2px solid var(--border);
+    padding-left: 18px; margin-left: -16px;
+  }
+  .derivation-step:last-child .d-body { border-left: none; }
+  .kepler-result {
+    background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(34,197,94,0.1));
+    border: 2px solid #c084fc; border-radius: 14px;
+    padding: 24px; text-align: center; margin: 20px 0;
+    box-shadow: 0 0 30px rgba(168,85,247,0.15);
+  }
+  .timeline-item {
+    display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px;
+  }
+  .timeline-item .yr {
+    background: var(--accent); color: #fff; border-radius: 8px;
+    padding: 4px 10px; font-weight: 700; font-size: 0.82rem;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  #ellipse-diagram {
+    width: 100%; max-width: 580px; height: 320px;
+    border-radius: 12px; border: 1px solid var(--border);
+    margin: 16px auto; display: block; background: rgba(5,10,24,0.6);
+  }
+  #area-diagram {
+    width: 100%; max-width: 580px; height: 340px;
+    border-radius: 12px; border: 1px solid var(--border);
+    margin: 16px auto; display: block; background: rgba(5,10,24,0.6);
+  }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+
+<!-- ── Progress Bar ── -->
+<div id="progress-bar">
+  <div class="logo">🪐 Kepler's Laws</div>
+  <div class="progress-steps">
+    <div class="step-dot active" onclick="goTo(0)" title="Core Concepts"></div>
+    <div class="step-dot" onclick="goTo(1)" title="Concept Check"></div>
+    <div class="step-dot" onclick="goTo(2)" title="Worked Example"></div>
+    <div class="step-dot" onclick="goTo(3)" title="Your Turn"></div>
+    <div class="step-dot" onclick="goTo(4)" title="Quiz"></div>
+    <div class="step-dot" onclick="goTo(5)" title="Homework"></div>
+  </div>
+  <div id="score-badge">⭐ 0 pts</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 0 — Core Concepts
+     ════════════════════════════════════════════ -->
+<div class="section active" id="sec-0">
+<div class="container">
+  <div class="section-tag">Section 1 of 6 — Core Concepts</div>
+  <h1>Kepler's Laws of<br><span style="color:#c084fc">Planetary Motion</span> 🪐</h1>
+  <p>Over 400 years ago, a brilliant astronomer named <strong>Johannes Kepler</strong> cracked
+     the cosmic code of how planets move — without a telescope, without a computer,
+     just mountains of hand-written data and pure determination.
+     His three laws describe <strong>every orbit in the universe</strong>: from Mercury to Mars,
+     from satellites to the Moon, even the paths of comets! ☄️</p>
+
+  <div class="fun-fact">
+    Kepler spent <strong>8 years</strong> trying to fit Mars's orbit into a perfect circle before
+    finally realizing it was an <strong>ellipse</strong>. He said the answer was so unexpected that
+    he initially thought he had made a calculation error! Talk about persistence. 💪
+  </div>
+
+  <!-- Interactive orbit canvas -->
+  <canvas id="orbit-canvas" width="620" height="380"></canvas>
+  <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-top:-8px;">
+    🎮 Drag the sliders below to change the orbit shape and watch Kepler's laws in action!
+  </p>
+
+  <!-- Orbit simulator controls -->
+  <div class="card">
+    <h3>🎛️ Kepler Orbit Explorer</h3>
+    <p>Change the eccentricity (how "squished" the orbit is) and see how the planet speeds up near the Sun!</p>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;">Eccentricity:</span>
+      <span>⭕</span>
+      <input type="range" id="ecc-slider" min="0" max="85" step="1" value="40" oninput="updateSim()">
+      <span>🥚</span>
+      <span class="sim-val" id="sim-ecc">0.40</span>
+    </div>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;">Speed:</span>
+      <span class="sim-val" id="sim-speed-label" style="min-width:100px;">—</span>
+      <span style="color:var(--muted);font-size:0.9rem;margin-left:16px;">Distance to Sun:</span>
+      <span class="sim-val" id="sim-dist-label" style="min-width:60px;">—</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+      <button class="btn btn-secondary" style="padding:6px 14px;font-size:0.82rem;" onclick="toggleAreaSweep()">
+        Show Equal Areas 🔺
+      </button>
+      <button class="btn btn-secondary" style="padding:6px 14px;font-size:0.82rem;" onclick="resetSim()">
+        Reset 🔄
+      </button>
+    </div>
+    <div id="area-note" style="margin-top:8px;font-size:0.85rem;color:var(--muted);"></div>
+  </div>
+
+  <!-- ═══ LAW 1 ═══ -->
+  <div class="card glow" style="margin-top:24px; box-shadow: 0 0 30px rgba(168,85,247,0.2);">
+    <div class="law-badge one">Kepler's 1st Law</div>
+    <h2>The Law of Ellipses</h2>
+    <p style="color:var(--text);font-size:1.05rem;">
+      Every planet moves in an <strong>elliptical orbit</strong> with the <strong>Sun at one focus</strong>.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>✨ What's an Ellipse?</h3>
+    <p>An ellipse is like a stretched circle — an oval shape with two special points called <strong>foci</strong> (singular: <em>focus</em>).
+       Drag the slider to see how the shape changes!</p>
+
+    <canvas id="ellipse-diagram" width="580" height="320"></canvas>
+    <div class="sim-row" style="max-width:580px;margin:0 auto;">
+      <span style="color:var(--muted);font-size:0.85rem;">Shape:</span>
+      <span>⭕ circle</span>
+      <input type="range" id="ecc-diagram-slider" min="0" max="90" step="1" value="50" oninput="drawEllipseDiagram()">
+      <span>🥚 elongated</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0;">
+      <div class="card" style="padding:12px;margin:0;text-align:center;">
+        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px;">Semi-major axis</div>
+        <div style="color:#c084fc;font-weight:700;font-size:0.92rem;">\(a\)</div>
+        <div style="font-size:0.78rem;color:var(--muted);">Half the <span style="color:#c084fc;">longest</span> diameter</div>
+      </div>
+      <div class="card" style="padding:12px;margin:0;text-align:center;">
+        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px;">Semi-minor axis</div>
+        <div style="color:#60a5fa;font-weight:700;font-size:0.92rem;">\(b\)</div>
+        <div style="font-size:0.78rem;color:var(--muted);">Half the <span style="color:#60a5fa;">shortest</span> diameter</div>
+      </div>
+      <div class="card" style="padding:12px;margin:0;text-align:center;">
+        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px;">Focal distance</div>
+        <div style="color:#fbbf24;font-weight:700;font-size:0.92rem;">\(c\)</div>
+        <div style="font-size:0.78rem;color:var(--muted);">Center to each <span style="color:#fbbf24;">focus</span></div>
+      </div>
+    </div>
+
+    <div class="formula-box" style="padding:14px 20px;">
+      <p style="margin:0;color:var(--text);font-size:0.95rem;text-align:center;">
+        <strong>Eccentricity</strong> measures how "squished" the ellipse is: &nbsp;
+        \(\displaystyle e = \frac{c}{a}\)
+      </p>
+      <p style="margin:8px 0 0;color:var(--muted);font-size:0.85rem;text-align:center;">
+        \(e = 0\) → perfect circle &nbsp;|&nbsp; \(e\) close to 1 → very elongated &nbsp;|&nbsp;
+        also: \(b^2 = a^2 - c^2\)
+      </p>
+    </div>
+
+    <div class="card amber" style="padding:14px;margin:14px 0 0;">
+      <strong>⚠️ Key Point:</strong>
+      <p style="margin:6px 0 0; color:var(--text);">A <strong>circle is a special ellipse</strong> with eccentricity \(e = 0\) (both foci merge into the center).
+         Earth's orbit is nearly circular (\(e = 0.017\)), while comets can have very elongated orbits (\(e \gt 0.9\))!
+         The Sun sits at one focus — <em>not</em> the center.</p>
+    </div>
+  </div>
+
+  <!-- ═══ LAW 2 ═══ -->
+  <div class="card glow" style="margin-top:20px; box-shadow: 0 0 30px rgba(245,158,11,0.2);">
+    <div class="law-badge two">Kepler's 2nd Law</div>
+    <h2>The Law of Equal Areas</h2>
+    <p style="color:var(--text);font-size:1.05rem;">
+      A line from the Sun to a planet sweeps out <strong>equal areas in equal time intervals</strong>.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>🏃‍♀️ What Does This Mean?</h3>
+    <p>Imagine a line connecting the Sun to the planet. As the planet orbits,
+       this line sweeps out a pie-slice shape. Kepler discovered that <strong>every slice of the same time duration has the same area</strong>!
+       Look at the diagram — both shaded wedges cover the <em>same amount of time</em>:</p>
+
+    <canvas id="area-diagram" width="580" height="340"></canvas>
+    <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-top:-8px;">
+      Both colored wedges represent the <strong>same time interval</strong> — notice they have <strong>equal area</strong>!
+    </p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;">
+      <div class="card" style="padding:14px;margin:0;text-align:center;border-color:#4ade80;">
+        <div style="font-size:1.4rem;margin-bottom:6px;">🚀</div>
+        <div style="font-size:0.82rem;color:var(--text);"><strong>Near Perihelion (close)</strong></div>
+        <div style="font-size:0.82rem;color:var(--muted);margin:4px 0;">
+          <span style="color:#4ade80;">Short radius</span> but <span style="color:#4ade80;">wide angle</span></div>
+        <div style="font-size:0.82rem;color:var(--muted);">Planet moves <strong style="color:#4ade80;">FAST</strong> to sweep the same area</div>
+      </div>
+      <div class="card" style="padding:14px;margin:0;text-align:center;border-color:#60a5fa;">
+        <div style="font-size:1.4rem;margin-bottom:6px;">🐢</div>
+        <div style="font-size:0.82rem;color:var(--text);"><strong>Near Aphelion (far)</strong></div>
+        <div style="font-size:0.82rem;color:var(--muted);margin:4px 0;">
+          <span style="color:#60a5fa;">Long radius</span> but <span style="color:#60a5fa;">narrow angle</span></div>
+        <div style="font-size:0.82rem;color:var(--muted);">Planet moves <strong style="color:#fca5a5;">SLOW</strong> — long arm makes up for it</div>
+      </div>
+    </div>
+
+    <div class="card amber" style="padding:14px;margin:14px 0 0;">
+      <strong>🧠 Think of it like an ice skater!</strong>
+      <p style="margin:6px 0 0; color:var(--text);">When a figure skater pulls their arms in, they spin <strong>faster</strong>.
+         When they stretch out, they spin <strong>slower</strong>. The planet does the same thing —
+         closer to the Sun (arms in) → faster. Farther away (arms out) → slower. Same total "sweep" each second!</p>
+    </div>
+
+    <div class="fun-fact">
+      Earth is closest to the Sun in <strong>January</strong> (perihelion) and farthest in <strong>July</strong> (aphelion).
+      Surprise — we're actually closer to the Sun during the Northern Hemisphere's winter! ❄️☀️
+      Seasons are caused by Earth's <em>tilt</em>, not its distance from the Sun.
+    </div>
+  </div>
+
+  <!-- ═══ LAW 3 ═══ -->
+  <div class="card glow" style="margin-top:20px; box-shadow: 0 0 30px rgba(34,197,94,0.2);">
+    <div class="law-badge three">Kepler's 3rd Law</div>
+    <h2>The Law of Harmonies</h2>
+    <p style="color:var(--text);font-size:1.05rem;">
+      The <strong>square of the orbital period</strong> is proportional to the <strong>cube of the semi-major axis</strong>:
+    </p>
+    <div class="formula-box" style="border-color:#4ade80;">
+      \[ T^2 \propto r^3 \]
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔗 Connecting to Newton's Gravity</h3>
+    <p>Kepler discovered the pattern, but <strong>Newton explained WHY</strong> using gravity!
+       Let's derive the exact relationship for circular orbits (where \(a = r\)):</p>
+
+    <div class="derivation-flow">
+      <div class="derivation-step">
+        <div class="d-num">1</div>
+        <div class="d-body">
+          <strong style="color:var(--text);">Start with the satellite speed formula</strong>
+          <div class="formula-box" style="text-align:center;margin:10px 0;">
+            \[ v = \sqrt{\frac{GM}{r}} \]
+          </div>
+        </div>
+      </div>
+      <div class="derivation-step">
+        <div class="d-num">2</div>
+        <div class="d-body">
+          <strong style="color:var(--text);">Speed = distance / time for one orbit</strong>
+          <div class="formula-box" style="text-align:center;margin:10px 0;">
+            \[ v = \frac{2\pi r}{T} \]
+          </div>
+        </div>
+      </div>
+      <div class="derivation-step">
+        <div class="d-num">3</div>
+        <div class="d-body">
+          <strong style="color:var(--text);">Set them equal and square both sides</strong>
+          <div class="formula-box" style="text-align:center;margin:10px 0;">
+            \[ \frac{4\pi^2 r^2}{T^2} = \frac{GM}{r} \]
+          </div>
+        </div>
+      </div>
+      <div class="derivation-step">
+        <div class="d-num">4</div>
+        <div class="d-body">
+          <strong style="color:var(--text);">Rearrange to isolate \(T^2\)</strong>
+          <div class="formula-box" style="text-align:center;margin:10px 0;">
+            \[ T^2 = \frac{4\pi^2}{GM}\,r^3 \]
+          </div>
+          <p style="color:var(--accent2);font-weight:600;margin:0;font-size:0.9rem;">🤯 \(T^2/r^3\) is the SAME constant for every object orbiting the same central body!</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="kepler-result">
+      <p style="color:#c084fc;font-weight:700;margin-bottom:8px;font-size:1rem;">🏆 KEPLER'S THIRD LAW (Newton's Form)</p>
+      <div style="font-size:1.3rem;">
+        \[ \boxed{T^2 = \frac{4\pi^2}{GM}\,r^3} \]
+      </div>
+      <p style="color:var(--text);margin:12px 0 0;font-size:0.92rem;">where \(M\) = central body mass, \(r\) = orbital radius, \(G = 6.674 \times 10^{-11}\ N \cdot m^2/kg^2\)</p>
+    </div>
+  </div>
+
+  <!-- Planet comparison -->
+  <div class="card">
+    <h3>🌍 Check It: Planet Year Lengths</h3>
+    <p>Kepler's 3rd law predicts that farther planets have longer years. Let's see!</p>
+    <div class="planet-grid">
+      <div class="planet-item">
+        <div class="emoji">☿️</div>
+        <div class="label">Mercury</div>
+        <div class="value accent">0.39 AU</div>
+        <div class="value green">88 days</div>
+      </div>
+      <div class="planet-item">
+        <div class="emoji">♀️</div>
+        <div class="label">Venus</div>
+        <div class="value accent">0.72 AU</div>
+        <div class="value green">225 days</div>
+      </div>
+      <div class="planet-item">
+        <div class="emoji">🌍</div>
+        <div class="label">Earth</div>
+        <div class="value accent">1.00 AU</div>
+        <div class="value green">365 days</div>
+      </div>
+      <div class="planet-item">
+        <div class="emoji">🔴</div>
+        <div class="label">Mars</div>
+        <div class="value accent">1.52 AU</div>
+        <div class="value green">687 days</div>
+      </div>
+      <div class="planet-item">
+        <div class="emoji">🟠</div>
+        <div class="label">Jupiter</div>
+        <div class="value accent">5.20 AU</div>
+        <div class="value green">11.9 yrs</div>
+      </div>
+      <div class="planet-item">
+        <div class="emoji">🪐</div>
+        <div class="label">Saturn</div>
+        <div class="value accent">9.54 AU</div>
+        <div class="value green">29.5 yrs</div>
+      </div>
+      <div class="planet-item">
+        <div class="emoji">💎</div>
+        <div class="label">Uranus</div>
+        <div class="value accent">19.2 AU</div>
+        <div class="value green">84 yrs</div>
+      </div>
+      <div class="planet-item">
+        <div class="emoji">🔵</div>
+        <div class="label">Neptune</div>
+        <div class="value accent">30.1 AU</div>
+        <div class="value green">165 yrs</div>
+      </div>
+    </div>
+    <p style="font-size:0.88rem;margin:0;">If you're 14, Neptune hasn't even finished <strong>1/12 of one orbit</strong> since the year you were born! 🐢</p>
+  </div>
+
+  <!-- Fun Kepler timeline -->
+  <div class="card">
+    <h3>📜 Kepler's Story — A Cosmic Detective</h3>
+    <div class="timeline-item">
+      <div class="yr">1571</div>
+      <div><strong>Born in Germany</strong> — premature, sickly, with poor eyesight. Ironic for someone who would study the skies!</div>
+    </div>
+    <div class="timeline-item">
+      <div class="yr">1600</div>
+      <div><strong>Joins Tycho Brahe</strong> — the greatest naked-eye observer ever, who had decades of incredibly precise planetary data.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="yr">1601</div>
+      <div><strong>Tycho dies</strong> — Kepler inherits all his data. The treasure hunt begins! 🗺️</div>
+    </div>
+    <div class="timeline-item">
+      <div class="yr">1609</div>
+      <div><strong>Laws 1 & 2 published</strong> — after 8 years of calculations by hand, he cracks the elliptical orbit code.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="yr">1619</div>
+      <div><strong>Law 3 published</strong> — 10 more years to find the \(T^2 \propto r^3\) pattern. Kepler called it "harmonies of the world." 🎵</div>
+    </div>
+  </div>
+
+  <!-- Constants reference -->
+  <div class="card">
+    <h3>📋 Useful Constants (keep handy!)</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.88rem;">
+      <div style="color:var(--muted);">\(G\)</div><div>\(6.674 \times 10^{-11}\ N\cdot m^2/kg^2\)</div>
+      <div style="color:var(--muted);">\(M_{Sun}\)</div><div>\(1.99 \times 10^{30}\ kg\)</div>
+      <div style="color:var(--muted);">\(M_{Earth}\)</div><div>\(5.98 \times 10^{24}\ kg\)</div>
+      <div style="color:var(--muted);">\(r_{Earth}\)</div><div>\(6.37 \times 10^6\ m\)</div>
+      <div style="color:var(--muted);">1 AU</div><div>\(1.496 \times 10^{11}\ m\)</div>
+      <div style="color:var(--muted);">1 year</div><div>\(3.156 \times 10^7\ s\)</div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <div></div>
+    <button class="btn btn-primary" onclick="goTo(1)">Check My Understanding →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 1 — Concept Check
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-1">
+<div class="container">
+  <div class="section-tag">Section 2 of 6 — Concept Check</div>
+  <h1>Let's See What <span style="color:var(--accent)">You Know! 🧠</span></h1>
+  <p>Answer these 5 questions before we move to examples. Think carefully about each one!</p>
+
+  <div class="cc-grid" id="cc-container"></div>
+
+  <div id="cc-feedback" class="feedback info" style="margin-top:10px;"></div>
+  <div id="cc-result" style="display:none;" class="card green">
+    <h3 id="cc-result-title"></h3>
+    <p id="cc-result-msg"></p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(0)">← Review Concepts</button>
+    <button class="btn btn-primary" id="cc-next-btn" onclick="goTo(2)" disabled>See Worked Example →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 2 — Worked Example
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-2">
+<div class="container">
+  <div class="section-tag">Section 3 of 6 — Worked Example</div>
+  <h1>Example: <span style="color:var(--accent)">Mars's Orbit 🔴</span></h1>
+
+  <div class="card amber">
+    <h3>Problem Statement</h3>
+    <p style="color:var(--text);">Mars orbits the Sun at an average distance of <strong>2.28 × 10¹¹ m</strong> (1.52 AU).</p>
+    <p style="color:var(--text);margin:0;">(a) What is Mars's orbital period in seconds?<br>
+    (b) Convert the period to Earth days.<br>
+    (c) Verify using Kepler's 3rd law ratio method: if Earth's period is 1 year at 1 AU, what is Mars's period?</p>
+  </div>
+
+  <p>Work through each step by clicking the buttons below 👇</p>
+
+  <!-- Step 1 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+      <div>
+        <strong>Identify known values</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Gather the data we need</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex-step1')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex-step1">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ r_{Mars} = 2.28 \times 10^{11}\ m \]
+        \[ M_{Sun} = 1.99 \times 10^{30}\ kg \]
+        \[ G = 6.674 \times 10^{-11}\ N\cdot m^2/kg^2 \]
+      </div>
+      <p style="font-size:0.88rem;">💡 For planets orbiting the Sun, \(M\) is always the Sun's mass!</p>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+      <div>
+        <strong>Part (a): Apply Kepler's 3rd Law</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">\(T = 2\pi\sqrt{r^3/(GM)}\)</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex-step2')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex-step2">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ T = 2\pi\sqrt{\frac{r^3}{GM_{Sun}}} = 2\pi\sqrt{\frac{(2.28 \times 10^{11})^3}{6.674 \times 10^{-11} \times 1.99 \times 10^{30}}} \]
+        \[ = 2\pi\sqrt{\frac{1.186 \times 10^{34}}{1.328 \times 10^{20}}} = 2\pi\sqrt{8.932 \times 10^{13}} \]
+        \[ \boxed{T \approx 5.93 \times 10^{7}\ s} \]
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+      <div>
+        <strong>Part (b): Convert to days</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Divide by seconds per day</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex-step3')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex-step3">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ T_{days} = \frac{5.93 \times 10^7\ s}{86{,}400\ s/day} \approx \boxed{687\ \text{days}} \]
+      </div>
+      <div class="card green" style="padding:14px;margin-top:12px;">
+        <strong>✅ Real-world check:</strong> NASA's value for Mars's orbital period is 687 days. Spot on!
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">4</div>
+      <div>
+        <strong>Part (c): The elegant ratio method!</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Compare Mars to Earth using \(T^2 \propto r^3\)</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex-step4')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex-step4">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ \frac{T_{Mars}^2}{T_{Earth}^2} = \frac{r_{Mars}^3}{r_{Earth}^3} \]
+        \[ T_{Mars}^2 = T_{Earth}^2 \times \left(\frac{r_{Mars}}{r_{Earth}}\right)^3 = (1\ \text{yr})^2 \times (1.52)^3 \]
+        \[ T_{Mars}^2 = 3.512 \quad \Rightarrow \quad \boxed{T_{Mars} = 1.874\ \text{years} \approx 684\ \text{days}} \]
+      </div>
+      <p style="font-size:0.88rem;">🎯 The ratio method is super elegant — you don't even need \(G\) or \(M_{Sun}\)! Just compare to Earth.</p>
+    </div>
+  </div>
+
+  <div class="card amber">
+    <h3>🤔 Thinking Question</h3>
+    <p style="color:var(--text);">If a new planet were discovered at 4 AU from the Sun, would its year be (a) 4 years, (b) 8 years, or (c) some other value?</p>
+    <button class="btn btn-secondary" style="padding:8px 16px;font-size:0.85rem;" onclick="revealStep('think-answer')">Reveal Answer</button>
+    <div class="step-block" id="think-answer">
+      <p style="color:var(--text);margin-top:10px;"><strong>8 years!</strong>
+         \(T^2 = r^3 = 4^3 = 64\), so \(T = \sqrt{64} = 8\) years.
+         The period doesn't scale linearly with distance — it grows faster!
+         That's why Neptune at 30 AU takes 165 years, not 30 years. 🤯</p>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(1)">← Concept Check</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Your Turn! 🚀 →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 3 — Student Practice
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-3">
+<div class="container">
+  <div class="section-tag">Section 4 of 6 — Your Turn!</div>
+  <h1>Solve It <span style="color:var(--accent)">Yourself 🚀</span></h1>
+
+  <div class="card amber">
+    <h3>Problem: Jupiter's Orbit</h3>
+    <p style="color:var(--text);">Jupiter orbits the Sun at an average distance of <strong>5.20 AU</strong>
+       (1 AU = 1.496 × 10¹¹ m).</p>
+    <p style="color:var(--text);margin:0;">
+      <strong>(a)</strong> Using the ratio method with Earth, find Jupiter's orbital period in years.<br>
+      <strong>(b)</strong> Convert Jupiter's orbital distance to meters.<br>
+      <strong>(c)</strong> Use \(T = 2\pi\sqrt{r^3/(GM_{Sun})}\) to calculate the period in seconds, then convert to years.
+    </p>
+  </div>
+
+  <!-- Part (a): Ratio method -->
+  <div class="card">
+    <h3>Part (a): Ratio method — find \(T\) in years</h3>
+    <p>Use \(T^2 = r^3\) when distances are in AU and periods in years.</p>
+    <div class="input-row">
+      <label>\(T_{Jupiter}\) (years):</label>
+      <input type="text" id="ans-a" placeholder="e.g. sqrt(5.2^3) or 11.9">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkPracticeA()">Check ✓</button>
+      <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintA()">Hint 💡</button>
+    </div>
+    <div id="feedback-a" class="feedback"></div>
+    <div id="expr-hint-a"></div>
+    <div id="hint-a" class="step-block"></div>
+  </div>
+
+  <!-- Part (b): Convert to meters -->
+  <div id="partB-section" style="display:none;">
+  <div class="card">
+    <h3>Part (b): Convert orbital distance to meters</h3>
+    <p>Multiply: \(r = 5.20\ \text{AU} \times 1.496 \times 10^{11}\ \text{m/AU}\)</p>
+    <div class="input-row">
+      <label>\(r\) (m):</label>
+      <input type="text" id="ans-b" placeholder="e.g. 5.20*1.496e11 or 7.78e11">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkPracticeB()">Check ✓</button>
+      <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintB()">Hint 💡</button>
+    </div>
+    <div id="feedback-b" class="feedback"></div>
+    <div id="expr-hint-b"></div>
+    <div id="hint-b" class="step-block"></div>
+  </div>
+  </div>
+
+  <!-- Part (c): Full calculation -->
+  <div id="partC-section" style="display:none;">
+  <div class="card">
+    <h3>Part (c): Calculate \(T\) using the full formula</h3>
+    <p>Use \(T = 2\pi\sqrt{r^3/(GM_{Sun})}\) and convert to years (÷ 3.156×10⁷ s/yr).</p>
+    <div class="input-row">
+      <label>\(T\) (years):</label>
+      <input type="text" id="ans-c" placeholder="e.g. 11.86">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkPracticeC()">Check ✓</button>
+      <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintC()">Hint 💡</button>
+    </div>
+    <div id="feedback-c" class="feedback"></div>
+    <div id="expr-hint-c"></div>
+    <div id="hint-c" class="step-block"></div>
+  </div>
+  </div>
+
+  <div id="practice-done" style="display:none;" class="card green">
+    <h3>🎉 Practice Complete!</h3>
+    <p style="color:var(--text);">Jupiter's year is about 11.86 Earth years — so if you're 14 on Earth, you'd barely be 1 year old on Jupiter! 🍼🪐</p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(2)">← Worked Example</button>
+    <button class="btn btn-primary" id="practice-next" onclick="goTo(4)" disabled>Take the Quiz →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 4 — Quiz
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-4">
+<div class="container">
+  <div class="section-tag">Section 5 of 6 — Quiz</div>
+  <h1>Quiz Time! <span style="color:var(--accent)">⚡ 6 Questions</span></h1>
+  <p>Test your full understanding. You'll earn points for each correct answer!</p>
+
+  <div id="quiz-container"></div>
+
+  <div id="quiz-result" style="display:none;">
+    <div class="card glow">
+      <div class="score-final">
+        <div class="score-circle">
+          <div class="num" id="quiz-score-num">0</div>
+          <div class="den" id="quiz-score-den">/ 6</div>
+        </div>
+        <h2 id="quiz-result-title"></h2>
+        <p id="quiz-result-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(3)">← Practice</button>
+    <button class="btn btn-primary" id="quiz-next-btn" onclick="goTo(5)" disabled>Homework →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 5 — Homework
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-5">
+<div class="container">
+  <div class="section-tag">Section 6 of 6 — Homework</div>
+  <h1>Homework <span style="color:var(--accent)">Problems 📝</span></h1>
+  <p>Work through these problems on paper. Show all steps!</p>
+
+  <div class="card amber" style="margin-bottom:20px;">
+    <h3>📋 Constants & Formulas Reference</h3>
+    <p style="color:var(--text);font-size:0.88rem;margin:0;">
+      \(G = 6.674 \times 10^{-11}\ N\cdot m^2/kg^2\) &nbsp;|&nbsp;
+      \(M_{Sun} = 1.99 \times 10^{30}\ kg\) &nbsp;|&nbsp;
+      \(M_{Earth} = 5.98 \times 10^{24}\ kg\)<br>
+      1 AU \(= 1.496 \times 10^{11}\) m &nbsp;|&nbsp;
+      1 year \(= 3.156 \times 10^7\) s<br>
+      \(T^2 = \frac{4\pi^2}{GM} r^3\) &nbsp;|&nbsp;
+      \(v = \sqrt{GM/r}\) &nbsp;|&nbsp;
+      Ratio: \(\frac{T_1^2}{T_2^2} = \frac{r_1^3}{r_2^3}\)
+    </p>
+  </div>
+
+  <h2 style="margin-bottom:14px;">Group A — Kepler's 3rd Law Calculations</h2>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 1</div>
+    <p style="color:var(--text);margin-bottom:12px;">Saturn orbits the Sun at an average distance of <strong>9.54 AU</strong>.
+    Using the ratio method (compare to Earth), find Saturn's orbital period in years.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw1')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw1" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw1" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      \(T^2 = r^3 = (9.54)^3 = 867.4\)<br>
+      \(T = \sqrt{867.4} \approx \boxed{29.5\ \text{years}}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 2</div>
+    <p style="color:var(--text);margin-bottom:12px;">An asteroid has an orbital period of <strong>8 years</strong> around the Sun.
+    What is its average distance from the Sun in AU?</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw2')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw2" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw2" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      \(r^3 = T^2 = 8^2 = 64\)<br>
+      \(r = 64^{1/3} = \boxed{4.00\ \text{AU}}\)<br>
+      That's between Mars (1.52 AU) and Jupiter (5.20 AU) — right in the asteroid belt!
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 3</div>
+    <p style="color:var(--text);margin-bottom:12px;">A moon orbits Jupiter with a period of <strong>3.55 days</strong> (Io) at a distance of
+    <strong>4.22 × 10⁸ m</strong>. Another moon (Europa) orbits at <strong>6.71 × 10⁸ m</strong>.
+    Find Europa's orbital period in days.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw3')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw3" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw3" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      Using ratios: \(\frac{T_E^2}{T_I^2} = \frac{r_E^3}{r_I^3}\)<br>
+      \(T_E^2 = (3.55)^2 \times \left(\frac{6.71 \times 10^8}{4.22 \times 10^8}\right)^3 = 12.60 \times (1.590)^3 = 12.60 \times 4.021 = 50.66\)<br>
+      \(T_E = \sqrt{50.66} \approx \boxed{7.12\ \text{days}}\)<br>
+      NASA's value: 7.15 days — very close!
+    </div>
+  </div>
+
+  <h2 style="margin-bottom:14px;margin-top:30px;">Group B — Conceptual & Challenge</h2>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 4</div>
+    <p style="color:var(--text);margin-bottom:12px;">A comet has an elliptical orbit around the Sun with a semi-major axis of <strong>18 AU</strong>.
+    (a) What is the comet's orbital period?
+    (b) If the comet was last at perihelion (closest to the Sun) in 2020, when will it return?</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw4')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw4" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw4" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(T^2 = 18^3 = 5832 \Rightarrow T = \sqrt{5832} \approx \boxed{76.4\ \text{years}}\)<br>
+      (b) Next perihelion: \(2020 + 76.4 \approx \boxed{2096}\)<br>
+      Fun fact: Halley's Comet has a similar period (~76 years)! ☄️
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 5</div>
+    <p style="color:var(--text);margin-bottom:12px;">Scientists discover an exoplanet orbiting a star that has <strong>twice the mass</strong> of our Sun.
+    The planet is at a distance of 1 AU from this star.
+    (a) Is its period longer, shorter, or the same as Earth's?
+    (b) Calculate the period using \(T = 2\pi\sqrt{r^3/(GM)}\).</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw5')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw5" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw5" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) <strong>Shorter</strong> — bigger \(M\) in the denominator means smaller \(T\).<br>
+      (b) \(T = 2\pi\sqrt{\frac{(1.496\times10^{11})^3}{6.674\times10^{-11}\times2(1.99\times10^{30})}}\)<br>
+      \(= 2\pi\sqrt{\frac{3.348\times10^{33}}{2.655\times10^{20}}} = 2\pi\sqrt{1.261\times10^{13}}\)<br>
+      \(\approx 2.23\times10^7\ s \approx \boxed{0.707\ \text{years} \approx 258\ \text{days}}\)<br>
+      That's \(1/\sqrt{2}\) of Earth's year — makes sense since \(M\) doubled!
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 6 (Challenge)</div>
+    <p style="color:var(--text);margin-bottom:12px;">Use Kepler's 3rd Law to <strong>find the mass of the Sun</strong>!
+    You know that Earth orbits at \(r = 1.496 \times 10^{11}\) m with a period of \(T = 3.156 \times 10^7\) s.
+    Rearrange \(T^2 = \frac{4\pi^2}{GM}r^3\) to solve for \(M\).</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw6')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw6" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw6" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      \[M = \frac{4\pi^2 r^3}{GT^2} = \frac{4\pi^2 (1.496\times10^{11})^3}{6.674\times10^{-11}\times(3.156\times10^7)^2}\]
+      \[= \frac{4\pi^2 \times 3.348\times10^{33}}{6.674\times10^{-11}\times9.960\times10^{14}} = \frac{1.322\times10^{35}}{6.647\times10^{4}}\]
+      \[\boxed{M_{Sun} \approx 1.99 \times 10^{30}\ kg}\]
+      This is how astronomers actually measure the mass of stars — by watching their planets orbit! 🌟🔭
+    </div>
+  </div>
+
+  <!-- Final score summary -->
+  <div class="card glow" style="margin-top:30px;text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:8px;">🪐</div>
+    <h2>Lesson Complete!</h2>
+    <p>Total Score: <strong style="color:var(--accent);font-size:1.2rem;" id="final-score-display">—</strong></p>
+    <p style="margin-top:8px;">Remember: <em>\(T^2 = \frac{4\pi^2}{GM}r^3\)</em> — the farther out you orbit, the longer your year!</p>
+    <button class="btn btn-primary" style="margin-top:12px;" onclick="goTo(0)">🔄 Restart Lesson</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(4)">← Quiz</button>
+    <div></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script>
+// ── Lesson-specific: Elliptical orbit simulation ──────────────
+const oc = document.getElementById('orbit-canvas');
+const octx = oc.getContext('2d');
+let planetAngle = 0; // true anomaly parameter
+let simEcc = 0.40;
+let showAreas = false;
+let areaSweeps = [];
+let areaTimer = 0;
+const AREA_INTERVAL = 120; // frames between area snapshots
+
+function ellipseRadius(a, e, theta) {
+  return a * (1 - e * e) / (1 + e * Math.cos(theta));
+}
+
+function drawOrbitSim() {
+  oc.width = oc.offsetWidth; oc.height = oc.offsetHeight;
+  const cx = oc.width / 2, cy = oc.height / 2;
+  const a = Math.min(cx, cy) * 0.72; // semi-major visual
+  const b = a * Math.sqrt(1 - simEcc * simEcc);
+  const focalDist = a * simEcc;
+  // Sun at right focus
+  const sunX = cx + focalDist, sunY = cy;
+
+  octx.clearRect(0, 0, oc.width, oc.height);
+
+  // Orbit path (ellipse centered at cx, cy)
+  octx.beginPath();
+  octx.ellipse(cx, cy, a, b, 0, 0, Math.PI * 2);
+  octx.strokeStyle = 'rgba(192,132,252,0.25)';
+  octx.lineWidth = 1.5;
+  octx.setLineDash([6, 4]);
+  octx.stroke();
+  octx.setLineDash([]);
+
+  // Draw area sweeps if enabled
+  if (showAreas && areaSweeps.length >= 2) {
+    var colors = ['rgba(59,130,246,0.18)', 'rgba(245,158,11,0.18)', 'rgba(34,197,94,0.18)',
+                  'rgba(168,85,247,0.18)', 'rgba(239,68,68,0.18)', 'rgba(6,182,212,0.18)'];
+    for (var i = 0; i < areaSweeps.length - 1; i++) {
+      var startA = areaSweeps[i], endA = areaSweeps[i + 1];
+      octx.beginPath();
+      octx.moveTo(sunX, sunY);
+      for (var t = startA; t <= endA; t += 0.02) {
+        var rr = ellipseRadius(a, simEcc, t);
+        var px = cx + rr * Math.cos(t) + focalDist * (1 - Math.cos(t) / (1 + simEcc * Math.cos(t)));
+        // More accurate: planet position relative to sun-focus ellipse
+        var ex = sunX + rr * Math.cos(t + Math.PI);
+        var ey = sunY + rr * Math.sin(t + Math.PI) * (b / a);
+        // Simpler: parametric ellipse
+        ex = cx + a * Math.cos(t);
+        ey = cy + b * Math.sin(t);
+        octx.lineTo(ex, ey);
+      }
+      octx.closePath();
+      octx.fillStyle = colors[i % colors.length];
+      octx.fill();
+      octx.strokeStyle = colors[i % colors.length].replace('0.18', '0.5');
+      octx.lineWidth = 1;
+      octx.stroke();
+    }
+  }
+
+  // Sun glow
+  var sg = octx.createRadialGradient(sunX, sunY, 2, sunX, sunY, 22);
+  sg.addColorStop(0, '#fef08a');
+  sg.addColorStop(0.5, '#f59e0b');
+  sg.addColorStop(1, 'rgba(245,158,11,0)');
+  octx.beginPath();
+  octx.arc(sunX, sunY, 22, 0, Math.PI * 2);
+  octx.fillStyle = sg;
+  octx.fill();
+  // Sun core
+  octx.beginPath();
+  octx.arc(sunX, sunY, 8, 0, Math.PI * 2);
+  octx.fillStyle = '#fef08a';
+  octx.fill();
+
+  // Planet position — parametric angle for smooth animation
+  // Kepler's 2nd law: speed up near perihelion
+  // Approximate: angular velocity ∝ 1/r²
+  var r_param = a * (1 - simEcc * simEcc) / (1 + simEcc * Math.cos(planetAngle));
+  var angularSpeed = 0.012 * (a * a) / (r_param * r_param);
+  if (angularSpeed > 0.08) angularSpeed = 0.08;
+  planetAngle += angularSpeed;
+  if (planetAngle > Math.PI * 2) {
+    planetAngle -= Math.PI * 2;
+    areaSweeps = [];
+    areaTimer = 0;
+  }
+
+  // Track area sweeps
+  areaTimer++;
+  if (showAreas && areaTimer >= AREA_INTERVAL) {
+    areaSweeps.push(planetAngle);
+    areaTimer = 0;
+  }
+
+  // Planet position on ellipse (parametric)
+  var planetR = a * (1 - simEcc * simEcc) / (1 + simEcc * Math.cos(planetAngle));
+  // Convert polar (from focus) to Cartesian
+  var px = sunX + planetR * Math.cos(planetAngle + Math.PI);
+  var py = sunY + planetR * Math.sin(planetAngle + Math.PI) * (b / (a * Math.sqrt(1 - simEcc * simEcc))) ;
+
+  // Simpler: use parametric ellipse with Kepler motion
+  px = cx + a * Math.cos(planetAngle);
+  py = cy + b * Math.sin(planetAngle);
+
+  // Line from sun to planet
+  octx.beginPath();
+  octx.moveTo(sunX, sunY);
+  octx.lineTo(px, py);
+  octx.strokeStyle = 'rgba(250,204,21,0.3)';
+  octx.lineWidth = 1;
+  octx.stroke();
+
+  // Planet
+  var pg = octx.createRadialGradient(px, py, 1, px, py, 7);
+  pg.addColorStop(0, '#60a5fa');
+  pg.addColorStop(1, '#3b82f6');
+  octx.beginPath();
+  octx.arc(px, py, 7, 0, Math.PI * 2);
+  octx.fillStyle = pg;
+  octx.fill();
+  octx.strokeStyle = '#93c5fd';
+  octx.lineWidth = 1;
+  octx.stroke();
+
+  // Distance & speed for labels
+  var dist = Math.sqrt((px - sunX) ** 2 + (py - sunY) ** 2);
+  var maxDist = a * (1 + simEcc);
+  var minDist = a * (1 - simEcc);
+  var speedNorm = (maxDist / Math.max(dist, 1));
+
+  document.getElementById('sim-speed-label').textContent = speedNorm < 1.2 ? 'Slow 🐢' : speedNorm < 1.8 ? 'Medium 🚶' : 'Fast! 🚀';
+  document.getElementById('sim-speed-label').style.color = speedNorm < 1.2 ? '#fca5a5' : speedNorm < 1.8 ? '#fcd34d' : '#86efac';
+  document.getElementById('sim-dist-label').textContent = dist < (minDist + maxDist) / 2 ? 'Close ☀️' : 'Far 🌌';
+
+  // Labels
+  octx.font = 'bold 11px system-ui';
+  octx.fillStyle = '#fcd34d';
+  octx.fillText('Sun ☀️', sunX + 12, sunY - 12);
+  octx.fillStyle = '#93c5fd';
+  octx.fillText('Planet', px + 12, py - 8);
+
+  // Perihelion / Aphelion labels
+  octx.font = '10px system-ui';
+  octx.fillStyle = '#86efac';
+  octx.fillText('Perihelion (closest)', cx - a - 4, cy - 10);
+  octx.fillStyle = '#fca5a5';
+  octx.fillText('Aphelion (farthest)', cx + a - 40, cy - 10);
+
+  // Foci markers
+  octx.beginPath();
+  octx.arc(cx - focalDist, cy, 3, 0, Math.PI * 2);
+  octx.fillStyle = 'rgba(148,163,184,0.3)';
+  octx.fill();
+  octx.font = '9px system-ui';
+  octx.fillStyle = '#64748b';
+  octx.fillText('empty focus', cx - focalDist - 16, cy + 14);
+
+  requestAnimationFrame(drawOrbitSim);
+}
+drawOrbitSim();
+
+// ── Ellipse Anatomy Diagram ──────────────────────────────
+function drawEllipseDiagram() {
+  var c = document.getElementById('ellipse-diagram');
+  var ctx = c.getContext('2d');
+  c.width = c.offsetWidth; c.height = c.offsetHeight;
+  var W = c.width, H = c.height;
+  var cx = W / 2, cy = H / 2;
+
+  var e = parseFloat(document.getElementById('ecc-diagram-slider').value) / 100;
+  var a = Math.min(cx, cy) * 0.75;
+  var bVal = a * Math.sqrt(1 - e * e);
+  var cFocal = a * e;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Full major axis (dashed, light)
+  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = 'rgba(148,163,184,0.2)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(cx - a, cy); ctx.lineTo(cx + a, cy); ctx.stroke();
+  // Full minor axis
+  ctx.beginPath(); ctx.moveTo(cx, cy - bVal); ctx.lineTo(cx, cy + bVal); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Ellipse outline
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, a, bVal, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(192,132,252,0.5)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // ── Label: semi-major axis a (center → right edge, purple) ──
+  ctx.beginPath();
+  ctx.moveTo(cx, cy + 4);
+  ctx.lineTo(cx + a, cy + 4);
+  ctx.strokeStyle = '#c084fc';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+  // arrowheads
+  ctx.beginPath();
+  ctx.moveTo(cx + a - 8, cy - 2); ctx.lineTo(cx + a, cy + 4); ctx.lineTo(cx + a - 8, cy + 10);
+  ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.font = 'bold 15px system-ui';
+  ctx.fillStyle = '#c084fc';
+  ctx.fillText('a', cx + a * 0.48, cy + 22);
+
+  // ── Label: semi-minor axis b (center → top, blue) ──
+  ctx.beginPath();
+  ctx.moveTo(cx - 4, cy);
+  ctx.lineTo(cx - 4, cy - bVal);
+  ctx.strokeStyle = '#60a5fa';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+  // arrowhead
+  ctx.beginPath();
+  ctx.moveTo(cx - 10, cy - bVal + 8); ctx.lineTo(cx - 4, cy - bVal); ctx.lineTo(cx + 2, cy - bVal + 8);
+  ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.font = 'bold 15px system-ui';
+  ctx.fillStyle = '#60a5fa';
+  ctx.fillText('b', cx - 18, cy - bVal * 0.45);
+
+  // ── Label: focal distance c (center → right focus, yellow) ──
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - 6);
+  ctx.lineTo(cx + cFocal, cy - 6);
+  ctx.strokeStyle = '#fbbf24';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([3, 3]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  if (e > 0.05) {
+    ctx.font = 'bold 13px system-ui';
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillText('c', cx + cFocal * 0.45, cy - 14);
+  }
+
+  // ── Center dot ──
+  ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#94a3b8'; ctx.fill();
+  ctx.font = '11px system-ui';
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText('center', cx - 16, cy + 18 + 16);
+
+  // ── Focus 1 (right = Sun) ──
+  var f1x = cx + cFocal;
+  var sg = ctx.createRadialGradient(f1x, cy, 1, f1x, cy, 12);
+  sg.addColorStop(0, '#fef08a'); sg.addColorStop(0.6, '#f59e0b'); sg.addColorStop(1, 'rgba(245,158,11,0)');
+  ctx.beginPath(); ctx.arc(f1x, cy, 12, 0, Math.PI * 2);
+  ctx.fillStyle = sg; ctx.fill();
+  ctx.beginPath(); ctx.arc(f1x, cy, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#fef08a'; ctx.fill();
+  ctx.font = 'bold 11px system-ui';
+  ctx.fillStyle = '#fcd34d';
+  ctx.fillText('Focus 1 (Sun)', f1x - 32, cy + 24);
+
+  // ── Focus 2 (left = empty) ──
+  var f2x = cx - cFocal;
+  ctx.beginPath(); ctx.arc(f2x, cy, 4, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(148,163,184,0.5)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(148,163,184,0.4)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(f2x, cy, 6, 0, Math.PI * 2); ctx.stroke();
+  ctx.font = '11px system-ui';
+  ctx.fillStyle = '#64748b';
+  ctx.fillText('Focus 2 (empty)', f2x - 36, cy + 22);
+
+  // ── Perihelion & Aphelion labels on the ellipse ──
+  // Perihelion = closest to right focus = right end of ellipse minus focus distance? No.
+  // Actually perihelion is the point on the ellipse closest to the Sun (right focus).
+  // That's the RIGHT end of the ellipse: (cx + a, cy), distance to sun = a - c
+  // Aphelion is the LEFT end: (cx - a, cy), distance to sun = a + c
+  ctx.font = '10px system-ui';
+  ctx.fillStyle = '#86efac';
+  ctx.fillText('Perihelion', cx + a - 26, cy - 14);
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText('(closest: a − c)', cx + a - 36, cy - 2 - 14 + 14 + 16);
+  ctx.fillStyle = '#fca5a5';
+  ctx.fillText('Aphelion', cx - a - 8, cy - 14);
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText('(farthest: a + c)', cx - a - 16, cy + 16);
+
+  // ── Eccentricity display ──
+  ctx.font = 'bold 13px system-ui';
+  ctx.fillStyle = '#e2e8f0';
+  ctx.fillText('e = ' + e.toFixed(2), 14, 24);
+  // Comparison
+  ctx.font = '11px system-ui';
+  ctx.fillStyle = '#94a3b8';
+  if (e < 0.05) ctx.fillText('(perfect circle!)', 14, 42);
+  else if (e < 0.1) ctx.fillText('(nearly circular — like Earth)', 14, 42);
+  else if (e < 0.3) ctx.fillText('(mildly elliptical — like Mars)', 14, 42);
+  else if (e < 0.6) ctx.fillText('(noticeably elliptical)', 14, 42);
+  else ctx.fillText('(very elongated — like a comet!)', 14, 42);
+}
+// Draw once on load, and on resize
+drawEllipseDiagram();
+window.addEventListener('resize', function() { drawEllipseDiagram(); drawAreaDiagram(); });
+
+// ── Equal Areas Diagram (Kepler's 2nd Law) ──────────────
+function drawAreaDiagram() {
+  var c = document.getElementById('area-diagram');
+  if (!c) return;
+  var ctx = c.getContext('2d');
+  c.width = c.offsetWidth; c.height = c.offsetHeight;
+  var W = c.width, H = c.height;
+  var cx = W / 2, cy = H / 2;
+
+  var ecc = 0.55; // moderate eccentricity to make the effect dramatic
+  var a = Math.min(cx, cy) * 0.78;
+  var bVal = a * Math.sqrt(1 - ecc * ecc);
+  var cFocal = a * ecc;
+  var sunX = cx + cFocal, sunY = cy;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Ellipse path (dashed)
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, a, bVal, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(148,163,184,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Utility: parametric point on ellipse
+  function ellipsePoint(theta) {
+    return { x: cx + a * Math.cos(theta), y: cy + bVal * Math.sin(theta) };
+  }
+
+  // We'll show two wedges of "equal area":
+  // Wedge A: near perihelion (right side, close to sun) — wide angle, short radius
+  // Wedge B: near aphelion (left side, far from sun) — narrow angle, long radius
+  //
+  // For visual clarity, we hand-pick angles that produce similar-looking areas.
+  // Near perihelion: planet is at right end (theta ~ 0). Use theta = -0.45 to +0.45 (wide).
+  // Near aphelion: planet is at left end (theta ~ PI). Use theta = PI-0.18 to PI+0.18 (narrow).
+  var periStart = -0.50, periEnd = 0.50;
+  var apoStart = Math.PI - 0.20, apoEnd = Math.PI + 0.20;
+
+  // Draw wedge helper
+  function drawWedge(tStart, tEnd, fillColor, strokeColor, label, labelSide) {
+    ctx.beginPath();
+    ctx.moveTo(sunX, sunY);
+    var steps = 60;
+    for (var i = 0; i <= steps; i++) {
+      var t = tStart + (tEnd - tStart) * i / steps;
+      var p = ellipsePoint(t);
+      ctx.lineTo(p.x, p.y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Arc length line on the ellipse (thicker, to show the "distance traveled")
+    ctx.beginPath();
+    for (var i = 0; i <= steps; i++) {
+      var t = tStart + (tEnd - tStart) * i / steps;
+      var p = ellipsePoint(t);
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    }
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = 3.5;
+    ctx.stroke();
+
+    // Label
+    var midT = (tStart + tEnd) / 2;
+    var mp = ellipsePoint(midT);
+    var lx = mp.x + (mp.x > cx ? 12 : -70);
+    var ly = mp.y + (labelSide === 'above' ? -18 : 22);
+    ctx.font = 'bold 12px system-ui';
+    ctx.fillStyle = strokeColor;
+    ctx.fillText(label, lx, ly);
+  }
+
+  // Draw APHELION wedge first (behind)
+  drawWedge(apoStart, apoEnd, 'rgba(96,165,250,0.2)', '#60a5fa', '', 'above');
+  // Draw PERIHELION wedge
+  drawWedge(periStart, periEnd, 'rgba(74,222,128,0.2)', '#4ade80', '', 'above');
+
+  // Radius lines from sun to wedge edges
+  ctx.setLineDash([3, 3]);
+  ctx.lineWidth = 1;
+  // Perihelion radii
+  var pp1 = ellipsePoint(periStart), pp2 = ellipsePoint(periEnd);
+  ctx.strokeStyle = 'rgba(74,222,128,0.5)';
+  ctx.beginPath(); ctx.moveTo(sunX, sunY); ctx.lineTo(pp1.x, pp1.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(sunX, sunY); ctx.lineTo(pp2.x, pp2.y); ctx.stroke();
+  // Aphelion radii
+  var ap1 = ellipsePoint(apoStart), ap2 = ellipsePoint(apoEnd);
+  ctx.strokeStyle = 'rgba(96,165,250,0.5)';
+  ctx.beginPath(); ctx.moveTo(sunX, sunY); ctx.lineTo(ap1.x, ap1.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(sunX, sunY); ctx.lineTo(ap2.x, ap2.y); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Sun
+  var sg = ctx.createRadialGradient(sunX, sunY, 2, sunX, sunY, 16);
+  sg.addColorStop(0, '#fef08a'); sg.addColorStop(0.5, '#f59e0b'); sg.addColorStop(1, 'rgba(245,158,11,0)');
+  ctx.beginPath(); ctx.arc(sunX, sunY, 16, 0, Math.PI * 2);
+  ctx.fillStyle = sg; ctx.fill();
+  ctx.beginPath(); ctx.arc(sunX, sunY, 6, 0, Math.PI * 2);
+  ctx.fillStyle = '#fef08a'; ctx.fill();
+  ctx.font = 'bold 11px system-ui';
+  ctx.fillStyle = '#fcd34d';
+  ctx.fillText('Sun', sunX + 10, sunY - 12);
+
+  // Planet dots at wedge midpoints
+  var periMid = ellipsePoint((periStart + periEnd) / 2);
+  var apoMid = ellipsePoint((apoStart + apoEnd) / 2);
+  ctx.beginPath(); ctx.arc(periMid.x, periMid.y, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#4ade80'; ctx.fill();
+  ctx.beginPath(); ctx.arc(apoMid.x, apoMid.y, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#60a5fa'; ctx.fill();
+
+  // Speed arrows (tangent to ellipse)
+  function tangent(theta) {
+    return { x: -a * Math.sin(theta), y: bVal * Math.cos(theta) };
+  }
+  function drawSpeedArrow(theta, color, len) {
+    var p = ellipsePoint(theta);
+    var t = tangent(theta);
+    var mag = Math.sqrt(t.x * t.x + t.y * t.y);
+    var ux = t.x / mag * len, uy = t.y / mag * len;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(p.x + ux, p.y + uy);
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.stroke();
+    // arrowhead
+    var ax = p.x + ux, ay = p.y + uy;
+    var perpx = -uy / len * 5, perpy = ux / len * 5;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(ax - ux / len * 8 + perpx, ay - uy / len * 8 + perpy);
+    ctx.lineTo(ax - ux / len * 8 - perpx, ay - uy / len * 8 - perpy);
+    ctx.closePath();
+    ctx.fillStyle = color; ctx.fill();
+  }
+  drawSpeedArrow((periStart + periEnd) / 2, '#4ade80', 45);
+  drawSpeedArrow((apoStart + apoEnd) / 2, '#60a5fa', 22);
+
+  // Labels with annotations
+  // Perihelion label box
+  ctx.font = 'bold 12px system-ui';
+  ctx.fillStyle = '#4ade80';
+  var plx = periMid.x + 14, ply = periMid.y - 28;
+  ctx.fillText('Near perihelion', plx, ply);
+  ctx.font = '11px system-ui';
+  ctx.fillStyle = '#86efac';
+  ctx.fillText('Short radius, wide sweep', plx, ply + 14);
+  ctx.fillText('FAST speed →', plx, ply + 28);
+
+  // Aphelion label box
+  ctx.font = 'bold 12px system-ui';
+  ctx.fillStyle = '#60a5fa';
+  var alx = apoMid.x - 130, aly = apoMid.y - 28;
+  ctx.fillText('Near aphelion', alx, aly);
+  ctx.font = '11px system-ui';
+  ctx.fillStyle = '#93c5fd';
+  ctx.fillText('Long radius, narrow sweep', alx, aly + 14);
+  ctx.fillText('SLOW speed →', alx, aly + 28);
+
+  // "Equal Area!" callout
+  ctx.font = 'bold 14px system-ui';
+  ctx.fillStyle = '#fbbf24';
+  ctx.textAlign = 'center';
+  ctx.fillText('Both wedges = SAME AREA!', cx, H - 16);
+  ctx.font = '11px system-ui';
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText('(same time interval, same area swept)', cx, H - 2);
+  ctx.textAlign = 'left';
+}
+drawAreaDiagram();
+
+function updateSim() {
+  simEcc = parseFloat(document.getElementById('ecc-slider').value) / 100;
+  document.getElementById('sim-ecc').textContent = simEcc.toFixed(2);
+  areaSweeps = [];
+  areaTimer = 0;
+}
+
+function toggleAreaSweep() {
+  showAreas = !showAreas;
+  areaSweeps = [planetAngle];
+  areaTimer = 0;
+  document.getElementById('area-note').textContent = showAreas
+    ? '🔺 Watch the colored slices — they all have roughly equal area! (Kepler\'s 2nd Law)'
+    : '';
+}
+
+function resetSim() {
+  planetAngle = 0;
+  areaSweeps = [];
+  areaTimer = 0;
+  document.getElementById('ecc-slider').value = 40;
+  simEcc = 0.40;
+  document.getElementById('sim-ecc').textContent = '0.40';
+  showAreas = false;
+  document.getElementById('area-note').textContent = '';
+}
+
+// ── Concept Check Data ───────────────────────────────────
+window.ccQuestions = [
+  {
+    q: "According to Kepler's 1st Law, what shape is a planet's orbit?",
+    opts: [
+      "A perfect circle with the Sun at the center.",
+      "An ellipse with the Sun at one focus.",
+      "An ellipse with the Sun at the center.",
+      "A parabola with the Sun at the vertex."
+    ],
+    ans: 1,
+    explain: "✅ Kepler's 1st Law: planets orbit in ellipses with the Sun at one FOCUS, not the center!"
+  },
+  {
+    q: "A planet is moving through the part of its orbit closest to the Sun (perihelion). According to Kepler's 2nd Law, the planet is:",
+    opts: [
+      "Moving at its slowest speed.",
+      "Moving at the same speed as everywhere else.",
+      "Moving at its fastest speed.",
+      "Not moving — it briefly stops at perihelion."
+    ],
+    ans: 2,
+    explain: "✅ Equal areas in equal times → when the planet is close to the Sun, the radius is short, so it must move FAST to sweep the same area."
+  },
+  {
+    q: "Planet A is 4 times farther from the Sun than Planet B. How do their orbital periods compare?",
+    opts: [
+      "Planet A's period is 4× longer.",
+      "Planet A's period is 8× longer.",
+      "Planet A's period is 16× longer.",
+      "Planet A's period is 2× longer."
+    ],
+    ans: 1,
+    explain: "✅ T² ∝ r³, so if r → 4r, then T² → 64T², meaning T → 8T. Planet A takes 8× longer!"
+  },
+  {
+    q: "In Kepler's 3rd Law T² = (4π²/GM)r³, which mass M appears in the formula?",
+    opts: [
+      "The orbiting planet's mass.",
+      "The total mass of both bodies.",
+      "The central body's mass (e.g., the Sun).",
+      "The mass of the universe."
+    ],
+    ans: 2,
+    explain: "✅ Just like satellite speed, the orbiting body's mass cancels! M is the mass of the body being orbited (Sun for planets, Earth for satellites)."
+  },
+  {
+    q: "An astronomer measures a moon's orbital radius and period around a distant planet. What can they calculate from this?",
+    opts: [
+      "The moon's mass.",
+      "The moon's temperature.",
+      "The planet's mass.",
+      "The distance to the star system."
+    ],
+    ans: 2,
+    explain: "✅ From T² = (4π²/GM)r³, rearranging gives M = 4π²r³/(GT²). By watching a moon orbit, we can weigh the planet! 🪐⚖️"
+  }
+];
+
+// ── Practice Problem Functions ────────────────────────────
+let practA = false, practB = false, practC = false;
+const JUP_AU = 5.20;
+const JUP_R = JUP_AU * 1.496e11; // meters
+const JUP_T_YR = Math.sqrt(JUP_AU * JUP_AU * JUP_AU); // years (ratio method)
+const G_VAL = 6.674e-11, M_SUN = 1.99e30;
+const JUP_T_S = 2 * Math.PI * Math.sqrt(JUP_R * JUP_R * JUP_R / (G_VAL * M_SUN));
+const JUP_T_YR_FULL = JUP_T_S / 3.156e7;
+
+function checkPracticeA() {
+  var ans = parseAnswer(document.getElementById('ans-a').value);
+  var fb = document.getElementById('feedback-a');
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try: sqrt(5.2^3) or 11.86'; return; }
+  if (Math.abs(ans - JUP_T_YR) / JUP_T_YR < 0.05) {
+    document.getElementById('ans-a').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! T = √(5.20³) = √(140.6) ≈ ' + JUP_T_YR.toFixed(2) + ' years';
+    if (!practA) { practA=true; addScore(5); }
+    document.getElementById('partB-section').style.display='block';
+    if (window.MathJax) MathJax.typesetPromise();
+  } else {
+    document.getElementById('ans-a').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ Use T² = r³ (in AU/years). So T = √(5.20³)';
+  }
+}
+function hintA() {
+  var h=document.getElementById('hint-a');
+  h.classList.add('visible');
+  h.innerHTML='<div class="formula-box" style="font-size:0.9rem;text-align:left;">T² = r³ = (5.20)³ = 140.6<br>T = √140.6 ≈ 11.86 years</div>';
+}
+
+function checkPracticeB() {
+  var ans = parseAnswer(document.getElementById('ans-b').value);
+  var fb = document.getElementById('feedback-b');
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try: 5.20*1.496e11'; return; }
+  if (Math.abs(ans - JUP_R) / JUP_R < 0.03) {
+    document.getElementById('ans-b').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! r = 5.20 × 1.496×10¹¹ = ' + JUP_R.toExponential(3) + ' m';
+    if (!practB) { practB=true; addScore(5); }
+    document.getElementById('partC-section').style.display='block';
+    if (window.MathJax) MathJax.typesetPromise();
+  } else {
+    document.getElementById('ans-b').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ Multiply: 5.20 × 1.496×10¹¹ m';
+  }
+}
+function hintB() {
+  var h=document.getElementById('hint-b');
+  h.classList.add('visible');
+  h.innerHTML='<p style="font-size:0.88rem;">r = 5.20 × 1.496×10¹¹ = 7.779×10¹¹ m</p>';
+}
+
+function checkPracticeC() {
+  var ans = parseAnswer(document.getElementById('ans-c').value);
+  var fb = document.getElementById('feedback-c');
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try a number in years.'; return; }
+  if (Math.abs(ans - JUP_T_YR_FULL) / JUP_T_YR_FULL < 0.05) {
+    document.getElementById('ans-c').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! T ≈ ' + JUP_T_YR_FULL.toFixed(2) + ' years — matches the ratio method!';
+    if (!practC) { practC=true; addScore(10); }
+    document.getElementById('practice-done').style.display='block';
+    document.getElementById('practice-next').disabled=false;
+    sectionDone[3]=true;
+  } else {
+    document.getElementById('ans-c').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ Use T = 2π√(r³/GM_Sun), then divide by 3.156×10⁷ to get years.';
+  }
+}
+function hintC() {
+  var h=document.getElementById('hint-c');
+  h.classList.add('visible');
+  h.innerHTML='<p style="font-size:0.88rem;">T = 2π√((7.779×10¹¹)³ / (6.674×10⁻¹¹ × 1.99×10³⁰))<br>= 2π√(4.705×10³⁵ / 1.328×10²⁰)<br>= 2π√(3.543×10¹⁵) ≈ 2π × 5.953×10⁷<br>= 3.741×10⁸ s ÷ 3.156×10⁷ s/yr ≈ 11.85 years</p>';
+}
+
+// ── Quiz Data ────────────────────────────────────────────
+window.quizData = [
+  {
+    type: 'mc',
+    q: 'Which of these is TRUE about Kepler\'s 1st Law?',
+    opts: [
+      'All orbits are perfect circles.',
+      'The Sun is at the center of every orbit.',
+      'The Sun is at one focus of the elliptical orbit.',
+      'Planets orbit in figure-eight shapes.'
+    ],
+    ans: 2,
+    explain: 'Kepler\'s 1st Law: orbits are ellipses with the Sun at one FOCUS.'
+  },
+  {
+    type: 'mc',
+    q: 'A planet moves fastest at perihelion and slowest at aphelion. This is explained by:',
+    opts: [
+      'Kepler\'s 1st Law (ellipses)',
+      'Kepler\'s 2nd Law (equal areas)',
+      'Kepler\'s 3rd Law (T² ∝ r³)',
+      'Newton\'s 1st Law (inertia)'
+    ],
+    ans: 1,
+    explain: 'Kepler\'s 2nd Law says equal areas are swept in equal times. Close to the Sun (short radius), the planet must move faster to sweep the same area.'
+  },
+  {
+    type: 'mc',
+    q: 'If a planet\'s orbital radius is doubled, its period will:',
+    opts: [
+      'Double (×2)',
+      'Quadruple (×4)',
+      'Increase by a factor of 2√2 ≈ 2.83',
+      'Increase by a factor of 8'
+    ],
+    ans: 2,
+    explain: 'T² ∝ r³. If r → 2r: T² → 8T², so T → √8 T = 2√2 T ≈ 2.83 T.'
+  },
+  {
+    type: 'mc',
+    q: 'Two moons orbit the same planet. Moon X has twice the orbital radius of Moon Y. What is the ratio T_X / T_Y?',
+    opts: [
+      '2',
+      '2√2 ≈ 2.83',
+      '4',
+      '8'
+    ],
+    ans: 1,
+    explain: 'T ∝ r^(3/2). If r_X = 2r_Y: T_X/T_Y = 2^(3/2) = 2√2 ≈ 2.83.'
+  },
+  {
+    type: 'calc',
+    q: 'Venus orbits the Sun at 0.72 AU. Using the ratio method (T² = r³ in AU/years), find Venus\'s orbital period in years.',
+    answer: Math.sqrt(0.72 * 0.72 * 0.72),
+    tolerance: 0.05,
+    unit: 'years',
+    hint: 'T² = (0.72)³ = 0.3732, so T = √0.3732',
+    explain: 'T = √(0.72³) = √(0.3732) ≈ 0.611 years ≈ 223 days.'
+  },
+  {
+    type: 'calc',
+    q: 'A satellite orbits Earth (M = 5.98×10²⁴ kg) with a period of 24 hours (86,400 s). What is its orbital radius in meters? Use r = (GMT²/4π²)^(1/3).',
+    answer: Math.pow(6.674e-11 * 5.98e24 * 86400 * 86400 / (4 * Math.PI * Math.PI), 1/3),
+    tolerance: 0.03,
+    unit: 'm',
+    hint: 'r = (6.674×10⁻¹¹ × 5.98×10²⁴ × 86400² / (4π²))^(1/3)',
+    explain: 'r = (GMT²/4π²)^(1/3) ≈ 4.23×10⁷ m ≈ 42,300 km — that\'s geostationary orbit!'
+  }
+];
+
+// ── Homework Step-by-Step Data ────────────────────────────
+window.hwSteps = {
+  hw1: [
+    { title: 'Write down Kepler\'s 3rd Law in AU/years',
+      body: 'When using AU for distance and years for time: \\(T^2 = r^3\\)' },
+    { title: 'Substitute Saturn\'s distance',
+      body: '\\[T^2 = (9.54)^3 = 9.54 \\times 9.54 \\times 9.54 = 867.4\\]' },
+    { title: 'Solve for T',
+      body: '\\[T = \\sqrt{867.4} \\approx \\boxed{29.5\\ \\text{years}}\\]<br>Saturn takes almost 30 Earth years to go around the Sun once! 🪐' }
+  ],
+  hw2: [
+    { title: 'Start from T² = r³',
+      body: 'We know \\(T = 8\\) years. Solve for \\(r\\).' },
+    { title: 'Find r³',
+      body: '\\[r^3 = T^2 = 8^2 = 64\\]' },
+    { title: 'Take the cube root',
+      body: '\\[r = 64^{1/3} = \\boxed{4.00\\ \\text{AU}}\\]<br>This asteroid orbits between Mars (1.52 AU) and Jupiter (5.20 AU) — right in the asteroid belt! 🪨' }
+  ],
+  hw3: [
+    { title: 'Set up the ratio',
+      body: 'Both moons orbit Jupiter, so: \\(\\frac{T_E^2}{T_I^2} = \\frac{r_E^3}{r_I^3}\\)' },
+    { title: 'Calculate the radius ratio cubed',
+      body: '\\[\\left(\\frac{r_E}{r_I}\\right)^3 = \\left(\\frac{6.71 \\times 10^8}{4.22 \\times 10^8}\\right)^3 = (1.590)^3 = 4.021\\]' },
+    { title: 'Solve for Europa\'s period',
+      body: '\\[T_E^2 = T_I^2 \\times 4.021 = (3.55)^2 \\times 4.021 = 12.60 \\times 4.021 = 50.66\\]\\[T_E = \\sqrt{50.66} \\approx \\boxed{7.12\\ \\text{days}}\\]<br>Galileo discovered these moons in 1610 with one of the first telescopes! 🔭' }
+  ],
+  hw4: [
+    { title: 'Apply Kepler\'s 3rd Law',
+      body: '\\[T^2 = r^3 = (18)^3 = 5832\\]' },
+    { title: 'Find the period',
+      body: '\\[T = \\sqrt{5832} \\approx \\boxed{76.4\\ \\text{years}}\\]' },
+    { title: 'Find the return date',
+      body: 'Next perihelion: \\(2020 + 76 \\approx \\boxed{2096}\\)<br>You might be 84 years old when it returns. Mark your calendar! 📅☄️' }
+  ],
+  hw5: [
+    { title: 'Think about it conceptually',
+      body: '\\(T = 2\\pi\\sqrt{r^3/(GM)}\\). Bigger \\(M\\) → smaller fraction under the root → <strong>shorter period</strong>. A heavier star pulls harder!' },
+    { title: 'Set up the calculation',
+      body: '\\(M = 2M_{Sun} = 2 \\times 1.99\\times10^{30} = 3.98\\times10^{30}\\) kg<br>\\(r = 1\\ \\text{AU} = 1.496\\times10^{11}\\) m' },
+    { title: 'Calculate',
+      body: '\\[T = 2\\pi\\sqrt{\\frac{(1.496\\times10^{11})^3}{6.674\\times10^{-11}\\times3.98\\times10^{30}}}\\]\\[= 2\\pi\\sqrt{\\frac{3.348\\times10^{33}}{2.656\\times10^{20}}} = 2\\pi\\sqrt{1.261\\times10^{13}}\\]\\[\\approx 2.231\\times10^{7}\\ s \\div 3.156\\times10^{7}\\ s/yr \\approx \\boxed{0.707\\ \\text{yr} \\approx 258\\ \\text{days}}\\]<br>That\'s \\(1/\\sqrt{2}\\) of Earth\'s year — doubling the star\'s mass cuts the period by \\(\\sqrt{2}\\)! ⭐' }
+  ],
+  hw6: [
+    { title: 'Start from Kepler\'s 3rd Law',
+      body: '\\[T^2 = \\frac{4\\pi^2}{GM}r^3\\]<br>We want to solve for \\(M\\).' },
+    { title: 'Rearrange for M',
+      body: '\\[M = \\frac{4\\pi^2 r^3}{G T^2}\\]' },
+    { title: 'Substitute Earth\'s values',
+      body: '\\[M = \\frac{4\\pi^2 (1.496\\times10^{11})^3}{6.674\\times10^{-11} \\times (3.156\\times10^{7})^2}\\]' },
+    { title: 'Compute step by step',
+      body: 'Numerator: \\(4\\pi^2 \\times 3.348\\times10^{33} = 1.322\\times10^{35}\\)<br>Denominator: \\(6.674\\times10^{-11} \\times 9.960\\times10^{14} = 6.647\\times10^{4}\\)' },
+    { title: 'Final answer',
+      body: '\\[M_{Sun} = \\frac{1.322\\times10^{35}}{6.647\\times10^{4}} \\approx \\boxed{1.99 \\times 10^{30}\\ kg}\\]<br>We just "weighed" the Sun using only Earth\'s orbit! This is exactly how astronomers measure the mass of stars, exoplanet host stars, and even black holes. 🕳️⚖️' }
+  ]
+};
+
+// ── Practice input config ────────────────────────────────
+window.practiceInputs = [['ans-a','checkPracticeA'],['ans-b','checkPracticeB'],['ans-c','checkPracticeC']];
+window.practiceHints  = ['expr-hint-a','expr-hint-b','expr-hint-c'];
+</script>
+<script src="../common/lesson.js"></script>
+</body>
+</html>
