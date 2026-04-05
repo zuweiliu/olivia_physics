@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Satellite Speed — Interactive Lesson</title>
+<link rel="stylesheet" href="../common/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  /* Lesson-specific styles */
+  #orbit-canvas {
+    width: 100%; max-width: 600px; height: 340px;
+    border-radius: 12px; border: 1px solid var(--border);
+    margin: 16px auto; display: block;
+  }
+  .derivation-flow {
+    display: flex; flex-direction: column; gap: 0;
+    margin: 20px 0;
+  }
+  .derivation-step {
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .derivation-step .d-num {
+    background: var(--accent); color: #fff; border-radius: 50%;
+    width: 30px; height: 30px; display: flex; align-items: center;
+    justify-content: center; font-weight: 700; font-size: 0.82rem; flex-shrink: 0;
+  }
+  .derivation-step .d-body {
+    flex: 1; padding-bottom: 18px; border-left: 2px solid var(--border);
+    padding-left: 18px; margin-left: -16px;
+  }
+  .derivation-step:last-child .d-body { border-left: none; }
+  .speed-result {
+    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(34,197,94,0.1));
+    border: 2px solid var(--accent); border-radius: 14px;
+    padding: 24px; text-align: center; margin: 20px 0;
+    box-shadow: 0 0 30px rgba(59,130,246,0.15);
+  }
+  .comparison-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px; margin: 16px 0;
+  }
+  .comparison-item {
+    background: var(--deep); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px; text-align: center;
+  }
+  .comparison-item .emoji { font-size: 1.8rem; margin-bottom: 6px; }
+  .comparison-item .label { font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; }
+  .comparison-item .value { font-weight: 700; color: var(--accent); font-size: 0.95rem; }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+
+<!-- ── Progress Bar ── -->
+<div id="progress-bar">
+  <div class="logo">🛰️ Satellite Speed</div>
+  <div class="progress-steps">
+    <div class="step-dot active" onclick="goTo(0)" title="Core Concepts"></div>
+    <div class="step-dot" onclick="goTo(1)" title="Concept Check"></div>
+    <div class="step-dot" onclick="goTo(2)" title="Worked Example"></div>
+    <div class="step-dot" onclick="goTo(3)" title="Your Turn"></div>
+    <div class="step-dot" onclick="goTo(4)" title="Quiz"></div>
+    <div class="step-dot" onclick="goTo(5)" title="Homework"></div>
+  </div>
+  <div id="score-badge">⭐ 0 pts</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 0 — Core Concepts
+     ════════════════════════════════════════════ -->
+<div class="section active" id="sec-0">
+<div class="container">
+  <div class="section-tag">Section 1 of 6 — Core Concepts</div>
+  <h1>How Fast Must a<br><span style="color:var(--accent)">Satellite Orbit?</span> 🛰️</h1>
+  <p>The International Space Station zooms around Earth at <strong>27,600 km/h</strong> — that's about <strong>7.66 km every second</strong>.
+     Why that exact speed? Too slow and it crashes; too fast and it flies away. Let's find out why!</p>
+
+  <div class="fun-fact">
+    The ISS completes one full orbit around Earth every <strong>90 minutes</strong>. Astronauts see 16 sunrises and 16 sunsets every day!
+  </div>
+
+  <!-- Orbit simulation canvas -->
+  <canvas id="orbit-canvas" width="600" height="340"></canvas>
+  <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-top:-8px;">
+    🎮 Drag the slider below to change altitude and watch how satellite speed changes!
+  </p>
+
+  <!-- Altitude slider -->
+  <div class="card">
+    <h3>🎛️ Satellite Speed Explorer</h3>
+    <p>Change the orbit altitude and see the speed update in real-time.</p>
+    <div class="sim-row">
+      <span style="font-size:1.2rem;">🌍</span>
+      <input type="range" id="alt-slider" min="200" max="36000" step="100" value="408" oninput="updateOrbitSim()">
+      <span style="font-size:1.2rem;">🛰️</span>
+    </div>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;">Altitude:</span>
+      <span class="sim-val" id="sim-alt">408 km</span>
+      <span style="color:var(--muted);font-size:0.9rem;margin-left:16px;">Speed:</span>
+      <span class="sim-val" id="sim-speed">7,670 m/s</span>
+    </div>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;">Period:</span>
+      <span class="sim-val" id="sim-period">92.6 min</span>
+      <span style="color:var(--muted);font-size:0.9rem;margin-left:16px;">Orbital radius:</span>
+      <span class="sim-val" id="sim-radius">6,778 km</span>
+    </div>
+    <div style="height:8px;background:var(--deep);border-radius:4px;margin-top:8px;overflow:hidden;">
+      <div id="speed-bar" style="height:100%;background:var(--accent);border-radius:4px;transition:width 0.2s;width:70%;"></div>
+    </div>
+    <div id="orbit-note" style="margin-top:8px;font-size:0.85rem;color:var(--muted);"></div>
+  </div>
+
+  <!-- Part 1: Circular Motion Review -->
+  <div class="card glow amber" style="margin-top:24px;">
+    <h3>💡 Step 1: Review — Circular Motion</h3>
+    <p style="color:var(--text);font-size:1.05rem;">Before we calculate satellite speed, we need to remember how <strong>circular motion</strong> works. Any object moving in a circle needs a force pulling it toward the center!</p>
+  </div>
+
+  <div class="card">
+    <h2>Circular Motion Essentials</h2>
+    <p>When an object moves in a circle at constant speed, it's constantly <strong>changing direction</strong>. That means it's <strong>accelerating</strong> — even if the speed stays the same!</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:16px 0;">
+      <div class="card" style="padding:14px;margin:0;text-align:center;">
+        <div style="font-size:1.4rem;margin-bottom:6px;">🎯</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:4px;">Centripetal Acceleration</div>
+        <div style="color:var(--accent);font-weight:700;font-size:0.95rem;">\(a_c = \dfrac{v^2}{r}\)</div>
+      </div>
+      <div class="card" style="padding:14px;margin:0;text-align:center;">
+        <div style="font-size:1.4rem;margin-bottom:6px;">💪</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:4px;">Centripetal Force</div>
+        <div style="color:var(--accent);font-weight:700;font-size:0.95rem;">\(F_c = \dfrac{mv^2}{r}\)</div>
+      </div>
+      <div class="card" style="padding:14px;margin:0;text-align:center;">
+        <div style="font-size:1.4rem;margin-bottom:6px;">⏱️</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:4px;">Speed from Period</div>
+        <div style="color:var(--accent);font-weight:700;font-size:0.95rem;">\(v = \dfrac{2\pi r}{T}\)</div>
+      </div>
+    </div>
+
+    <div class="card amber" style="padding:14px;margin:14px 0 0;">
+      <strong>⚠️ Key Point:</strong>
+      <p style="margin:6px 0 0; color:var(--text);">The centripetal force is NOT a new force — it's whatever <em>real</em> force is pulling the object toward the center.
+         For a ball on a string, it's tension. For a car turning, it's friction. For a satellite, it's <strong>gravity</strong>!</p>
+    </div>
+  </div>
+
+  <!-- Part 2: Universal Gravitation Review -->
+  <div class="card glow amber" style="margin-top:20px;">
+    <h3>💡 Step 2: Review — Universal Gravitation</h3>
+    <p style="color:var(--text);font-size:1.05rem;">Gravity is the force that pulls the satellite toward Earth — and it's what provides the centripetal force!</p>
+  </div>
+
+  <div class="card">
+    <h2>Newton's Law of Universal Gravitation</h2>
+    <p>The gravitational force between a planet of mass \(M\) and a satellite of mass \(m\), separated by distance \(r\):</p>
+    <div class="formula-box">
+      \[ F_g = G \frac{Mm}{r^2} \]
+    </div>
+    <p style="font-size:0.9rem;color:var(--muted);">Remember: \(r\) is measured from center-to-center, not from the surface!</p>
+  </div>
+
+  <!-- Part 3: The Big Derivation -->
+  <div class="card glow" style="margin-top:20px;">
+    <h3>🚀 Step 3: Deriving Satellite Speed!</h3>
+    <p style="color:var(--text);font-size:1.05rem;">Now the magic: set gravity equal to the centripetal force, and watch the satellite's mass <strong>cancel out</strong>!</p>
+  </div>
+
+  <div class="card">
+    <h2>The Derivation</h2>
+    <p>For a satellite in circular orbit, <strong>gravity IS the centripetal force</strong>:</p>
+
+    <div class="derivation-flow">
+      <div class="derivation-step">
+        <div class="d-num">1</div>
+        <div class="d-body">
+          <strong style="color:var(--text);">Set gravitational force = centripetal force</strong>
+          <div class="formula-box" style="text-align:center;margin:10px 0;">
+            \[ G\frac{Mm}{r^2} = \frac{mv^2}{r} \]
+          </div>
+        </div>
+      </div>
+      <div class="derivation-step">
+        <div class="d-num">2</div>
+        <div class="d-body">
+          <strong style="color:var(--text);">Cancel the satellite mass \(m\) from both sides!</strong>
+          <div class="formula-box" style="text-align:center;margin:10px 0;">
+            \[ G\frac{M\cancel{m}}{r^2} = \frac{\cancel{m}\,v^2}{r} \quad \Rightarrow \quad G\frac{M}{r^2} = \frac{v^2}{r} \]
+          </div>
+          <p style="color:var(--accent2);font-weight:600;margin:0;font-size:0.9rem;">🤯 The satellite's mass doesn't matter! A bowling ball and a feather orbit at the same speed!</p>
+        </div>
+      </div>
+      <div class="derivation-step">
+        <div class="d-num">3</div>
+        <div class="d-body">
+          <strong style="color:var(--text);">Multiply both sides by \(r\) and solve for \(v\)</strong>
+          <div class="formula-box" style="text-align:center;margin:10px 0;">
+            \[ v^2 = \frac{GM}{r} \]
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="speed-result">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:8px;font-size:1rem;">🏆 THE SATELLITE SPEED FORMULA</p>
+      <div style="font-size:1.3rem;">
+        \[ \boxed{v = \sqrt{\frac{GM}{r}}} \]
+      </div>
+      <p style="color:var(--text);margin:12px 0 0;font-size:0.92rem;">where \(M\) = planet mass, \(r\) = orbital radius (center to center), \(G = 6.674 \times 10^{-11}\ N \cdot m^2/kg^2\)</p>
+    </div>
+
+    <div class="fun-fact">
+      Since the satellite's mass cancels, <strong>every satellite at the same altitude orbits at the same speed</strong> — whether it's a 1 kg cubesat or the 420,000 kg ISS!
+    </div>
+  </div>
+
+  <!-- Orbital Period -->
+  <div class="card">
+    <h2>Bonus: Orbital Period</h2>
+    <p>Since speed = distance / time, and one full orbit has distance \(2\pi r\):</p>
+    <div class="formula-box">
+      \[ T = \frac{2\pi r}{v} = 2\pi r \sqrt{\frac{r}{GM}} = 2\pi\sqrt{\frac{r^3}{GM}} \]
+    </div>
+    <p style="font-size:0.9rem;">Higher orbit → bigger \(r\) → <em>slower</em> speed and <em>longer</em> period. At 35,786 km altitude, \(T\) = 24 hours — that's a <strong>geostationary satellite</strong>! 📡</p>
+  </div>
+
+  <!-- Fun comparison -->
+  <div class="card">
+    <h3>🏎️ Speed Comparison — How Fast Is Orbital Speed?</h3>
+    <div class="comparison-grid">
+      <div class="comparison-item">
+        <div class="emoji">🚶</div>
+        <div class="label">Walking</div>
+        <div class="value">1.4 m/s</div>
+      </div>
+      <div class="comparison-item">
+        <div class="emoji">🚗</div>
+        <div class="label">Highway Car</div>
+        <div class="value">30 m/s</div>
+      </div>
+      <div class="comparison-item">
+        <div class="emoji">✈️</div>
+        <div class="label">Jet Airplane</div>
+        <div class="value">250 m/s</div>
+      </div>
+      <div class="comparison-item">
+        <div class="emoji">🔊</div>
+        <div class="label">Speed of Sound</div>
+        <div class="value">343 m/s</div>
+      </div>
+      <div class="comparison-item">
+        <div class="emoji">🛰️</div>
+        <div class="label">ISS (Low Orbit)</div>
+        <div class="value" style="color:var(--green);">7,670 m/s</div>
+      </div>
+      <div class="comparison-item">
+        <div class="emoji">📡</div>
+        <div class="label">Geostationary</div>
+        <div class="value">3,070 m/s</div>
+      </div>
+    </div>
+    <p style="font-size:0.88rem;margin:0;">The ISS travels <strong>22× the speed of sound</strong>! It could fly from New York to London in about 6 minutes. 🤯</p>
+  </div>
+
+  <!-- Constants reference -->
+  <div class="card">
+    <h3>📋 Useful Constants (keep handy!)</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.88rem;">
+      <div style="color:var(--muted);">\(G\)</div><div>\(6.674 \times 10^{-11}\ N\cdot m^2/kg^2\)</div>
+      <div style="color:var(--muted);">\(M_{Earth}\)</div><div>\(5.98 \times 10^{24}\ kg\)</div>
+      <div style="color:var(--muted);">\(r_{Earth}\)</div><div>\(6.37 \times 10^6\ m\)</div>
+      <div style="color:var(--muted);">\(M_{Mars}\)</div><div>\(6.42 \times 10^{23}\ kg\)</div>
+      <div style="color:var(--muted);">\(r_{Mars}\)</div><div>\(3.39 \times 10^6\ m\)</div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <div></div>
+    <button class="btn btn-primary" onclick="goTo(1)">Check My Understanding →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 1 — Concept Check
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-1">
+<div class="container">
+  <div class="section-tag">Section 2 of 6 — Concept Check</div>
+  <h1>Let's See What <span style="color:var(--accent)">You Know! 🧠</span></h1>
+  <p>Answer these 5 questions before we move to examples. Think carefully about each one!</p>
+
+  <div class="cc-grid" id="cc-container"></div>
+
+  <div id="cc-feedback" class="feedback info" style="margin-top:10px;"></div>
+  <div id="cc-result" style="display:none;" class="card green">
+    <h3 id="cc-result-title"></h3>
+    <p id="cc-result-msg"></p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(0)">← Review Concepts</button>
+    <button class="btn btn-primary" id="cc-next-btn" onclick="goTo(2)" disabled>See Worked Example →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 2 — Worked Example
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-2">
+<div class="container">
+  <div class="section-tag">Section 3 of 6 — Worked Example</div>
+  <h1>Example: <span style="color:var(--accent)">The ISS 🛰️</span></h1>
+
+  <div class="card amber">
+    <h3>Problem Statement</h3>
+    <p style="color:var(--text);">The International Space Station orbits Earth at an altitude of <strong>408 km</strong> above the surface.</p>
+    <p style="color:var(--text);margin:0;">(a) What is its orbital speed?<br>
+    (b) How long does one orbit take (the period)?<br>
+    (c) How many orbits does it complete per day?</p>
+  </div>
+
+  <p>Work through each step by clicking the buttons below 👇</p>
+
+  <!-- Step 1 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+      <div>
+        <strong>Find the orbital radius \(r\)</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">r = Earth's radius + altitude</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex-step1')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex-step1">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ r = r_E + h = 6.37 \times 10^6 + 408 \times 10^3 \]
+        \[ \boxed{r = 6.778 \times 10^6\ m} \]
+      </div>
+      <p style="font-size:0.88rem;">💡 Always convert altitude to meters and add Earth's radius!</p>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+      <div>
+        <strong>Part (a): Apply the satellite speed formula</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">\(v = \sqrt{GM_E / r}\)</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex-step2')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex-step2">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ v = \sqrt{\frac{GM_E}{r}} = \sqrt{\frac{6.674 \times 10^{-11} \times 5.98 \times 10^{24}}{6.778 \times 10^6}} \]
+        \[ = \sqrt{\frac{3.991 \times 10^{14}}{6.778 \times 10^6}} = \sqrt{5.888 \times 10^7} \]
+        \[ \boxed{v \approx 7{,}674\ m/s \approx 7.67\ km/s} \]
+      </div>
+      <p style="font-size:0.88rem;">That's about <strong>27,600 km/h</strong> — fast enough to cross the entire US in about 9 minutes! 🇺🇸</p>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+      <div>
+        <strong>Part (b): Find the orbital period</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">\(T = 2\pi r / v\)</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex-step3')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex-step3">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ T = \frac{2\pi r}{v} = \frac{2\pi \times 6.778 \times 10^6}{7674} \]
+        \[ = \frac{4.259 \times 10^7}{7674} \approx 5{,}549\ s \]
+        \[ \boxed{T \approx 5{,}549\ s \approx 92.5\ \text{minutes}} \]
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">4</div>
+      <div>
+        <strong>Part (c): Orbits per day</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Divide 24 hours by the period</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex-step4')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex-step4">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ \text{Orbits per day} = \frac{24 \times 60\ \text{min}}{92.5\ \text{min}} \approx \boxed{15.6\ \text{orbits/day}} \]
+      </div>
+      <div class="card green" style="padding:14px;margin-top:12px;">
+        <strong>✅ Real-world check:</strong> NASA confirms the ISS completes about 15.5 orbits per day. Our answer is spot on!
+        <p style="margin:6px 0 0;font-size:0.88rem;">Astronauts experience 15–16 sunrises every 24 hours! 🌅🌅🌅</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card amber">
+    <h3>🤔 Thinking Question</h3>
+    <p style="color:var(--text);">If we doubled the mass of the ISS (by adding more modules), would it need to go faster, slower, or the same speed?</p>
+    <button class="btn btn-secondary" style="padding:8px 16px;font-size:0.85rem;" onclick="revealStep('think-answer')">Reveal Answer</button>
+    <div class="step-block" id="think-answer">
+      <p style="color:var(--text);margin-top:10px;"><strong>The same speed!</strong> Remember, the satellite's mass \(m\) canceled out in the derivation.
+         The orbital speed \(v = \sqrt{GM/r}\) depends only on the <em>planet's</em> mass and the orbital radius.
+         A heavier ISS orbits at the same speed as a lighter one! 🤯</p>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(1)">← Concept Check</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Your Turn! 🚀 →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 3 — Student Practice
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-3">
+<div class="container">
+  <div class="section-tag">Section 4 of 6 — Your Turn!</div>
+  <h1>Solve It <span style="color:var(--accent)">Yourself 🚀</span></h1>
+
+  <div class="card amber">
+    <h3>Problem: A GPS Satellite</h3>
+    <p style="color:var(--text);">GPS satellites orbit Earth at an altitude of <strong>20,200 km</strong> above the surface.</p>
+    <p style="color:var(--text);margin:0;">
+      <strong>(a)</strong> What is the orbital radius \(r\)?<br>
+      <strong>(b)</strong> What is the orbital speed of a GPS satellite?<br>
+      <strong>(c)</strong> What is the orbital period (in hours)?
+    </p>
+  </div>
+
+  <!-- Part (a): Orbital radius -->
+  <div class="card">
+    <h3>Part (a): Find the orbital radius</h3>
+    <p>Remember: \(r = r_E + h\)</p>
+    <div class="input-row">
+      <label>\(r\) (m):</label>
+      <input type="text" id="ans-r" placeholder="e.g. RE+20200e3 or 2.657e7">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkPracticeR()">Check ✓</button>
+      <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintR()">Hint 💡</button>
+    </div>
+    <div id="feedback-r" class="feedback"></div>
+    <div id="expr-hint-r"></div>
+    <div id="hint-r" class="step-block"></div>
+  </div>
+
+  <!-- Part (b): Speed -->
+  <div id="partB-section" style="display:none;">
+  <div class="card">
+    <h3>Part (b): Calculate the orbital speed</h3>
+    <p>Use \(v = \sqrt{GM_E / r}\)</p>
+    <div class="input-row">
+      <label>\(v\) (m/s):</label>
+      <input type="text" id="ans-v" placeholder="e.g. sqrt(G*ME/2.657e7)">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkPracticeV()">Check ✓</button>
+      <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintV()">Hint 💡</button>
+    </div>
+    <div id="feedback-v" class="feedback"></div>
+    <div id="expr-hint-v"></div>
+    <div id="hint-v" class="step-block"></div>
+  </div>
+  </div>
+
+  <!-- Part (c): Period -->
+  <div id="partC-section" style="display:none;">
+  <div class="card">
+    <h3>Part (c): Find the orbital period</h3>
+    <p>Use \(T = 2\pi r / v\) and convert to hours.</p>
+    <div class="input-row">
+      <label>\(T\) (hours):</label>
+      <input type="text" id="ans-T" placeholder="e.g. 12 or 11.97">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkPracticeT()">Check ✓</button>
+      <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintT()">Hint 💡</button>
+    </div>
+    <div id="feedback-T" class="feedback"></div>
+    <div id="expr-hint-T"></div>
+    <div id="hint-T" class="step-block"></div>
+  </div>
+  </div>
+
+  <div id="practice-done" style="display:none;" class="card green">
+    <h3>🎉 Practice Complete!</h3>
+    <p style="color:var(--text);">GPS satellites orbit at about 3,870 m/s with a period of ~12 hours. That's why each GPS satellite passes over the same spot twice a day!</p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(2)">← Worked Example</button>
+    <button class="btn btn-primary" id="practice-next" onclick="goTo(4)" disabled>Take the Quiz →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 4 — Quiz
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-4">
+<div class="container">
+  <div class="section-tag">Section 5 of 6 — Quiz</div>
+  <h1>Quiz Time! <span style="color:var(--accent)">⚡ 6 Questions</span></h1>
+  <p>Test your full understanding. You'll earn points for each correct answer!</p>
+
+  <div id="quiz-container"></div>
+
+  <div id="quiz-result" style="display:none;">
+    <div class="card glow">
+      <div class="score-final">
+        <div class="score-circle">
+          <div class="num" id="quiz-score-num">0</div>
+          <div class="den" id="quiz-score-den">/ 6</div>
+        </div>
+        <h2 id="quiz-result-title"></h2>
+        <p id="quiz-result-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(3)">← Practice</button>
+    <button class="btn btn-primary" id="quiz-next-btn" onclick="goTo(5)" disabled>Homework →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SECTION 5 — Homework
+     ════════════════════════════════════════════ -->
+<div class="section" id="sec-5">
+<div class="container">
+  <div class="section-tag">Section 6 of 6 — Homework</div>
+  <h1>Homework <span style="color:var(--accent)">Problems 📝</span></h1>
+  <p>Work through these problems on paper. Show all steps!</p>
+
+  <div class="card amber" style="margin-bottom:20px;">
+    <h3>📋 Constants & Formulas Reference</h3>
+    <p style="color:var(--text);font-size:0.88rem;margin:0;">
+      \(G = 6.674 \times 10^{-11}\ N\cdot m^2/kg^2\) &nbsp;|&nbsp;
+      \(M_E = 5.98 \times 10^{24}\ kg\) &nbsp;|&nbsp; \(r_E = 6.37 \times 10^6\ m\)<br>
+      \(v = \sqrt{GM/r}\) &nbsp;|&nbsp; \(T = 2\pi\sqrt{r^3/(GM)}\) &nbsp;|&nbsp;
+      \(F_c = mv^2/r\) &nbsp;|&nbsp; \(F_g = GMm/r^2\)
+    </p>
+  </div>
+
+  <h2 style="margin-bottom:14px;">Group A — Satellite Speed Calculations</h2>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 1</div>
+    <p style="color:var(--text);margin-bottom:12px;">The Hubble Space Telescope orbits at an altitude of <strong>547 km</strong> above Earth's surface.
+    Find its (a) orbital speed and (b) orbital period in minutes.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw1')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw1" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw1" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(r = 6.37\!\times\!10^6 + 547\!\times\!10^3 = 6.917\!\times\!10^6\) m<br>
+      \(v = \sqrt{GM_E/r} = \sqrt{6.674\!\times\!10^{-11}\!\times\!5.98\!\times\!10^{24}/6.917\!\times\!10^6} \approx \boxed{7{,}594\ m/s}\)<br>
+      (b) \(T = 2\pi r/v = 2\pi(6.917\!\times\!10^6)/7594 \approx 5723\ s \approx \boxed{95.4\ \text{min}}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 2</div>
+    <p style="color:var(--text);margin-bottom:12px;">A geostationary satellite has an orbital period of exactly <strong>24 hours</strong>.
+    Find (a) its orbital radius and (b) its altitude above Earth's surface in km.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw2')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw2" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw2" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) From \(T = 2\pi\sqrt{r^3/(GM_E)}\), solve for \(r\):<br>
+      \(r = \left(\dfrac{GM_E T^2}{4\pi^2}\right)^{1/3} = \left(\dfrac{6.674\!\times\!10^{-11}\times5.98\!\times\!10^{24}\times(86400)^2}{4\pi^2}\right)^{1/3} \approx \boxed{4.23\times10^7\ m}\)<br>
+      (b) altitude \(= r - r_E = 4.23\!\times\!10^7 - 6.37\!\times\!10^6 \approx \boxed{35{,}900\ km}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 3</div>
+    <p style="color:var(--text);margin-bottom:12px;">A satellite orbits Mars at an altitude of <strong>300 km</strong>.
+    Mars has mass \(6.42 \times 10^{23}\) kg and radius \(3.39 \times 10^6\) m.
+    Find its orbital speed and period.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw3')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw3" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw3" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      \(r = 3.39\!\times\!10^6 + 300\!\times\!10^3 = 3.69\!\times\!10^6\) m<br>
+      \(v = \sqrt{6.674\!\times\!10^{-11}\times6.42\!\times\!10^{23}/3.69\!\times\!10^6} \approx \boxed{3{,}407\ m/s}\)<br>
+      \(T = 2\pi(3.69\!\times\!10^6)/3407 \approx 6802\ s \approx \boxed{113.4\ \text{min}}\)
+    </div>
+  </div>
+
+  <h2 style="margin-bottom:14px;margin-top:30px;">Group B — Conceptual & Challenge</h2>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 4</div>
+    <p style="color:var(--text);margin-bottom:12px;">Two satellites orbit Earth: Satellite A at altitude 400 km, Satellite B at altitude 800 km.
+    (a) Which is faster?
+    (b) Find the ratio \(v_A / v_B\).
+    (c) Which has a shorter period?</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw4')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw4" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw4" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) Satellite A is faster (lower orbit → higher speed).<br>
+      (b) \(v_A/v_B = \sqrt{r_B/r_A} = \sqrt{7.17\!\times\!10^6/6.77\!\times\!10^6} \approx \boxed{1.029}\)<br>
+      (c) Satellite A has a shorter period (lower orbit → faster → shorter T).
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 5</div>
+    <p style="color:var(--text);margin-bottom:12px;">A spy satellite orbits at the lowest stable altitude, about <strong>160 km</strong>.
+    (a) Find its speed. (b) How many times does it orbit Earth per day?
+    (c) How long does it spend over any single point on the ground (assume it "sees" a 500 km strip)?</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw5')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw5" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw5" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(r=6.53\!\times\!10^6\) m, \(v=\sqrt{GM_E/r}\approx\boxed{7{,}814\ m/s}\)<br>
+      (b) \(T=2\pi r/v\approx5253\ s\approx87.6\) min → \(\boxed{16.4\ \text{orbits/day}}\)<br>
+      (c) Time over a 500 km strip \(\approx 500\!\times\!10^3/7814\approx\boxed{64\ s}\) — barely a minute!
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 6 (Challenge)</div>
+    <p style="color:var(--text);margin-bottom:12px;">Derive an expression for the orbital speed of a satellite orbiting <em>any</em> planet
+    in terms of the planet's surface gravity \(g_p\) and the planet's radius \(R_p\), for a satellite at altitude \(h\).
+    <em>Hint: recall that \(g_p = GM_p/R_p^2\).</em></p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw6')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw6" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw6" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      Since \(GM_p = g_p R_p^2\) and \(r = R_p + h\):<br>
+      \[\boxed{v = R_p\sqrt{\frac{g_p}{R_p + h}}}\]
+      This is useful because you only need \(g_p\), \(R_p\), and \(h\) — no need to look up \(G\) or \(M_p\)!
+    </div>
+  </div>
+
+  <!-- Final score summary -->
+  <div class="card glow" style="margin-top:30px;text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:8px;">🛰️</div>
+    <h2>Lesson Complete!</h2>
+    <p>Total Score: <strong style="color:var(--accent);font-size:1.2rem;" id="final-score-display">—</strong></p>
+    <p style="margin-top:8px;">Remember: <em>\(v = \sqrt{GM/r}\)</em> — the faster you go, the lower you orbit!</p>
+    <button class="btn btn-primary" style="margin-top:12px;" onclick="goTo(0)">🔄 Restart Lesson</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(4)">← Quiz</button>
+    <div></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script>
+// ── Lesson-specific: Orbit simulation canvas ──────────────
+const oc = document.getElementById('orbit-canvas');
+const octx = oc.getContext('2d');
+let satAngle = 0;
+let simAlt = 408; // km
+
+function drawOrbitSim() {
+  oc.width = oc.offsetWidth; oc.height = oc.offsetHeight;
+  const cx = oc.width / 2, cy = oc.height / 2;
+  const earthR = Math.min(cx, cy) * 0.32;
+  // Scale: altitude proportional to slider
+  const maxVisualR = Math.min(cx, cy) * 0.88;
+  const minVisualR = earthR + 12;
+  const altFrac = (simAlt - 200) / (36000 - 200);
+  const orbitR = minVisualR + altFrac * (maxVisualR - minVisualR);
+
+  octx.clearRect(0, 0, oc.width, oc.height);
+
+  // Orbit path
+  octx.beginPath(); octx.arc(cx, cy, orbitR, 0, Math.PI * 2);
+  octx.strokeStyle = 'rgba(59,130,246,0.2)'; octx.lineWidth = 1.5; octx.setLineDash([6,4]); octx.stroke(); octx.setLineDash([]);
+
+  // Earth
+  const eg = octx.createRadialGradient(cx, cy, 2, cx, cy, earthR);
+  eg.addColorStop(0, '#60a5fa'); eg.addColorStop(1, '#1d4ed8');
+  octx.beginPath(); octx.arc(cx, cy, earthR, 0, Math.PI * 2);
+  octx.fillStyle = eg; octx.fill();
+  // Continents
+  octx.fillStyle = 'rgba(34,197,94,0.5)';
+  octx.beginPath(); octx.ellipse(cx - earthR*0.15, cy - earthR*0.1, earthR*0.2, earthR*0.3, 0.3, 0, Math.PI * 2); octx.fill();
+  octx.beginPath(); octx.ellipse(cx + earthR*0.25, cy + earthR*0.15, earthR*0.15, earthR*0.2, -0.4, 0, Math.PI * 2); octx.fill();
+
+  // Satellite
+  const G_val = 6.674e-11, ME = 5.98e24;
+  const r_m = (6.37e6 + simAlt * 1e3);
+  const v_real = Math.sqrt(G_val * ME / r_m);
+  // Angular speed proportional to real omega = v/r, normalized to ISS baseline
+  const omega_ref = 7670 / 6.778e6; // ISS angular velocity (rad/s)
+  const omega_real = v_real / r_m;
+  const angSpeed = 0.015 * (omega_real / omega_ref);
+  satAngle += angSpeed;
+
+  const sx = cx + orbitR * Math.cos(satAngle);
+  const sy = cy + orbitR * Math.sin(satAngle);
+
+  // Satellite body
+  octx.fillStyle = '#e2e8f0';
+  octx.fillRect(sx - 4, sy - 3, 8, 6);
+  // Solar panels
+  octx.fillStyle = '#3b82f6';
+  octx.fillRect(sx - 16, sy - 2, 10, 4);
+  octx.fillRect(sx + 6, sy - 2, 10, 4);
+
+  // Gravity arrow (toward Earth)
+  const dx = cx - sx, dy = cy - sy, len = Math.sqrt(dx*dx + dy*dy);
+  const ux = dx/len, uy = dy/len;
+  const ax = sx + ux * 14, ay = sy + uy * 14;
+  const bx = sx + ux * 34, by = sy + uy * 34;
+  octx.beginPath(); octx.moveTo(ax, ay); octx.lineTo(bx, by);
+  octx.strokeStyle = '#f59e0b'; octx.lineWidth = 2; octx.stroke();
+  octx.beginPath(); octx.moveTo(bx, by);
+  octx.lineTo(bx - uy*5 - ux*5, by + ux*5 - uy*5);
+  octx.lineTo(bx + uy*5 - ux*5, by - ux*5 - uy*5);
+  octx.closePath(); octx.fillStyle = '#f59e0b'; octx.fill();
+
+  // Velocity arrow (tangent)
+  const vx = -uy, vy = ux; // perpendicular to radial
+  const va_x = sx + vx * 14, va_y = sy + vy * 14;
+  const vb_x = sx + vx * 30, vb_y = sy + vy * 30;
+  octx.beginPath(); octx.moveTo(va_x, va_y); octx.lineTo(vb_x, vb_y);
+  octx.strokeStyle = '#22c55e'; octx.lineWidth = 2; octx.stroke();
+  octx.beginPath(); octx.moveTo(vb_x, vb_y);
+  octx.lineTo(vb_x - vy*5 - vx*5, vb_y + vx*5 - vy*5);
+  octx.lineTo(vb_x + vy*5 - vx*5, vb_y - vx*5 - vy*5);
+  octx.closePath(); octx.fillStyle = '#22c55e'; octx.fill();
+
+  // Labels
+  octx.font = 'bold 11px system-ui';
+  octx.fillStyle = '#93c5fd'; octx.fillText('Earth', cx - 16, cy + earthR + 14);
+  octx.fillStyle = '#fcd34d'; octx.fillText('Fg', bx + 6, by - 4);
+  octx.fillStyle = '#86efac'; octx.fillText('v', vb_x + 6, vb_y - 4);
+  octx.fillStyle = '#cbd5e1'; octx.fillText('🛰️', sx + 18, sy + 5);
+
+  // Legend
+  octx.font = '10px system-ui';
+  octx.fillStyle = '#fcd34d'; octx.fillText('● Gravity (Fg)', 10, oc.height - 24);
+  octx.fillStyle = '#86efac'; octx.fillText('● Velocity (v)', 10, oc.height - 10);
+
+  requestAnimationFrame(drawOrbitSim);
+}
+drawOrbitSim();
+
+// ── Orbit speed simulator ────────────────────────────────
+function updateOrbitSim() {
+  const alt = parseFloat(document.getElementById('alt-slider').value);
+  simAlt = alt;
+  const G_val = 6.674e-11, ME = 5.98e24;
+  const r = 6.37e6 + alt * 1e3;
+  const v = Math.sqrt(G_val * ME / r);
+  const T = 2 * Math.PI * r / v;
+  document.getElementById('sim-alt').textContent = alt >= 1000 ? (alt/1000).toFixed(1)+' thousand km' : alt + ' km';
+  document.getElementById('sim-speed').textContent = v.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' m/s';
+  document.getElementById('sim-period').textContent = (T/60).toFixed(1) + ' min (' + (T/3600).toFixed(1) + ' hr)';
+  document.getElementById('sim-radius').textContent = (r/1e3).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' km';
+  // Speed bar (normalized to max speed at 200 km)
+  const vMax = Math.sqrt(G_val * ME / (6.37e6 + 200e3));
+  document.getElementById('speed-bar').style.width = Math.max(5, (v/vMax)*100) + '%';
+  // Note
+  var note = '';
+  if (alt < 300) note = '🔥 Very low orbit — atmospheric drag is significant here!';
+  else if (alt < 600) note = '🛰️ Low Earth Orbit (LEO) — ISS and Hubble territory!';
+  else if (alt < 2000) note = '🌐 Still LEO — many Earth-observation satellites orbit here.';
+  else if (alt >= 35000 && alt <= 36500) note = '📡 Geostationary orbit! The satellite stays above one spot on Earth.';
+  else if (alt > 20000 && alt < 21000) note = '📍 GPS satellite altitude — about 12-hour orbits.';
+  else note = '🚀 Medium Earth Orbit (MEO).';
+  document.getElementById('orbit-note').textContent = note;
+}
+updateOrbitSim();
+
+// ── Concept Check Data ───────────────────────────────────
+window.ccQuestions = [
+  {
+    q: "In circular motion, what direction does the centripetal acceleration point?",
+    opts: [
+      "In the direction of motion (tangent to the circle).",
+      "Toward the center of the circle.",
+      "Away from the center of the circle.",
+      "Upward, opposite to gravity."
+    ],
+    ans: 1,
+    explain: "✅ Centripetal means 'center-seeking.' The acceleration always points toward the center of the circle."
+  },
+  {
+    q: "For a satellite in orbit, what force provides the centripetal force?",
+    opts: [
+      "The satellite's engine thrust.",
+      "Air resistance pushing it in a circle.",
+      "Gravitational force from the planet.",
+      "The satellite's own inertia."
+    ],
+    ans: 2,
+    explain: "✅ Gravity pulls the satellite toward Earth's center — this IS the centripetal force. No engines needed once in orbit!"
+  },
+  {
+    q: "A satellite's orbital speed depends on which of the following?",
+    opts: [
+      "The satellite's mass only.",
+      "The satellite's mass and the planet's mass.",
+      "The planet's mass and the orbital radius only.",
+      "Only the orbital radius."
+    ],
+    ans: 2,
+    explain: "✅ v = √(GM/r) — only the planet's mass M and orbital radius r matter. The satellite's mass cancels out!"
+  },
+  {
+    q: "If you move a satellite to a higher orbit, its speed will:",
+    opts: [
+      "Increase — it needs more speed to stay up.",
+      "Decrease — higher orbit means lower speed.",
+      "Stay the same — speed doesn't depend on altitude.",
+      "Double — speed is proportional to altitude."
+    ],
+    ans: 1,
+    explain: "✅ v = √(GM/r). As r increases, v decreases. Higher orbits are slower. That's why geostationary satellites are much slower than the ISS!"
+  },
+  {
+    q: "Which step is WRONG in deriving satellite speed?",
+    opts: [
+      "Set GMm/r² = mv²/r",
+      "Cancel the satellite mass m from both sides",
+      "Get v² = GM/r",
+      "Cancel r² from both sides to get v² = GM"
+    ],
+    ans: 3,
+    explain: "✅ You cancel one r (not both). Starting from GM/r² = v²/r → multiply both sides by r → GM/r = v². The correct answer is v² = GM/r, not v² = GM."
+  }
+];
+
+// ── Practice Problem Functions ────────────────────────────
+let practR = false, practV = false, practT = false;
+const GPS_ALT = 20200e3; // 20,200 km in meters
+const GPS_R = 6.37e6 + GPS_ALT; // orbital radius
+const GPS_V = Math.sqrt(6.674e-11 * 5.98e24 / GPS_R);
+const GPS_T_hr = (2 * Math.PI * GPS_R / GPS_V) / 3600;
+
+function checkPracticeR() {
+  var ans = parseAnswer(document.getElementById('ans-r').value);
+  var fb = document.getElementById('feedback-r');
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try: RE+20200e3 or 6.37e6+20200e3'; return; }
+  if (Math.abs(ans - GPS_R) / GPS_R < 0.02) {
+    document.getElementById('ans-r').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! r = 6.37×10⁶ + 20.2×10⁶ = 2.657×10⁷ m';
+    if (!practR) { practR=true; addScore(5); }
+    document.getElementById('partB-section').style.display='block';
+    if (window.MathJax) MathJax.typesetPromise();
+  } else {
+    document.getElementById('ans-r').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ Remember: r = Earth radius + altitude = 6.37×10⁶ + 20.2×10⁶';
+  }
+}
+
+function hintR() {
+  var h=document.getElementById('hint-r');
+  h.classList.add('visible');
+  h.innerHTML='<div class="formula-box" style="font-size:0.9rem;text-align:left;">r = r_E + h = 6.37×10⁶ m + 20,200×10³ m = 2.657×10⁷ m</div>';
+}
+
+function checkPracticeV() {
+  var ans = parseAnswer(document.getElementById('ans-v').value);
+  var fb = document.getElementById('feedback-v');
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try: sqrt(G*ME/2.657e7)'; return; }
+  if (Math.abs(ans - GPS_V) / GPS_V < 0.03) {
+    document.getElementById('ans-v').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! v ≈ ' + GPS_V.toFixed(0) + ' m/s';
+    if (!practV) { practV=true; addScore(10); }
+    document.getElementById('partC-section').style.display='block';
+    if (window.MathJax) MathJax.typesetPromise();
+  } else {
+    document.getElementById('ans-v').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ Use v = √(GM_E / r) with r = 2.657×10⁷ m';
+  }
+}
+
+function hintV() {
+  var h=document.getElementById('hint-v');
+  h.classList.add('visible');
+  h.innerHTML='<p style="font-size:0.88rem;">v = √(6.674×10⁻¹¹ × 5.98×10²⁴ / 2.657×10⁷)<br>= √(3.991×10¹⁴ / 2.657×10⁷) = √(1.502×10⁷) ≈ 3,876 m/s</p>';
+}
+
+function checkPracticeT() {
+  var ans = parseAnswer(document.getElementById('ans-T').value);
+  var fb = document.getElementById('feedback-T');
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try a number in hours.'; return; }
+  if (Math.abs(ans - GPS_T_hr) / GPS_T_hr < 0.05) {
+    document.getElementById('ans-T').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! T ≈ ' + GPS_T_hr.toFixed(1) + ' hours — that\'s half a day!';
+    if (!practT) { practT=true; addScore(10); }
+    document.getElementById('practice-done').style.display='block';
+    document.getElementById('practice-next').disabled=false;
+    sectionDone[3]=true;
+  } else {
+    document.getElementById('ans-T').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ T = 2πr/v, then convert seconds to hours by dividing by 3600.';
+  }
+}
+
+function hintT() {
+  var h=document.getElementById('hint-T');
+  h.classList.add('visible');
+  h.innerHTML='<p style="font-size:0.88rem;">T = 2π × 2.657×10⁷ / 3876 ≈ 43,050 s<br>Convert: 43,050 ÷ 3600 ≈ 11.96 hours</p>';
+}
+
+// ── Quiz Data ────────────────────────────────────────────
+window.quizData = [
+  {
+    type: 'mc',
+    q: 'A satellite orbits Earth. If you move it to an orbit with 4× the radius, what happens to its speed?',
+    opts: ['Speed doubles.', 'Speed halves.', 'Speed is reduced to 1/4.', 'Speed stays the same.'],
+    ans: 1,
+    explain: 'v = √(GM/r). If r → 4r, then v → √(GM/4r) = v/2. Speed halves!'
+  },
+  {
+    type: 'mc',
+    q: 'Why does the satellite\'s mass cancel out in the orbital speed formula?',
+    opts: [
+      'Because satellites are always very light.',
+      'Because both gravitational force and centripetal force are proportional to the satellite\'s mass m.',
+      'Because gravity doesn\'t act on small objects.',
+      'It doesn\'t cancel — this is a common mistake.'
+    ],
+    ans: 1,
+    explain: 'F_g = GMm/r² and F_c = mv²/r — both have m. When you set them equal, m cancels!'
+  },
+  {
+    type: 'mc',
+    q: 'A geostationary satellite has T = 24 hours. What would be its orbital period if moved to half the orbital radius?',
+    opts: [
+      '12 hours',
+      '6 hours',
+      'About 8.5 hours',
+      '24 hours — period doesn\'t depend on radius.'
+    ],
+    ans: 2,
+    explain: 'T = 2π√(r³/GM) ∝ r^(3/2). If r → r/2, T → T/(2^(3/2)) = 24/2.83 ≈ 8.5 hours.'
+  },
+  {
+    type: 'mc',
+    q: 'In the orbit simulation, why does the gravitational force arrow point toward Earth while the satellite moves sideways?',
+    opts: [
+      'The satellite is being pushed sideways by Earth\'s rotation.',
+      'Gravity accelerates the satellite toward Earth (changing direction), while the satellite\'s inertia keeps it moving forward — together, this creates circular motion.',
+      'The satellite\'s engines fire sideways.',
+      'The gravitational force and velocity should point the same way — the simulation is wrong.'
+    ],
+    ans: 1,
+    explain: 'The satellite is always "falling" toward Earth, but moving fast enough sideways that it keeps missing. Gravity changes its direction, not its speed — that\'s circular motion!'
+  },
+  {
+    type: 'calc',
+    q: 'Calculate the orbital speed of a satellite orbiting Earth at an altitude of 1000 km.',
+    answer: Math.sqrt(6.674e-11 * 5.98e24 / (6.37e6 + 1e6)),
+    tolerance: 0.03,
+    unit: 'm/s',
+    hint: 'r = 6.37×10⁶ + 1×10⁶ = 7.37×10⁶ m, then v = √(GM_E/r)',
+    explain: 'v = √(6.674×10⁻¹¹ × 5.98×10²⁴ / 7.37×10⁶) ≈ 7,358 m/s'
+  },
+  {
+    type: 'calc',
+    q: 'A satellite has an orbital period of 2 hours (7200 s) around Earth. What is its orbital radius? (answer in meters)',
+    answer: Math.pow(6.674e-11 * 5.98e24 * 7200 * 7200 / (4 * Math.PI * Math.PI), 1/3),
+    tolerance: 0.03,
+    unit: 'm',
+    hint: 'From T = 2π√(r³/GM), solve: r = (GMT²/4π²)^(1/3)',
+    explain: 'r = (6.674×10⁻¹¹ × 5.98×10²⁴ × 7200² / (4π²))^(1/3) ≈ 8.06×10⁶ m'
+  }
+];
+
+// ── Homework Step-by-Step Data ────────────────────────────
+window.hwSteps = {
+  hw1: [
+    { title: 'Find the orbital radius',
+      body: '\\[r = r_E + h = 6.37\\times10^6 + 547\\times10^3 = 6.917\\times10^6\\ m\\]' },
+    { title: 'Apply the satellite speed formula',
+      body: '\\[v = \\sqrt{\\frac{GM_E}{r}} = \\sqrt{\\frac{6.674\\times10^{-11}\\times5.98\\times10^{24}}{6.917\\times10^6}}\\]' },
+    { title: 'Calculate the speed',
+      body: '\\[v = \\sqrt{\\frac{3.991\\times10^{14}}{6.917\\times10^6}} = \\sqrt{5.769\\times10^7} \\approx \\boxed{7{,}594\\ m/s}\\]' },
+    { title: 'Find the period',
+      body: '\\[T = \\frac{2\\pi r}{v} = \\frac{2\\pi(6.917\\times10^6)}{7594} \\approx 5723\\ s \\approx \\boxed{95.4\\ \\text{min}}\\]<br>Hubble orbits about 15 times a day! 🔭' }
+  ],
+  hw2: [
+    { title: 'Start from the period formula',
+      body: '\\[T = 2\\pi\\sqrt{\\frac{r^3}{GM_E}}\\]<br>We know \\(T = 24\\ \\text{hours} = 86{,}400\\ s\\). Solve for \\(r\\).' },
+    { title: 'Solve for r³',
+      body: 'Square both sides: \\(T^2 = 4\\pi^2\\dfrac{r^3}{GM_E}\\)<br>\\[r^3 = \\frac{GM_E\\,T^2}{4\\pi^2}\\]' },
+    { title: 'Substitute values',
+      body: '\\[r^3 = \\frac{6.674\\times10^{-11}\\times5.98\\times10^{24}\\times(86400)^2}{4\\pi^2}\\]\\[= \\frac{3.991\\times10^{14}\\times7.465\\times10^9}{39.48} = 7.54\\times10^{22}\\]' },
+    { title: 'Take the cube root',
+      body: '\\[r = (7.54\\times10^{22})^{1/3} \\approx \\boxed{4.23\\times10^7\\ m}\\]' },
+    { title: 'Find altitude',
+      body: '\\[h = r - r_E = 4.23\\times10^7 - 6.37\\times10^6 \\approx 3.59\\times10^7\\ m \\approx \\boxed{35{,}900\\ km}\\]<br>That\'s about 5.6 Earth radii above the surface! Weather and TV satellites live here. 📡' }
+  ],
+  hw3: [
+    { title: 'Find the orbital radius around Mars',
+      body: '\\[r = r_{Mars} + h = 3.39\\times10^6 + 300\\times10^3 = 3.69\\times10^6\\ m\\]' },
+    { title: 'Calculate the speed',
+      body: '\\[v = \\sqrt{\\frac{GM_{Mars}}{r}} = \\sqrt{\\frac{6.674\\times10^{-11}\\times6.42\\times10^{23}}{3.69\\times10^6}}\\]\\[= \\sqrt{\\frac{4.285\\times10^{13}}{3.69\\times10^6}} = \\sqrt{1.161\\times10^7} \\approx \\boxed{3{,}407\\ m/s}\\]' },
+    { title: 'Find the period',
+      body: '\\[T = \\frac{2\\pi r}{v} = \\frac{2\\pi(3.69\\times10^6)}{3407} \\approx 6802\\ s \\approx \\boxed{113.4\\ \\text{min}}\\]<br>Mars orbiter takes ~1.9 hours per orbit — a bit longer than LEO around Earth! 🔴' }
+  ],
+  hw4: [
+    { title: 'Compare the speeds conceptually',
+      body: 'Since \\(v = \\sqrt{GM/r}\\), a <strong>larger</strong> \\(r\\) gives a <strong>smaller</strong> \\(v\\). Satellite A (400 km) has a smaller \\(r\\) → <strong>faster</strong>.' },
+    { title: 'Calculate the ratio',
+      body: '\\(r_A = 6.37\\times10^6 + 400\\times10^3 = 6.77\\times10^6\\) m<br>\\(r_B = 6.37\\times10^6 + 800\\times10^3 = 7.17\\times10^6\\) m<br>\\[\\frac{v_A}{v_B} = \\sqrt{\\frac{r_B}{r_A}} = \\sqrt{\\frac{7.17\\times10^6}{6.77\\times10^6}} = \\sqrt{1.059} \\approx \\boxed{1.029}\\]' },
+    { title: 'Compare the periods',
+      body: 'Since \\(T \\propto r^{3/2}\\), smaller \\(r\\) → shorter \\(T\\). <strong>Satellite A</strong> has the shorter period.<br><br>Satellite A at 400 km is only ~3% faster than B at 800 km, but completes its orbit in a noticeably shorter time.' }
+  ],
+  hw5: [
+    { title: 'Find r and speed',
+      body: '\\(r = 6.37\\times10^6 + 160\\times10^3 = 6.53\\times10^6\\) m<br>\\[v = \\sqrt{\\frac{GM_E}{r}} = \\sqrt{\\frac{3.991\\times10^{14}}{6.53\\times10^6}} \\approx \\boxed{7{,}814\\ m/s}\\]' },
+    { title: 'Find orbits per day',
+      body: '\\[T = \\frac{2\\pi r}{v} = \\frac{2\\pi(6.53\\times10^6)}{7814} \\approx 5253\\ s \\approx 87.6\\ \\text{min}\\]\\[\\text{Orbits per day} = \\frac{24 \\times 60}{87.6} \\approx \\boxed{16.4}\\]' },
+    { title: 'Time over a 500 km strip',
+      body: '\\[t = \\frac{\\text{strip width}}{v} = \\frac{500 \\times 10^3}{7814} \\approx \\boxed{64\\ s}\\]<br>A spy satellite only has about <strong>1 minute</strong> to photograph each location. That\'s why they need incredible cameras! 📸🕵️' }
+  ],
+  hw6: [
+    { title: 'Start with the satellite speed formula',
+      body: '\\[v = \\sqrt{\\frac{GM_p}{r}} = \\sqrt{\\frac{GM_p}{R_p + h}}\\]<br>We want to replace \\(GM_p\\) with something involving \\(g_p\\).' },
+    { title: 'Use the surface gravity relation',
+      body: 'On the planet\'s surface: \\(g_p = GM_p/R_p^2\\)<br>Therefore: \\(GM_p = g_p R_p^2\\)' },
+    { title: 'Substitute into the speed formula',
+      body: '\\[v = \\sqrt{\\frac{g_p R_p^2}{R_p + h}} = R_p\\sqrt{\\frac{g_p}{R_p + h}}\\]\\[\\boxed{v = R_p\\sqrt{\\frac{g_p}{R_p + h}}}\\]<br>Now you can calculate orbital speed for <em>any</em> planet using only surface gravity, planet radius, and altitude! 🪐' }
+  ]
+};
+
+// ── Practice input config ────────────────────────────────
+window.practiceInputs = [['ans-r','checkPracticeR'],['ans-v','checkPracticeV'],['ans-T','checkPracticeT']];
+window.practiceHints  = ['expr-hint-r','expr-hint-v','expr-hint-T'];
+</script>
+<script src="../common/lesson.js"></script>
+</body>
+</html>
