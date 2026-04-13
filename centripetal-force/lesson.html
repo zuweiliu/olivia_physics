@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Centripetal Force — Interactive Lesson</title>
+<link rel="stylesheet" href="../common/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  #cf-canvas {
+    width: 100%; max-width: 520px; height: 340px;
+    border-radius: 12px; border: 1px solid var(--border);
+    margin: 16px auto; display: block;
+  }
+  .var-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+  .var-table th { text-align: left; padding: 8px 12px; color: var(--accent); border-bottom: 2px solid var(--border); }
+  .var-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .var-table tr:hover { background: rgba(59,130,246,0.06); }
+  .force-examples { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  @media (max-width: 600px) { .force-examples { grid-template-columns: 1fr; } }
+  .fbd-box {
+    background: var(--deep); border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 20px; text-align: center; margin: 14px 0;
+  }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+
+<!-- ── Progress Bar ── -->
+<div id="progress-bar">
+  <div class="logo">🌀 Centripetal Force</div>
+  <div class="progress-steps">
+    <div class="step-dot active" onclick="goTo(0)" title="Core Concepts"></div>
+    <div class="step-dot" onclick="goTo(1)" title="Concept Check"></div>
+    <div class="step-dot" onclick="goTo(2)" title="Worked Example"></div>
+    <div class="step-dot" onclick="goTo(3)" title="Your Turn"></div>
+    <div class="step-dot" onclick="goTo(4)" title="Quiz"></div>
+    <div class="step-dot" onclick="goTo(5)" title="Homework"></div>
+  </div>
+  <div id="score-badge">⭐ 0 pts</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 0 — Introduction & Core Concepts
+     ═══════════════════════════════════════ -->
+<div class="section active" id="sec-0">
+<div class="container">
+  <div class="section-tag">Section 1 of 6 — Core Concepts</div>
+  <h1>Centripetal<br><span style="color:var(--accent)">Force</span></h1>
+
+  <div class="card amber" style="padding:14px;margin-bottom:18px;">
+    <strong>🔗 Prerequisite: Circular Motion Kinematics</strong>
+    <p style="margin:6px 0 0;color:var(--text);">This lesson builds directly on the <a href="../circular-motion/lesson.html" style="color:var(--accent);">Circular Motion Kinematics</a> lesson. You learned that an object moving in a circle has centripetal acceleration \(a_c = v^2/r\) pointing toward the center. Now we ask: <strong>what force causes that acceleration?</strong></p>
+  </div>
+
+  <p>You're in a car making a sharp turn. You feel <strong>pushed outward</strong> against the door. But here's the twist — there's actually a force pushing you <strong>inward</strong>. That's the <strong>centripetal force</strong>, and without it, you'd fly off in a straight line (Newton's 1st Law!).</p>
+
+  <canvas id="cf-canvas" width="520" height="340"></canvas>
+  <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-top:-8px;">
+    🎮 The red arrow shows the centripetal force — always pulling toward the center. The green arrow is velocity (tangent).
+  </p>
+
+  <div class="fun-fact">
+    There is no such thing as "centrifugal force" in physics! What you feel as being thrown outward is just your body wanting to go straight (inertia) while the car turns underneath you. The real force is always <strong>inward</strong>.
+  </div>
+
+  <!-- ── Big Idea: Newton's 2nd Law in a Circle ── -->
+  <div class="card glow amber" style="margin-top:24px;">
+    <h3>💡 The Big Idea — Newton's 2nd Law Meets the Circle</h3>
+    <p style="color:var(--text);font-size:1.05rem;">
+      From the previous lesson: \(a_c = v^2/r\). Newton's 2nd Law says \(F = ma\). Combine them:
+    </p>
+    <div class="formula-box">
+      \[ F_c = m\,a_c = \frac{mv^2}{r} \]
+    </div>
+    <p style="color:var(--text);">This is the <strong>net force toward the center</strong> required to keep an object moving in a circle. It's not a new type of force — it's just Newton's 2nd Law applied to circular motion!</p>
+  </div>
+
+  <div class="card">
+    <h2>Centripetal Force: \(F_c = \dfrac{mv^2}{r}\)</h2>
+    <p><strong>Where it comes from:</strong> We already know \(a_c = v^2/r\) (from kinematics). Newton's 2nd Law says the net force in any direction equals \(ma\). In the radial direction (toward center):</p>
+    <div class="formula-box">
+      \[ F_c = ma_c = m\frac{v^2}{r} = m\omega^2 r \]
+    </div>
+
+    <h3 style="margin-top:14px;">🔍 Formula Analysis: \(F_c = mv^2/r\)</h3>
+    <table class="var-table">
+      <tr><th>Variable</th><th>Role</th><th>Physics Meaning of Change</th></tr>
+      <tr><td style="color:var(--accent);font-weight:700;">\(F_c\)</td><td>Net inward force (N)</td><td>Total force pointing toward center</td></tr>
+      <tr><td style="color:var(--accent2);font-weight:700;">\(m\)</td><td>Mass — <strong>constant</strong></td><td>Heavier object needs more force for same circle</td></tr>
+      <tr><td style="color:var(--accent);font-weight:700;">\(v\)</td><td>Speed — can vary</td><td>Double \(v\) → <strong>4×</strong> the force needed!</td></tr>
+      <tr><td style="color:var(--accent2);font-weight:700;">\(r\)</td><td>Radius — <strong>constant</strong> for a given path</td><td>Tighter curve (smaller \(r\)) → more force needed</td></tr>
+    </table>
+
+    <div class="card amber" style="padding:14px;margin:14px 0 0;">
+      <strong>⚠️ Critical Understanding</strong>
+      <p style="margin:6px 0 0;color:var(--text);">Centripetal force is <strong>not a new force</strong>. It's the <em>name</em> for whatever net force happens to point toward the center of the circle. It could be tension, gravity, friction, a normal force component, or a combination!</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       FORCE ANALYSIS METHOD — The Universal Recipe
+       ══════════════════════════════════════════════════════ -->
+  <div class="card glow" style="margin-top:24px;">
+    <h2>🔑 The Force Analysis Recipe (Use This EVERY Time)</h2>
+    <p>Force analysis is the <strong>core skill</strong> of this lesson. Before you touch any formula, follow these four steps:</p>
+
+    <div style="display:grid;gap:12px;margin-top:14px;">
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+        <div>
+          <strong style="color:var(--text);">Draw a Free Body Diagram (FBD)</strong>
+          <p style="margin:4px 0 0;font-size:0.9rem;">Isolate the object. Draw <strong>only forces exerted ON it</strong> by other objects. Ask: what is <em>touching</em> it? What <em>field forces</em> (gravity) act on it? Every force needs a source!</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+        <div>
+          <strong style="color:var(--text);">Choose your coordinate axes</strong>
+          <p style="margin:4px 0 0;font-size:0.9rem;">For circular motion: one axis points <strong>toward the center</strong> (radial), the other is <strong>perpendicular</strong> to it. Decompose every force into these two directions.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+        <div>
+          <strong style="color:var(--text);">Write Newton's 2nd Law for EACH axis</strong>
+          <p style="margin:4px 0 0;font-size:0.9rem;">
+            <strong>Toward center:</strong> \(\sum F_{\text{radial}} = \dfrac{mv^2}{r}\) &nbsp;(net inward force = centripetal force)<br>
+            <strong>Perpendicular:</strong> \(\sum F_{\perp} = 0\) &nbsp;(no acceleration in this direction, so forces balance)
+          </p>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">4</div>
+        <div>
+          <strong style="color:var(--text);">Solve for the unknown</strong>
+          <p style="margin:4px 0 0;font-size:0.9rem;">Use the known forces (weight \(mg\), angles, friction \(\mu_s N\)) and the two equations to find the unknown force or speed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card red-c" style="padding:18px;">
+    <h3>🚨 The #1 Mistake Students Make</h3>
+    <p style="color:var(--text);">Students often write \(F_c = mv^2/r\) as if centripetal force is a <em>separate</em> force to add to the diagram. <strong>It is NOT.</strong></p>
+    <p style="color:var(--text);margin:0;">\(\dfrac{mv^2}{r}\) is the <strong>result</strong> — it equals the <strong>net force toward the center</strong>, which is the <em>sum</em> of all the real forces (tension, gravity, friction, normal force) in the radial direction. Never draw "\(F_c\)" on an FBD!</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SCENARIO 1: Ball on a String (Horizontal Circle)
+       ══════════════════════════════════════════════════════ -->
+  <div class="card" style="margin-top:28px;">
+    <h2>Scenario 1: Ball on a String 🪢 (Horizontal Circle)</h2>
+    <p>A ball of mass \(m\) swings in a horizontal circle on a string of length \(r\).</p>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 1: What forces act ON the ball?</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left;">
+        <div>
+          <p style="color:var(--text);font-size:0.9rem;margin:0;"><strong>Contact forces:</strong></p>
+          <p style="color:var(--muted);font-size:0.88rem;margin:4px 0 0;">What touches the ball? <strong>The string</strong> → <strong>Tension \(T\)</strong>, directed along the string toward the center.</p>
+        </div>
+        <div>
+          <p style="color:var(--text);font-size:0.9rem;margin:0;"><strong>Field forces:</strong></p>
+          <p style="color:var(--muted);font-size:0.88rem;margin:4px 0 0;">Gravity always acts → <strong>Weight \(mg\)</strong>, straight down.</p>
+        </div>
+      </div>
+      <p style="color:var(--red);font-weight:700;font-size:0.88rem;margin:12px 0 0;">That's it! Only 2 forces. No "centripetal force" arrow. No "centrifugal force."</p>
+    </div>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 2 & 3: Choose axes → Write Newton's 2nd Law</p>
+      <p style="color:var(--muted);font-size:0.88rem;">For a perfectly horizontal circle (simplified): tension is horizontal, weight is vertical.</p>
+      <div class="formula-box" style="font-size:0.95rem;text-align:left;">
+        \[ \text{Toward center (radial): } T = \frac{mv^2}{r} \]
+        \[ \text{Vertical: balanced (string is horizontal)} \]
+      </div>
+      <p style="color:var(--accent);font-size:0.88rem;margin:8px 0 0;"><strong>The tension IS the net radial force. Only tension points toward the center, so tension = centripetal force.</strong></p>
+    </div>
+
+    <div class="card green" style="padding:14px;margin:0;">
+      <strong>Step 4: Solve</strong>
+      <p style="margin:6px 0 0;color:var(--text);">
+        <strong>Known:</strong> \(m\), \(v\), \(r\) → <strong>Unknown:</strong> \(T\)<br>
+        \(T = mv^2/r\). That's the tension the string must provide!
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SCENARIO 2: Car on a Flat Curve
+       ══════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>Scenario 2: Car on a Flat Curve 🚗</h2>
+    <p>A car of mass \(m\) rounds a flat (level) curve of radius \(r\) at speed \(v\).</p>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 1: What forces act ON the car?</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left;">
+        <div>
+          <p style="color:var(--text);font-size:0.9rem;margin:0;"><strong>Contact forces (what touches the car?):</strong></p>
+          <p style="color:var(--muted);font-size:0.88rem;margin:4px 0 0;">
+            • <strong>Road surface</strong> → <strong>Normal force \(N\)</strong> (perpendicular to road = straight up)<br>
+            • <strong>Road surface</strong> → <strong>Static friction \(f_s\)</strong> (parallel to road, pointing toward the center of the turn)
+          </p>
+        </div>
+        <div>
+          <p style="color:var(--text);font-size:0.9rem;margin:0;"><strong>Field forces:</strong></p>
+          <p style="color:var(--muted);font-size:0.88rem;margin:4px 0 0;">• <strong>Weight \(mg\)</strong>, straight down.</p>
+          <p style="color:var(--muted);font-size:0.88rem;margin:8px 0 0;"><em>3 forces total. That's it.</em></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 2 & 3: Choose axes → Newton's 2nd Law</p>
+      <p style="color:var(--muted);font-size:0.88rem;">Radial = horizontal toward center. Perpendicular = vertical.</p>
+      <div class="formula-box" style="font-size:0.95rem;text-align:left;">
+        \[ \textbf{Vertical (no acceleration):}\quad N - mg = 0 \implies \boxed{N = mg} \]
+        \[ \textbf{Toward center:}\quad f_s = \frac{mv^2}{r} \]
+      </div>
+      <p style="color:var(--text);font-size:0.88rem;margin:8px 0 0;">
+        <strong>Only friction points toward the center</strong> → friction IS the net radial force → friction = centripetal force.<br>
+        \(N\) and \(mg\) are both vertical — they don't contribute to the radial direction at all.
+      </p>
+    </div>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 4: Solve — What's the max speed before skidding?</p>
+      <p style="color:var(--muted);font-size:0.88rem;">Friction has a maximum: \(f_{s,\max} = \mu_s N\). We already know \(N = mg\) from the vertical equation!</p>
+      <div class="formula-box" style="font-size:0.95rem;text-align:left;">
+        \[ f_{s,\max} = \mu_s N = \mu_s mg \]
+        \[ \text{Set max friction = centripetal force:} \quad \mu_s mg = \frac{mv^2_{\max}}{r} \]
+        \[ \text{Cancel } m \text{ from both sides:} \quad \mu_s g = \frac{v^2_{\max}}{r} \]
+        \[ \boxed{v_{\max} = \sqrt{\mu_s g r}} \]
+      </div>
+      <p style="color:var(--accent);font-size:0.88rem;margin:8px 0 0;"><strong>See how we used the vertical equation (\(N = mg\)) inside the radial equation?</strong> That's the power of writing <em>both</em> equations. The "perpendicular" equation often gives you a known force to substitute!</p>
+    </div>
+
+    <div class="card green" style="padding:14px;">
+      <strong>✅ Why does mass cancel?</strong>
+      <p style="margin:6px 0 0;color:var(--text);">On the left, friction depends on \(m\) (through \(N = mg\)). On the right, centripetal force also depends on \(m\). Since both sides are proportional to \(m\), it cancels. A truck and a motorcycle have the same max speed on the same curve (assuming same tires).</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SCENARIO 3: Banked Curve (No Friction)
+       ══════════════════════════════════════════════════════ -->
+  <div class="card glow amber">
+    <h3>💡 Big Idea #2 — Banked Curves</h3>
+    <p style="color:var(--text);font-size:1.05rem;">
+      What if we <strong>tilt</strong> the road? On a <strong>banked curve</strong>, the normal force is no longer vertical — it's tilted. Its <strong>horizontal component</strong> points toward the center, providing centripetal force <em>without any friction</em>!
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Scenario 3: Banked Curve (No Friction) ✈️</h2>
+    <p>A car of mass \(m\) moves at speed \(v\) on a curve banked at angle \(\theta\). No friction.</p>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 1: What forces act ON the car?</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left;">
+        <div>
+          <p style="color:var(--text);font-size:0.9rem;margin:0;"><strong>Contact forces:</strong></p>
+          <p style="color:var(--muted);font-size:0.88rem;margin:4px 0 0;">• <strong>Normal force \(N\)</strong> from the road — perpendicular to the <em>tilted</em> surface (so \(N\) is tilted too!)<br>• No friction (the problem says so).</p>
+        </div>
+        <div>
+          <p style="color:var(--text);font-size:0.9rem;margin:0;"><strong>Field forces:</strong></p>
+          <p style="color:var(--muted);font-size:0.88rem;margin:4px 0 0;">• <strong>Weight \(mg\)</strong>, straight down.</p>
+          <p style="color:var(--muted);font-size:0.88rem;margin:8px 0 0;"><em>Only 2 forces! But \(N\) is tilted — that changes everything.</em></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 2: Choose axes — this is the key step!</p>
+      <p style="color:var(--text);font-size:0.9rem;">We use <strong>horizontal</strong> (toward center) and <strong>vertical</strong> (up/down) — NOT along the tilted surface.</p>
+      <p style="color:var(--muted);font-size:0.88rem;">Because the acceleration is horizontal (toward the center of the circle), we decompose \(N\) into horizontal and vertical components:</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px;">
+        <div class="card" style="padding:12px;margin:0;border-color:var(--accent);">
+          <p style="color:var(--accent);font-weight:700;font-size:0.88rem;margin:0;">Horizontal component of \(N\)</p>
+          <p style="color:var(--text);font-size:1rem;font-weight:700;margin:6px 0 0;">\(N\sin\theta\)</p>
+          <p style="color:var(--muted);font-size:0.82rem;margin:4px 0 0;">Points toward the center → provides centripetal force!</p>
+        </div>
+        <div class="card" style="padding:12px;margin:0;border-color:var(--green);">
+          <p style="color:var(--green);font-weight:700;font-size:0.88rem;margin:0;">Vertical component of \(N\)</p>
+          <p style="color:var(--text);font-size:1rem;font-weight:700;margin:6px 0 0;">\(N\cos\theta\)</p>
+          <p style="color:var(--muted);font-size:0.82rem;margin:4px 0 0;">Points up → must balance weight \(mg\)</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 3: Newton's 2nd Law for each axis</p>
+      <div class="formula-box" style="font-size:0.95rem;text-align:left;">
+        \[ \textbf{Vertical (no vertical acceleration):}\quad N\cos\theta = mg \quad \cdots\text{(Eq. 1)} \]
+        \[ \textbf{Toward center:}\quad N\sin\theta = \frac{mv^2}{r} \quad \cdots\text{(Eq. 2)} \]
+      </div>
+    </div>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 4: Solve — use known force to eliminate unknown!</p>
+      <p style="color:var(--text);font-size:0.9rem;"><strong>The trick:</strong> We have two equations and two unknowns (\(N\) and \(v\), or \(N\) and \(\theta\)). Divide Eq. 2 by Eq. 1 to eliminate \(N\):</p>
+      <div class="formula-box" style="font-size:0.95rem;text-align:left;">
+        \[ \frac{N\sin\theta}{N\cos\theta} = \frac{mv^2/r}{mg} \]
+        \[ \tan\theta = \frac{v^2}{rg} \]
+        \[ \boxed{v = \sqrt{rg\tan\theta}} \]
+      </div>
+      <p style="color:var(--accent);font-size:0.88rem;margin:8px 0 0;"><strong>Notice: both \(N\) and \(m\) cancel!</strong> The ideal speed on a banked curve doesn't depend on the car's mass or the normal force. It only depends on the geometry (\(r\), \(\theta\)) and gravity (\(g\)).</p>
+    </div>
+
+    <div class="card amber" style="padding:14px;">
+      <strong>🔑 Why divide the equations? — A general technique</strong>
+      <p style="margin:6px 0 0;color:var(--text);">Whenever you have two equations that share an unknown force (here, \(N\)), dividing one by the other eliminates it. This "divide trick" works any time a tilted force appears in both equations — you'll see it again with banking planes!</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SCENARIO 4: Vertical Circle — BOTTOM
+       ══════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>Scenario 4: Vertical Circle — Bottom 🎢</h2>
+    <p>An object of mass \(m\) moves in a vertical circle of radius \(r\). Let's analyze forces at the <strong>bottom</strong> (e.g., bottom of a roller coaster loop, a monkey swinging past the lowest point).</p>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 1: What forces act ON the object at the bottom?</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left;">
+        <div>
+          <p style="color:var(--text);font-size:0.9rem;margin:0;"><strong>Contact force:</strong></p>
+          <p style="color:var(--muted);font-size:0.88rem;margin:4px 0 0;">• <strong>Tension \(T\)</strong> (or Normal force \(N\)) — directed <strong>upward</strong> along the string/track (toward the center of the circle, which is <em>above</em> the object).</p>
+        </div>
+        <div>
+          <p style="color:var(--text);font-size:0.9rem;margin:0;"><strong>Field force:</strong></p>
+          <p style="color:var(--muted);font-size:0.88rem;margin:4px 0 0;">• <strong>Weight \(mg\)</strong> — directed <strong>downward</strong> (away from the center).</p>
+        </div>
+      </div>
+      <p style="color:var(--text);font-weight:700;font-size:0.88rem;margin:12px 0 0;">Key observation: \(T\) and \(mg\) point in <strong>opposite</strong> directions! Tension is toward center, weight is away.</p>
+    </div>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 2 & 3: The radial direction is vertical (upward = toward center)</p>
+      <div class="formula-box" style="font-size:0.95rem;text-align:left;">
+        \[ \textbf{Toward center (up):}\quad T - mg = \frac{mv^2}{r} \]
+      </div>
+      <p style="color:var(--text);font-size:0.88rem;">
+        <strong>Read this equation carefully:</strong><br>
+        • \(T\) is positive (it points toward center ✅)<br>
+        • \(mg\) is subtracted (it points <em>away from</em> center ❌)<br>
+        • The <strong>net</strong> of these two = \(mv^2/r\)
+      </p>
+    </div>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 4: Solve for the unknown tension</p>
+      <div class="formula-box" style="font-size:0.95rem;text-align:left;">
+        \[ \boxed{T = mg + \frac{mv^2}{r}} \]
+      </div>
+      <p style="color:var(--text);font-size:0.88rem;margin:8px 0 0;">
+        <strong>Physics meaning:</strong> The tension must do <em>two jobs</em>:<br>
+        ① Support the weight (\(mg\)) — just to hold the object up<br>
+        ② Provide extra inward force (\(mv^2/r\)) — to curve the path<br>
+        So \(T > mg\) always! <strong>You feel heavier at the bottom of a loop.</strong>
+      </p>
+    </div>
+
+    <div class="card green" style="padding:14px;">
+      <strong>✅ Example numbers:</strong> A 60 kg person at the bottom of a roller coaster loop (\(r = 10\) m, \(v = 12\) m/s):
+      <p style="margin:6px 0 0;color:var(--text);">\(N = mg + mv^2/r = 60(9.80) + 60(144)/10 = 588 + 864 = \mathbf{1452\ N}\).<br>
+      That's 2.5× their normal weight — they feel 2.5g! 🎢</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SCENARIO 5: Vertical Circle — TOP
+       ══════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>Scenario 5: Vertical Circle — Top 🎢</h2>
+    <p>Same object, now at the <strong>top</strong> of the vertical circle.</p>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 1: What forces act ON the object at the top?</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left;">
+        <div>
+          <p style="color:var(--text);font-size:0.9rem;margin:0;"><strong>Contact force:</strong></p>
+          <p style="color:var(--muted);font-size:0.88rem;margin:4px 0 0;">• <strong>\(N\)</strong> (or \(T\)) — directed <strong>downward</strong> (toward center, which is <em>below</em> the object now).</p>
+        </div>
+        <div>
+          <p style="color:var(--text);font-size:0.9rem;margin:0;"><strong>Field force:</strong></p>
+          <p style="color:var(--muted);font-size:0.88rem;margin:4px 0 0;">• <strong>Weight \(mg\)</strong> — directed <strong>downward</strong> (also toward center!).</p>
+        </div>
+      </div>
+      <p style="color:var(--text);font-weight:700;font-size:0.88rem;margin:12px 0 0;">Key observation: At the top, <strong>BOTH</strong> forces point toward the center (both downward)! They work <em>together</em>.</p>
+    </div>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 2 & 3: The radial direction is vertical (downward = toward center)</p>
+      <div class="formula-box" style="font-size:0.95rem;text-align:left;">
+        \[ \textbf{Toward center (down):}\quad mg + N = \frac{mv^2}{r} \]
+      </div>
+      <p style="color:var(--text);font-size:0.88rem;">
+        <strong>Both</strong> \(mg\) and \(N\) are positive (both point toward center).<br>
+        They <strong>add up</strong> to equal the centripetal force.
+      </p>
+    </div>
+
+    <div class="fbd-box">
+      <p style="color:var(--accent2);font-weight:700;margin-bottom:10px;">Step 4: Solve for the unknown normal force</p>
+      <div class="formula-box" style="font-size:0.95rem;text-align:left;">
+        \[ \boxed{N = \frac{mv^2}{r} - mg} \]
+      </div>
+      <p style="color:var(--text);font-size:0.88rem;margin:8px 0 0;">
+        <strong>Physics meaning:</strong> Gravity already provides \(mg\) toward center. You only need \(N\) for the <em>remaining</em> centripetal force.
+        Since \(N = mv^2/r - mg\):<br>
+        • If \(v\) is large → \(N > 0\) (track pushes down on you, you feel lighter than normal)<br>
+        • If \(v\) is just right → \(N = 0\) (you feel <strong>weightless</strong>! gravity alone provides all the centripetal force)<br>
+        • If \(v\) is too small → formula gives \(N < 0\), which is impossible — <strong>you lose contact and fall!</strong>
+      </p>
+    </div>
+
+    <div class="card amber" style="padding:14px;">
+      <strong>⚠️ Minimum speed at the top</strong>
+      <p style="margin:6px 0 0;color:var(--text);">Set \(N = 0\) (barely maintaining contact):<br>
+      \(mg = mv^2_{\min}/r\) → \(\boxed{v_{\min} = \sqrt{gr}}\).<br>
+      Below this speed, the object falls away from the circular path. This is why roller coasters must go fast enough at the top!</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       SCENARIO COMPARISON TABLE
+       ══════════════════════════════════════════════════════ -->
+  <div class="card glow">
+    <h2>📊 Compare All Scenarios Side by Side</h2>
+    <p>Look at the pattern: it's <strong>always the same recipe</strong>, just different forces.</p>
+    <div style="overflow-x:auto;">
+    <table class="var-table" style="min-width:600px;">
+      <tr>
+        <th>Scenario</th>
+        <th>Forces on object</th>
+        <th>What = \(mv^2/r\)?</th>
+        <th>Key insight</th>
+      </tr>
+      <tr>
+        <td style="color:var(--text);font-weight:600;">Ball on string</td>
+        <td>\(T\) (in), \(mg\) (down)</td>
+        <td>\(T = mv^2/r\)</td>
+        <td>Tension alone is the net radial force</td>
+      </tr>
+      <tr>
+        <td style="color:var(--text);font-weight:600;">Car, flat curve</td>
+        <td>\(N\) (up), \(mg\) (down), \(f_s\) (in)</td>
+        <td>\(f_s = mv^2/r\)</td>
+        <td>Friction alone is the net radial force; use vertical eq to find \(N\)</td>
+      </tr>
+      <tr>
+        <td style="color:var(--text);font-weight:600;">Banked curve</td>
+        <td>\(N\) (tilted), \(mg\) (down)</td>
+        <td>\(N\sin\theta = mv^2/r\)</td>
+        <td>Decompose \(N\); divide equations to eliminate \(N\)</td>
+      </tr>
+      <tr>
+        <td style="color:var(--text);font-weight:600;">Vert. circle — bottom</td>
+        <td>\(T\) (up/in), \(mg\) (down/out)</td>
+        <td>\(T - mg = mv^2/r\)</td>
+        <td>Opposite directions → subtract; \(T > mg\) → feel heavy</td>
+      </tr>
+      <tr>
+        <td style="color:var(--text);font-weight:600;">Vert. circle — top</td>
+        <td>\(N\) (down/in), \(mg\) (down/in)</td>
+        <td>\(mg + N = mv^2/r\)</td>
+        <td>Same direction → add; \(N < mg\) → feel light</td>
+      </tr>
+    </table>
+    </div>
+  </div>
+
+  <!-- ── Interactive Simulator ── -->
+  <div class="card">
+    <h3>🎛️ Interactive: Centripetal Force Calculator</h3>
+    <p>Adjust mass, speed, and radius to see how much centripetal force is needed — and what that means for friction and banking.</p>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;">Mass \(m\):</span>
+      <input type="range" id="sim-m" min="1" max="2000" step="10" value="1000" oninput="updateCFSim()">
+      <span class="sim-val" id="sim-m-val">1000 kg</span>
+    </div>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;">Speed \(v\):</span>
+      <input type="range" id="sim-v" min="1" max="50" step="1" value="20" oninput="updateCFSim()">
+      <span class="sim-val" id="sim-v-val">20 m/s</span>
+    </div>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;">Radius \(r\):</span>
+      <input type="range" id="sim-r" min="10" max="500" step="10" value="100" oninput="updateCFSim()">
+      <span class="sim-val" id="sim-r-val">100 m</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+      <div class="card" style="padding:12px;margin:0;text-align:center;">
+        <div style="font-size:0.78rem;color:var(--muted);">Centripetal Force \(F_c\)</div>
+        <div style="color:var(--accent);font-weight:700;font-size:1.1rem;" id="sim-Fc">4000 N</div>
+      </div>
+      <div class="card" style="padding:12px;margin:0;text-align:center;">
+        <div style="font-size:0.78rem;color:var(--muted);">Centripetal Accel \(a_c\)</div>
+        <div style="color:var(--accent);font-weight:700;font-size:1.1rem;" id="sim-ac">4.0 m/s²</div>
+      </div>
+      <div class="card" style="padding:12px;margin:0;text-align:center;">
+        <div style="font-size:0.78rem;color:var(--muted);">Min \(\mu_s\) needed (flat road)</div>
+        <div style="color:var(--accent2);font-weight:700;font-size:1.1rem;" id="sim-mu">0.41</div>
+      </div>
+      <div class="card" style="padding:12px;margin:0;text-align:center;">
+        <div style="font-size:0.78rem;color:var(--muted);">Ideal bank angle \(\theta\)</div>
+        <div style="color:var(--accent2);font-weight:700;font-size:1.1rem;" id="sim-theta">22.2°</div>
+      </div>
+    </div>
+    <div id="cf-sim-insight" style="margin-top:10px;font-size:0.85rem;color:var(--muted);"></div>
+  </div>
+
+  <div class="fun-fact">
+    NASCAR tracks are banked up to 33° at Talladega! At that angle, cars can go about 200 mph around the curve with almost no friction needed. The banking does all the work.
+  </div>
+
+  <!-- Link back -->
+  <div class="card green" style="padding:14px;">
+    <strong>🔗 Connection to Previous Lesson</strong>
+    <p style="margin:6px 0 0;color:var(--text);">In <a href="../circular-motion/lesson.html" style="color:var(--accent);">Circular Motion Kinematics</a>, you learned to <em>describe</em> circular motion (\(\theta, \omega, v, a_c\)). Now you've learned to <em>explain</em> it — the centripetal force is what makes circular motion happen. Kinematics asks "how?" — dynamics asks "why?"</p>
+  </div>
+
+  <div class="nav-row">
+    <div></div>
+    <button class="btn btn-primary" onclick="goTo(1)">Check My Understanding →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 1 — Concept Check
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-1">
+<div class="container">
+  <div class="section-tag">Section 2 of 6 — Concept Check</div>
+  <h1>Let's See What <span style="color:var(--accent)">You Know! 🧠</span></h1>
+  <p>Answer these 5 questions before we move to examples.</p>
+
+  <div class="cc-grid" id="cc-container"></div>
+
+  <div id="cc-feedback" class="feedback info" style="margin-top:10px;"></div>
+  <div id="cc-result" style="display:none;" class="card green">
+    <h3 id="cc-result-title"></h3>
+    <p id="cc-result-msg"></p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(0)">← Review Concepts</button>
+    <button class="btn btn-primary" id="cc-next-btn" onclick="goTo(2)" disabled>See Worked Example →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 2 — Worked Example
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-2">
+<div class="container">
+  <div class="section-tag">Section 3 of 6 — Worked Example</div>
+  <h1>Example: <span style="color:var(--accent)">Jet Banking Turn ✈️</span></h1>
+
+  <div class="card amber">
+    <h3>Problem Statement</h3>
+    <p style="color:var(--text);">A jet flying at <strong>123 m/s</strong> banks to make a horizontal circular turn. The radius of the turn is <strong>3810 m</strong>, and the mass of the jet is <strong>2.0 × 10⁵ kg</strong>. Calculate the magnitude of the necessary lifting force.</p>
+  </div>
+
+  <p>Work through each step by clicking the buttons below 👇</p>
+
+  <!-- Step 1 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+      <div>
+        <strong>Draw the Free Body Diagram</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">What forces act on the banking jet?</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('step1')">Show Step</button>
+    </div>
+    <div class="step-block" id="step1">
+      <div class="fbd-box">
+        <p style="color:var(--text);font-size:0.9rem;">
+          <strong>Forces on the banked jet:</strong><br>
+          - <strong>Lift \(L\)</strong>: perpendicular to wings (tilted at angle \(\theta\))<br>
+          - <strong>Weight \(mg\)</strong>: straight down<br><br>
+          The <strong>horizontal component</strong> of lift (\(L\sin\theta\)) provides centripetal force.<br>
+          The <strong>vertical component</strong> of lift (\(L\cos\theta\)) balances weight.
+        </p>
+      </div>
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ \text{Horizontal: } L\sin\theta = \frac{mv^2}{r} \]
+        \[ \text{Vertical: } L\cos\theta = mg \]
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+      <div>
+        <strong>Solve for the lift force \(L\)</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Use both equations together</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('step2')">Show Step</button>
+    </div>
+    <div class="step-block" id="step2">
+      <p style="color:var(--text);font-size:0.9rem;">Square both equations and add them (since \(\sin^2\theta + \cos^2\theta = 1\)):</p>
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ L^2\sin^2\theta + L^2\cos^2\theta = \left(\frac{mv^2}{r}\right)^2 + (mg)^2 \]
+        \[ L^2 = m^2\left(\frac{v^4}{r^2} + g^2\right) \]
+        \[ L = m\sqrt{\frac{v^4}{r^2} + g^2} \]
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+      <div>
+        <strong>Plug in the numbers</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Calculate the final answer</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('step3')">Show Step</button>
+    </div>
+    <div class="step-block" id="step3">
+      <div class="formula-box" style="text-align:left;font-size:0.9rem;">
+        \[ \frac{v^2}{r} = \frac{(123)^2}{3810} = \frac{15129}{3810} = 3.97\ m/s^2 \]
+        \[ L = 2.0\times10^5 \times \sqrt{(3.97)^2 + (9.80)^2} \]
+        \[ L = 2.0\times10^5 \times \sqrt{15.76 + 96.04} \]
+        \[ L = 2.0\times10^5 \times \sqrt{111.8} = 2.0\times10^5 \times 10.57 \]
+        \[ \boxed{L \approx 2.11 \times 10^6\ N} \]
+      </div>
+      <div class="card green" style="padding:14px;margin-top:12px;">
+        <strong>✅ The lift force is about 2.11 million Newtons!</strong>
+        <p style="margin:6px 0 0;font-size:0.88rem;">Compare to the jet's weight: \(mg = 2.0\times10^5 \times 9.80 = 1.96\times10^6\) N. The lift is only slightly more than the weight — this is a gentle turn (the centripetal acceleration is just 0.4g).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card amber">
+    <h3>🤔 Thinking Question</h3>
+    <p style="color:var(--text);">If the jet needed to make a tighter turn (smaller \(r\)) at the same speed, would it need more or less lift force?</p>
+    <button class="btn btn-secondary" style="padding:8px 16px;font-size:0.85rem;" onclick="revealStep('think-ans')">Reveal Answer</button>
+    <div class="step-block" id="think-ans">
+      <p style="color:var(--text);margin-top:10px;"><strong>More lift!</strong> Smaller \(r\) → larger \(v^2/r\) → larger centripetal force needed → the jet must bank more steeply, increasing the required lift.</p>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(1)">← Concept Check</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Your Turn! 🚀 →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 3 — Student Practice
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-3">
+<div class="container">
+  <div class="section-tag">Section 4 of 6 — Your Turn!</div>
+  <h1>Solve It <span style="color:var(--accent)">Yourself 🚀</span></h1>
+
+  <div class="card amber">
+    <h3>Problem: Amusement Park Ride</h3>
+    <p style="color:var(--text);">At an amusement park, a cylindrically shaped chamber spins around a central axis. People sit in seats with their backs against the outer wall. The outer wall moves at a speed of <strong>3.2 m/s</strong>, and an <strong>83 kg</strong> person feels a <strong>560 N</strong> force pressing against his back.</p>
+    <p style="color:var(--text);margin:0;">
+      <strong>(a)</strong> What is the radius of the chamber?<br>
+      <strong>(b)</strong> What is the centripetal acceleration?
+    </p>
+  </div>
+
+  <!-- Part (a) -->
+  <div class="card">
+    <h3>Part (a): Find the Radius</h3>
+    <p>The 560 N force <em>is</em> the centripetal force (the wall pushes the person inward). Use \(F_c = mv^2/r\) and solve for \(r\).</p>
+    <div class="input-row">
+      <label>Radius \(r\) (m):</label>
+      <input type="text" id="ans-r" placeholder="e.g. 83*3.2^2/560">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkPracticeR()">Check ✓</button>
+      <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintPR()">Hint 💡</button>
+    </div>
+    <div id="feedback-r" class="feedback"></div>
+    <div id="expr-hint-r"></div>
+    <div id="hint-pr" class="step-block"></div>
+  </div>
+
+  <!-- Part (b) -->
+  <div id="partB-section" style="display:none;">
+  <div class="card">
+    <h3>Part (b): Centripetal Acceleration</h3>
+    <p>Use \(a_c = v^2/r\) or \(a_c = F_c/m\).</p>
+    <div class="input-row">
+      <label>\(a_c\) (m/s²):</label>
+      <input type="text" id="ans-ac" placeholder="e.g. 560/83">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkPracticeAc()">Check ✓</button>
+    </div>
+    <div id="feedback-ac" class="feedback"></div>
+    <div id="expr-hint-ac"></div>
+  </div>
+  </div>
+
+  <div id="practice-done" style="display:none;" class="card green">
+    <h3>🎉 Practice Complete!</h3>
+    <p style="color:var(--text);">The chamber has a radius of about 1.52 m and the rider feels about 6.75 m/s² of centripetal acceleration — roughly 0.69g. Enough to feel pressed into your seat!</p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(2)">← Worked Example</button>
+    <button class="btn btn-primary" id="practice-next" onclick="goTo(4)" disabled>Take the Quiz →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 4 — Quiz
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-4">
+<div class="container">
+  <div class="section-tag">Section 5 of 6 — Quiz</div>
+  <h1>Quiz Time! <span style="color:var(--accent)">⚡ 6 Questions</span></h1>
+  <p>Test your understanding of centripetal force!</p>
+
+  <div id="quiz-container"></div>
+
+  <div id="quiz-result" style="display:none;">
+    <div class="card glow">
+      <div class="score-final">
+        <div class="score-circle">
+          <div class="num" id="quiz-score-num">0</div>
+          <div class="den" id="quiz-score-den">/ 6</div>
+        </div>
+        <h2 id="quiz-result-title"></h2>
+        <p id="quiz-result-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(3)">← Practice</button>
+    <button class="btn btn-primary" id="quiz-next-btn" onclick="goTo(5)" disabled>Homework →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 5 — Homework
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-5">
+<div class="container">
+  <div class="section-tag">Section 6 of 6 — Homework</div>
+  <h1>Homework <span style="color:var(--accent)">Problems 📝</span></h1>
+  <p>Work through these problems on paper. Draw a free body diagram for each one!</p>
+
+  <div class="card amber" style="margin-bottom:20px;">
+    <h3>📋 Key Formulas Reference</h3>
+    <p style="color:var(--text);font-size:0.88rem;margin:0;">
+      \(F_c = mv^2/r = m\omega^2 r\) &nbsp;|&nbsp;
+      \(a_c = v^2/r\) &nbsp;|&nbsp;
+      \(v = r\omega = 2\pi r/T\)<br>
+      Flat curve: \(f_s = mv^2/r\), \(v_{\max} = \sqrt{\mu_s g r}\)<br>
+      Banked curve: \(\tan\theta = v^2/(rg)\)
+    </p>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 1</div>
+    <p style="color:var(--text);margin-bottom:12px;">A <strong>9.5 kg monkey</strong> hangs by one arm from a branch and swings on a vertical circle. The radial distance is <strong>85 cm</strong>. At the lowest point, the monkey's speed is <strong>2.8 m/s</strong>.
+    (a) Find the centripetal force.
+    (b) Find the tension in the monkey's arm.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw1')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw1" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw1" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(F_c = mv^2/r = 9.5 \times (2.8)^2 / 0.85 = \boxed{87.5\ N}\)<br>
+      (b) At the bottom: \(T - mg = mv^2/r\), so \(T = mg + mv^2/r = 9.5(9.80) + 87.5 = 93.1 + 87.5 = \boxed{180.6\ N}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 2</div>
+    <p style="color:var(--text);margin-bottom:12px;">On a banked race track, the smallest circular path has radius <strong>112 m</strong> and the largest has radius <strong>165 m</strong>. The height of the outer wall is <strong>18 m</strong>. Find (a) the smallest and (b) the largest speed at which cars can move without relying on friction.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw2')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw2" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw2" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      Bank angle: \(\sin\theta = 18/(165-112) = 18/53\), so \(\theta = 19.8°\), \(\tan\theta = 0.360\).<br>
+      (a) \(v_{\min} = \sqrt{r_{\min} \cdot g \cdot \tan\theta} = \sqrt{112 \times 9.80 \times 0.360} = \boxed{19.9\ m/s}\)<br>
+      (b) \(v_{\max} = \sqrt{165 \times 9.80 \times 0.360} = \boxed{24.2\ m/s}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 3</div>
+    <p style="color:var(--text);margin-bottom:12px;">A car (mass 1200 kg) rounds a flat curve of radius <strong>80 m</strong>.
+    (a) If the coefficient of static friction is \(\mu_s = 0.65\), what is the maximum speed?
+    (b) What centripetal force does friction provide at this speed?
+    (c) If the road is wet (\(\mu_s = 0.30\)), what is the new max speed?</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw3')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw3" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw3" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(v_{\max} = \sqrt{\mu_s g r} = \sqrt{0.65 \times 9.80 \times 80} = \boxed{22.6\ m/s}\) (≈ 81 km/h)<br>
+      (b) \(F_c = \mu_s mg = 0.65 \times 1200 \times 9.80 = \boxed{7644\ N}\)<br>
+      (c) \(v_{\max} = \sqrt{0.30 \times 9.80 \times 80} = \boxed{15.3\ m/s}\) (≈ 55 km/h) — much slower on wet roads!
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 4</div>
+    <p style="color:var(--text);margin-bottom:12px;">A ball on a string (mass 0.50 kg, string length 1.2 m) swings in a horizontal circle.
+    (a) If the speed is 4.0 m/s, what is the tension in the string?
+    (b) The string can hold a maximum tension of 50 N. What is the maximum speed?</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw4')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw4" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw4" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(T = mv^2/r = 0.50 \times (4.0)^2 / 1.2 = \boxed{6.67\ N}\)<br>
+      (b) \(v_{\max} = \sqrt{T_{\max} \cdot r / m} = \sqrt{50 \times 1.2 / 0.50} = \boxed{10.95\ m/s}\)
+    </div>
+  </div>
+
+  <!-- Final score summary -->
+  <div class="card glow" style="margin-top:30px;text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:8px;">🌀</div>
+    <h2>Lesson Complete!</h2>
+    <p>Total Score: <strong style="color:var(--accent);font-size:1.2rem;" id="final-score-display">—</strong></p>
+    <p style="margin-top:8px;">You now understand both the <em>kinematics</em> and <em>dynamics</em> of circular motion!</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px;">
+      <a href="../circular-motion/lesson.html" class="btn btn-secondary">← Review: Circular Motion Kinematics</a>
+      <button class="btn btn-primary" onclick="goTo(0)">🔄 Restart Lesson</button>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(4)">← Quiz</button>
+    <div></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script>
+// ── Centripetal Force Animation ──────────────────────────
+var cfc = document.getElementById('cf-canvas');
+var cfctx = cfc.getContext('2d');
+var cfAngle = 0;
+function drawCF() {
+  cfc.width = cfc.offsetWidth; cfc.height = cfc.offsetHeight;
+  var cx = cfc.width/2, cy = cfc.height/2;
+  var R = Math.min(cx,cy)*0.6;
+  cfctx.clearRect(0,0,cfc.width,cfc.height);
+
+  // orbit path
+  cfctx.beginPath(); cfctx.arc(cx,cy,R,0,Math.PI*2);
+  cfctx.strokeStyle='rgba(59,130,246,0.3)'; cfctx.lineWidth=2; cfctx.stroke();
+
+  // center dot
+  cfctx.beginPath(); cfctx.arc(cx,cy,5,0,Math.PI*2);
+  cfctx.fillStyle='rgba(255,255,255,0.4)'; cfctx.fill();
+  cfctx.font='bold 11px system-ui'; cfctx.fillStyle='#94a3b8';
+  cfctx.fillText('center',cx-18,cy+18);
+
+  // object
+  var px = cx + R*Math.cos(cfAngle), py = cy + R*Math.sin(cfAngle);
+  cfctx.beginPath(); cfctx.arc(px,py,10,0,Math.PI*2);
+  var grad = cfctx.createRadialGradient(px,py,1,px,py,10);
+  grad.addColorStop(0,'#60a5fa'); grad.addColorStop(1,'#3b82f6');
+  cfctx.fillStyle=grad; cfctx.fill();
+
+  // velocity arrow (tangent, green)
+  var vx = -Math.sin(cfAngle)*55, vy = Math.cos(cfAngle)*55;
+  cfctx.beginPath(); cfctx.moveTo(px,py); cfctx.lineTo(px+vx,py+vy);
+  cfctx.strokeStyle='#22c55e'; cfctx.lineWidth=2.5; cfctx.stroke();
+  var al=8, aa=Math.atan2(vy,vx);
+  cfctx.beginPath();
+  cfctx.moveTo(px+vx,py+vy);
+  cfctx.lineTo(px+vx-al*Math.cos(aa-0.4),py+vy-al*Math.sin(aa-0.4));
+  cfctx.lineTo(px+vx-al*Math.cos(aa+0.4),py+vy-al*Math.sin(aa+0.4));
+  cfctx.closePath(); cfctx.fillStyle='#22c55e'; cfctx.fill();
+
+  // centripetal force arrow (toward center, red)
+  var dx = cx - px, dy = cy - py;
+  var len = Math.sqrt(dx*dx+dy*dy);
+  var ux = dx/len, uy = dy/len;
+  var fx = ux*60, fy = uy*60;
+  var sx = px+ux*14, sy = py+uy*14;
+  cfctx.beginPath(); cfctx.moveTo(sx,sy); cfctx.lineTo(sx+fx,sy+fy);
+  cfctx.strokeStyle='#ef4444'; cfctx.lineWidth=3; cfctx.stroke();
+  var fa = Math.atan2(fy,fx);
+  cfctx.beginPath();
+  cfctx.moveTo(sx+fx,sy+fy);
+  cfctx.lineTo(sx+fx-al*Math.cos(fa-0.4),sy+fy-al*Math.sin(fa-0.4));
+  cfctx.lineTo(sx+fx-al*Math.cos(fa+0.4),sy+fy-al*Math.sin(fa+0.4));
+  cfctx.closePath(); cfctx.fillStyle='#ef4444'; cfctx.fill();
+
+  // labels
+  cfctx.font='bold 11px system-ui';
+  cfctx.fillStyle='#86efac'; cfctx.fillText('v',px+vx+6,py+vy-4);
+  cfctx.fillStyle='#fca5a5'; cfctx.fillText('Fc',sx+fx+6,sy+fy-4);
+
+  cfAngle += 0.018;
+  requestAnimationFrame(drawCF);
+}
+drawCF();
+
+// ── Interactive Simulator ────────────────────────────────
+function updateCFSim() {
+  var m = parseFloat(document.getElementById('sim-m').value);
+  var v = parseFloat(document.getElementById('sim-v').value);
+  var r = parseFloat(document.getElementById('sim-r').value);
+  var Fc = m*v*v/r;
+  var ac = v*v/r;
+  var mu = ac/9.80;
+  var theta = Math.atan(ac/9.80)*180/Math.PI;
+  document.getElementById('sim-m-val').textContent = m+' kg';
+  document.getElementById('sim-v-val').textContent = v+' m/s';
+  document.getElementById('sim-r-val').textContent = r+' m';
+  document.getElementById('sim-Fc').textContent = Fc>=1000 ? (Fc/1000).toFixed(1)+' kN' : Fc.toFixed(0)+' N';
+  document.getElementById('sim-ac').textContent = ac.toFixed(1)+' m/s²';
+  document.getElementById('sim-mu').textContent = mu.toFixed(2);
+  document.getElementById('sim-theta').textContent = theta.toFixed(1)+'°';
+  var insight = '';
+  if (mu > 1) insight = '⚠️ μ_s > 1 needed — most tires can\'t handle this! You\'d need banking or to slow down.';
+  else if (mu > 0.7) insight = '😬 High friction needed — close to the limit for dry rubber on asphalt (~0.7–0.8).';
+  else if (mu > 0.3) insight = '🚗 Moderate friction — comfortable on dry roads, risky on wet.';
+  else insight = '😌 Low friction needed — safe even on slippery roads.';
+  document.getElementById('cf-sim-insight').textContent = insight;
+}
+updateCFSim();
+
+// ── Concept Check Data ───────────────────────────────────
+window.ccQuestions = [
+  {
+    q: "Centripetal force is:",
+    opts: [
+      "A new, special type of force that only appears in circular motion.",
+      "The name for the net force directed toward the center of the circle — it can be any real force.",
+      "A force that pushes objects outward during circular motion.",
+      "Only caused by gravity."
+    ],
+    ans: 1,
+    explain: "✅ Centripetal force is not a new force. It's just the label for whatever net force points toward the center — tension, friction, gravity, normal force, etc."
+  },
+  {
+    q: "A car rounds a flat (unbanked) curve. What provides the centripetal force?",
+    opts: [
+      "The engine's forward push.",
+      "Gravity pulling the car down.",
+      "Static friction between the tires and the road.",
+      "The normal force from the road."
+    ],
+    ans: 2,
+    explain: "✅ On a flat curve, static friction is the only horizontal force — it pushes the tires (and car) toward the center of the turn."
+  },
+  {
+    q: "On a banked curve with no friction, what provides the centripetal force?",
+    opts: [
+      "Gravity alone.",
+      "The horizontal component of the normal force (N sin θ).",
+      "The vertical component of the normal force.",
+      "The car's momentum."
+    ],
+    ans: 1,
+    explain: "✅ When the road is tilted, the normal force N is tilted too. Its horizontal component N·sin(θ) points toward the center — that's the centripetal force."
+  },
+  {
+    q: "If you triple the speed on the same curve, the centripetal force needed becomes:",
+    opts: [
+      "3× larger.",
+      "6× larger.",
+      "9× larger.",
+      "The same — speed doesn't matter."
+    ],
+    ans: 2,
+    explain: "✅ F_c = mv²/r. Triple v → (3v)² = 9v². The force is 9× larger! That's why speeding on curves is so dangerous."
+  },
+  {
+    q: "At the bottom of a vertical circular loop (roller coaster), the normal force on you is:",
+    opts: [
+      "Less than your weight — you feel lighter.",
+      "Equal to your weight.",
+      "Greater than your weight — you feel heavier.",
+      "Zero — you feel weightless."
+    ],
+    ans: 2,
+    explain: "✅ At the bottom: N - mg = mv²/r, so N = mg + mv²/r. The normal force exceeds your weight — you feel pressed into the seat!"
+  }
+];
+
+// ── Practice Problem Logic ───────────────────────────────
+var prRDone=false, prAcDone=false;
+
+function checkPracticeR() {
+  var ans = parseAnswer(document.getElementById('ans-r').value);
+  var fb = document.getElementById('feedback-r');
+  var expected = 83*3.2*3.2/560;
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try: 83*3.2^2/560'; return; }
+  if (Math.abs(ans-expected)/expected<0.05) {
+    document.getElementById('ans-r').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! r = mv²/F = 83×(3.2)²/560 ≈ '+expected.toFixed(2)+' m';
+    if (!prRDone) { prRDone=true; addScore(10); }
+    document.getElementById('partB-section').style.display='block';
+    if (window.MathJax) MathJax.typesetPromise();
+  } else {
+    document.getElementById('ans-r').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ r = mv²/Fc = 83 × (3.2)² / 560';
+  }
+}
+
+function hintPR() {
+  var h = document.getElementById('hint-pr');
+  h.classList.add('visible');
+  h.innerHTML='<div class="formula-box" style="font-size:0.9rem;text-align:left;">F_c = mv²/r → r = mv²/F_c = 83 × (3.2)² / 560</div>';
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+function checkPracticeAc() {
+  var ans = parseAnswer(document.getElementById('ans-ac').value);
+  var fb = document.getElementById('feedback-ac');
+  var expected = 560/83;
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression.'; return; }
+  if (Math.abs(ans-expected)/expected<0.05) {
+    document.getElementById('ans-ac').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! a_c = F/m = 560/83 ≈ '+expected.toFixed(2)+' m/s²';
+    if (!prAcDone) { prAcDone=true; addScore(10); }
+    document.getElementById('practice-done').style.display='block';
+    document.getElementById('practice-next').disabled=false;
+    sectionDone[3]=true;
+  } else {
+    document.getElementById('ans-ac').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ a_c = F_c/m = 560/83';
+  }
+}
+
+// ── Quiz Data ────────────────────────────────────────────
+window.quizData = [
+  {
+    type:'mc',
+    q:'A satellite orbits Earth in a circle. What provides the centripetal force?',
+    opts:['The satellite\'s engines.','Gravity.','There is no force — the satellite is in free fall.','Air resistance.'],
+    ans:1,
+    explain:'Gravity provides the centripetal force: F_g = mv²/r. The satellite is in free fall, but gravity IS the centripetal force!'
+  },
+  {
+    type:'mc',
+    q:'On a banked curve, the ideal speed (no friction needed) depends on:',
+    opts:['Mass of the car, radius, and bank angle.','Radius, bank angle, and g — but NOT mass.','Only the bank angle.','Only the radius.'],
+    ans:1,
+    explain:'v = √(rg·tanθ). Mass cancels out! The ideal speed depends on r, g, and θ only.'
+  },
+  {
+    type:'mc',
+    q:'A ball on a string moves in a horizontal circle. If the string suddenly breaks, the ball will:',
+    opts:[
+      'Fly outward (radially away from center).',
+      'Continue in a straight line tangent to the circle at the point of release.',
+      'Spiral outward.',
+      'Stop immediately.'
+    ],
+    ans:1,
+    explain:'Newton\'s 1st Law: with no net force, the ball continues in a straight line in the direction it was moving — tangent to the circle.'
+  },
+  {
+    type:'mc',
+    q:'At the top of a vertical loop on a roller coaster, what forces point toward the center?',
+    opts:[
+      'Only gravity.',
+      'Only the normal force.',
+      'Both gravity AND the normal force.',
+      'Neither — you\'re weightless at the top.'
+    ],
+    ans:2,
+    explain:'At the top, both mg and N point downward (toward center). So mg + N = mv²/r. You feel lighter because N < mg on the ground.'
+  },
+  {
+    type:'calc',
+    q:'A 1500 kg car moves at 25 m/s around a flat curve of radius 100 m. What centripetal force is needed (N)?',
+    answer:9375,
+    tolerance:0.05,
+    unit:'N',
+    hint:'F_c = mv²/r = 1500 × (25)² / 100',
+    explain:'F_c = mv²/r = 1500 × 625 / 100 = 9375 N. That\'s the friction force the tires must provide!'
+  },
+  {
+    type:'calc',
+    q:'A road is banked at 20° with radius 150 m. What is the ideal speed (no friction) in m/s?',
+    answer:23.1,
+    tolerance:0.05,
+    unit:'m/s',
+    hint:'v = √(r·g·tan θ) = √(150 × 9.80 × tan20°)',
+    explain:'v = √(rg·tanθ) = √(150 × 9.80 × 0.364) = √(534.7) ≈ 23.1 m/s (about 83 km/h).'
+  }
+];
+
+// ── Homework Step-by-Step Data ───────────────────────────
+window.hwSteps = {
+  hw1: [
+    { title: 'Draw the FBD at the lowest point',
+      body: 'At the bottom of the swing, two forces act on the monkey:<br>• <strong>Tension \\(T\\)</strong> — upward (toward center)<br>• <strong>Weight \\(mg\\)</strong> — downward (away from center)<br>Net force toward center: \\(T - mg = F_c\\)' },
+    { title: 'Part (a): Find centripetal force',
+      body: '\\[F_c = \\frac{mv^2}{r} = \\frac{9.5 \\times (2.8)^2}{0.85} = \\frac{9.5 \\times 7.84}{0.85} = \\boxed{87.5\\ N}\\]' },
+    { title: 'Part (b): Find tension',
+      body: 'At the bottom: \\(T - mg = mv^2/r\\)<br>\\[T = mg + \\frac{mv^2}{r} = 9.5(9.80) + 87.5 = 93.1 + 87.5 = \\boxed{180.6\\ N}\\]' },
+    { title: 'Why is T > mg?',
+      body: 'The arm must support the monkey\'s weight AND provide extra force to curve the motion upward. At the bottom of a swing, you always feel heavier! 🐒' }
+  ],
+  hw2: [
+    { title: 'Find the bank angle',
+      body: 'The height difference between inner and outer tracks: \\(h = 18\\ m\\).<br>The radial distance: \\(\\Delta r = 165 - 112 = 53\\ m\\).<br>\\[\\sin\\theta = \\frac{h}{\\Delta r} = \\frac{18}{53} \\implies \\theta = 19.8°\\]<br>\\(\\tan\\theta = \\tan(19.8°) = 0.360\\)' },
+    { title: 'Use the banked curve formula',
+      body: 'For no friction: \\(v = \\sqrt{rg\\tan\\theta}\\)' },
+    { title: 'Part (a): Smallest speed (inner track)',
+      body: '\\[v_{\\min} = \\sqrt{112 \\times 9.80 \\times 0.360} = \\sqrt{395.1} = \\boxed{19.9\\ m/s}\\]' },
+    { title: 'Part (b): Largest speed (outer track)',
+      body: '\\[v_{\\max} = \\sqrt{165 \\times 9.80 \\times 0.360} = \\sqrt{582.1} = \\boxed{24.2\\ m/s}\\]<br>Cars on the outer lane can go faster!' }
+  ],
+  hw3: [
+    { title: 'Part (a): Max speed on dry road',
+      body: 'Friction provides centripetal force: \\(\\mu_s mg = mv^2/r\\). Mass cancels!<br>\\[v_{\\max} = \\sqrt{\\mu_s g r} = \\sqrt{0.65 \\times 9.80 \\times 80} = \\sqrt{509.6} = \\boxed{22.6\\ m/s}\\]<br>That\'s about 81 km/h.' },
+    { title: 'Part (b): Friction force at max speed',
+      body: '\\[F_c = \\mu_s mg = 0.65 \\times 1200 \\times 9.80 = \\boxed{7644\\ N}\\]' },
+    { title: 'Part (c): Max speed on wet road',
+      body: '\\[v_{\\max} = \\sqrt{0.30 \\times 9.80 \\times 80} = \\sqrt{235.2} = \\boxed{15.3\\ m/s}\\]<br>Only 55 km/h! Wet roads cut your safe cornering speed by about a third. 🌧️' }
+  ],
+  hw4: [
+    { title: 'Part (a): Tension at 4.0 m/s',
+      body: 'Tension provides centripetal force (horizontal circle):<br>\\[T = \\frac{mv^2}{r} = \\frac{0.50 \\times (4.0)^2}{1.2} = \\frac{8.0}{1.2} = \\boxed{6.67\\ N}\\]' },
+    { title: 'Part (b): Max speed before string breaks',
+      body: 'Set \\(T_{\\max} = mv^2_{\\max}/r\\) and solve for \\(v_{\\max}\\):<br>\\[v_{\\max} = \\sqrt{\\frac{T_{\\max} \\cdot r}{m}} = \\sqrt{\\frac{50 \\times 1.2}{0.50}} = \\sqrt{120} = \\boxed{10.95\\ m/s}\\]' }
+  ]
+};
+
+// ── Practice input config ────────────────────────────────
+window.practiceInputs = [['ans-r','checkPracticeR'],['ans-ac','checkPracticeAc']];
+window.practiceHints  = ['expr-hint-r','expr-hint-ac'];
+</script>
+<script src="../common/lesson.js"></script>
+</body>
+</html>

@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Circular Motion Kinematics — Interactive Lesson</title>
+<link rel="stylesheet" href="../common/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  #cm-canvas {
+    width: 100%; max-width: 520px; height: 320px;
+    border-radius: 12px; border: 1px solid var(--border);
+    margin: 16px auto; display: block;
+  }
+  .var-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+  .var-table th { text-align: left; padding: 8px 12px; color: var(--accent); border-bottom: 2px solid var(--border); }
+  .var-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .var-table tr:hover { background: rgba(59,130,246,0.06); }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+
+<!-- ── Progress Bar ── -->
+<div id="progress-bar">
+  <div class="logo">🎡 Circular Motion</div>
+  <div class="progress-steps">
+    <div class="step-dot active" onclick="goTo(0)" title="Core Concepts"></div>
+    <div class="step-dot" onclick="goTo(1)" title="Concept Check"></div>
+    <div class="step-dot" onclick="goTo(2)" title="Worked Example"></div>
+    <div class="step-dot" onclick="goTo(3)" title="Your Turn"></div>
+    <div class="step-dot" onclick="goTo(4)" title="Quiz"></div>
+    <div class="step-dot" onclick="goTo(5)" title="Homework"></div>
+  </div>
+  <div id="score-badge">⭐ 0 pts</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 0 — Introduction & Core Concepts
+     ═══════════════════════════════════════ -->
+<div class="section active" id="sec-0">
+<div class="container">
+  <div class="section-tag">Section 1 of 6 — Core Concepts</div>
+  <h1>Circular Motion<br><span style="color:var(--accent)">Kinematics</span></h1>
+  <p>In previous chapters, you studied <strong>straight-line motion</strong> (displacement, velocity, acceleration) and <strong>projectile motion</strong> (2D, but the object lands). Now we study objects that <strong>don't land</strong> — they move in <strong>circles</strong>. Think of a car rounding a curve, a planet orbiting a star, or a point on a spinning CD.</p>
+
+  <canvas id="cm-canvas" width="520" height="320"></canvas>
+  <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-top:-8px;">
+    🎮 Watch: a point moves in a circle. The green arrow is velocity (tangent), the gold arrow is the angle swept.
+  </p>
+
+  <div class="fun-fact">
+    The first Ferris wheel (1893, Chicago) was 80 m in diameter — riders at the rim were in uniform circular motion, constantly accelerating toward the center even though their speed never changed!
+  </div>
+
+  <!-- ── 1. Rotational Angle ── -->
+  <div class="card glow amber" style="margin-top:24px;">
+    <h3>💡 Big Idea #1 — Rotational Angle (Angular Displacement)</h3>
+    <p style="color:var(--text);font-size:1.05rem;">
+      Just like <strong>distance</strong> tells you how far something moved in a line, <strong>angular displacement \(\theta\)</strong> tells you <em>how much something has rotated</em>.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Where Does \(\theta = \dfrac{s}{r}\) Come From?</h2>
+    <p>Imagine a circle of radius \(r\). A point on the circle moves along an <strong>arc of length \(s\)</strong>.
+       The <em>angle</em> swept out is defined as:</p>
+    <div class="formula-box">
+      \[ \theta = \frac{s}{r} \]
+    </div>
+    <p><strong>Physics meaning:</strong> \(\theta\) tells you what <em>fraction</em> of the full circle you've swept through.
+       A full circle has arc length \(s = 2\pi r\), so \(\theta = 2\pi r / r = 2\pi\) radians = 360°.</p>
+
+    <div class="card amber" style="padding:14px;margin:14px 0 0;">
+      <strong>⚠️ Why radians, not degrees?</strong>
+      <p style="margin:6px 0 0;color:var(--text);">Radians make the formula beautifully simple: \(s = r\theta\). No conversion factors needed.
+         In degrees you'd need \(s = \frac{\pi r \theta°}{180}\) — messy! Physics always uses <strong>radians</strong>.</p>
+    </div>
+
+    <h3 style="margin-top:18px;">🔍 Formula Analysis: \(\theta = s / r\)</h3>
+    <table class="var-table">
+      <tr><th>Variable</th><th>Role</th><th>Physics Meaning</th></tr>
+      <tr><td style="color:var(--accent);font-weight:700;">\(\theta\)</td><td>Varies</td><td>How much the object has rotated (rad)</td></tr>
+      <tr><td style="color:var(--accent);font-weight:700;">\(s\)</td><td>Varies</td><td>Arc length traveled (m)</td></tr>
+      <tr><td style="color:var(--accent2);font-weight:700;">\(r\)</td><td><strong>Constant</strong> for a given point</td><td>Distance from the center (m)</td></tr>
+    </table>
+    <p><strong>Key insight:</strong> Two points on the same spinning disk sweep through the <em>same</em> angle \(\theta\), but the outer point travels a <em>longer arc</em> because its \(r\) is larger: \(s = r\theta\).</p>
+  </div>
+
+  <!-- ── 2. Angular Velocity ── -->
+  <div class="card glow amber">
+    <h3>💡 Big Idea #2 — Angular Velocity \(\omega\)</h3>
+    <p style="color:var(--text);font-size:1.05rem;">
+      Just like <strong>velocity</strong> tells you how fast position changes, <strong>angular velocity \(\omega\)</strong> tells you <em>how fast the angle changes</em>.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Angular Velocity: \(\omega = \dfrac{\Delta\theta}{\Delta t}\)</h2>
+    <p>If an object sweeps through angle \(\Delta\theta\) in time \(\Delta t\):</p>
+    <div class="formula-box">
+      \[ \omega = \frac{\Delta\theta}{\Delta t} \quad \text{(rad/s)} \]
+    </div>
+
+    <h3>The Golden Bridge: \(v = r\omega\)</h3>
+    <p>This connects <strong>linear speed</strong> (m/s) and <strong>angular speed</strong> (rad/s):</p>
+    <div class="formula-box">
+      \[ v = r\,\omega \]
+    </div>
+    <p><strong>Where it comes from:</strong> Start with \(s = r\theta\). Divide both sides by \(\Delta t\):
+       \(\frac{s}{\Delta t} = r \cdot \frac{\theta}{\Delta t}\), which gives \(v = r\omega\).</p>
+
+    <h3 style="margin-top:14px;">🔍 Formula Analysis: \(v = r\omega\)</h3>
+    <table class="var-table">
+      <tr><th>Variable</th><th>Role</th><th>If it changes…</th></tr>
+      <tr><td style="color:var(--accent);font-weight:700;">\(v\)</td><td>Linear speed (m/s)</td><td>—</td></tr>
+      <tr><td style="color:var(--accent2);font-weight:700;">\(r\)</td><td>Radius — <strong>constant</strong> for a given point</td><td>Larger \(r\) → faster \(v\) at same \(\omega\)</td></tr>
+      <tr><td style="color:var(--accent);font-weight:700;">\(\omega\)</td><td>Angular speed (rad/s)</td><td>Spin faster → bigger \(v\)</td></tr>
+    </table>
+
+    <div class="card green" style="padding:14px;margin:14px 0 0;">
+      <strong>✅ Same disk, different speeds!</strong>
+      <p style="margin:6px 0 0;color:var(--text);">Every point on a spinning CD has the <em>same</em> \(\omega\), but points near the edge have a <em>larger</em> \(v\) because they have a larger \(r\). That's why the outer track of a CD stores more data per rotation!</p>
+    </div>
+  </div>
+
+  <!-- ── 3. Period & Frequency ── -->
+  <div class="card glow amber">
+    <h3>💡 Big Idea #3 — Period \(T\) and Frequency \(f\)</h3>
+    <p style="color:var(--text);font-size:1.05rem;">
+      <strong>Period</strong> = time for one full revolution. <strong>Frequency</strong> = how many revolutions per second. They are reciprocals: \(T = 1/f\).
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Connecting Everything</h2>
+    <p>One full revolution sweeps \(\theta = 2\pi\) radians in time \(T\):</p>
+    <div class="formula-box">
+      \[ \omega = \frac{2\pi}{T} = 2\pi f \]
+    </div>
+    <p>The linear speed for one full circle (circumference \(= 2\pi r\)) in time \(T\):</p>
+    <div class="formula-box">
+      \[ v = \frac{2\pi r}{T} = 2\pi r f \]
+    </div>
+
+    <h3 style="margin-top:14px;">📋 The Complete Relationship Map</h3>
+    <div class="formula-box" style="font-size:0.95rem;text-align:left;">
+      \[
+      \boxed{
+        \theta = \frac{s}{r}, \quad
+        \omega = \frac{\Delta\theta}{\Delta t} = \frac{2\pi}{T} = 2\pi f, \quad
+        v = r\omega = \frac{2\pi r}{T}
+      }
+      \]
+    </div>
+  </div>
+
+  <!-- ── 4. Centripetal Acceleration ── -->
+  <div class="card glow amber">
+    <h3>💡 Big Idea #4 — Centripetal Acceleration</h3>
+    <p style="color:var(--text);font-size:1.05rem;">
+      Even at <strong>constant speed</strong>, a circling object is <strong>always accelerating</strong> — because its <em>direction</em> keeps changing. This acceleration points <strong>toward the center</strong>.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Centripetal Acceleration</h2>
+    <p>Acceleration means a change in <strong>velocity</strong> — and velocity is a vector (speed + direction).
+       In uniform circular motion, the speed stays the same but the direction constantly changes.
+       The resulting acceleration always points <strong>inward, toward the center</strong>.</p>
+    <div class="formula-box">
+      \[ a_c = \frac{v^2}{r} = \omega^2 r \]
+    </div>
+    <p><strong>"Centripetal"</strong> = Latin for "center-seeking." It's <em>not</em> a new type of acceleration — it's just the name for acceleration that points toward the center of a circle.</p>
+
+    <h3 style="margin-top:14px;">🔍 Formula Analysis: \(a_c = v^2/r\)</h3>
+    <table class="var-table">
+      <tr><th>Variable</th><th>Role</th><th>Physics Meaning of Change</th></tr>
+      <tr><td style="color:var(--accent);font-weight:700;">\(a_c\)</td><td>Centripetal acceleration (m/s²)</td><td>How sharply the direction changes</td></tr>
+      <tr><td style="color:var(--accent);font-weight:700;">\(v\)</td><td>Speed — can vary or be constant</td><td>Double \(v\) → <strong>4×</strong> the acceleration!</td></tr>
+      <tr><td style="color:var(--accent2);font-weight:700;">\(r\)</td><td>Radius — <strong>constant</strong> for a given path</td><td>Tighter curve (smaller \(r\)) → more acceleration</td></tr>
+    </table>
+
+    <div class="compare-grid">
+      <div class="card" style="padding:14px;margin:0;">
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:6px;">Driving analogy</div>
+        <div style="color:var(--text);font-size:0.9rem;">Faster car on same curve → you feel <strong>pushed harder</strong> sideways. That's \(v^2\) in the numerator!</div>
+      </div>
+      <div class="card" style="padding:14px;margin:0;">
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:6px;">Tighter curve</div>
+        <div style="color:var(--text);font-size:0.9rem;">Same speed but sharper turn → more acceleration. That's \(r\) in the denominator!</div>
+      </div>
+    </div>
+
+    <div class="card amber" style="padding:14px;margin:14px 0 0;">
+      <strong>⚠️ Alternate form: \(a_c = \omega^2 r\)</strong>
+      <p style="margin:6px 0 0;color:var(--text);">Substitute \(v = r\omega\) into \(a_c = v^2/r\) to get \(a_c = \omega^2 r\).
+         Now larger \(r\) means <em>more</em> acceleration (at the same \(\omega\)), which makes sense — the outer edge of a merry-go-round flings you harder!</p>
+    </div>
+  </div>
+
+  <!-- ── Interactive: Circular Motion Simulator ── -->
+  <div class="card">
+    <h3>🎛️ Interactive: See How Variables Relate</h3>
+    <p>Adjust the radius and speed to see how angular velocity, period, and centripetal acceleration change.</p>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;">Radius \(r\):</span>
+      <input type="range" id="sim-r" min="1" max="10" step="0.5" value="4" oninput="updateCMSim()">
+      <span class="sim-val" id="sim-r-val">4.0 m</span>
+    </div>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;">Speed \(v\):</span>
+      <input type="range" id="sim-v" min="1" max="20" step="0.5" value="8" oninput="updateCMSim()">
+      <span class="sim-val" id="sim-v-val">8.0 m/s</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+      <div class="card" style="padding:12px;margin:0;text-align:center;">
+        <div style="font-size:0.78rem;color:var(--muted);">Angular Velocity \(\omega\)</div>
+        <div style="color:var(--accent);font-weight:700;font-size:1.1rem;" id="sim-omega">2.00 rad/s</div>
+      </div>
+      <div class="card" style="padding:12px;margin:0;text-align:center;">
+        <div style="font-size:0.78rem;color:var(--muted);">Period \(T\)</div>
+        <div style="color:var(--accent);font-weight:700;font-size:1.1rem;" id="sim-T">3.14 s</div>
+      </div>
+      <div class="card" style="padding:12px;margin:0;text-align:center;">
+        <div style="font-size:0.78rem;color:var(--muted);">Centripetal Accel \(a_c\)</div>
+        <div style="color:var(--accent2);font-weight:700;font-size:1.1rem;" id="sim-ac">16.0 m/s²</div>
+      </div>
+      <div class="card" style="padding:12px;margin:0;text-align:center;">
+        <div style="font-size:0.78rem;color:var(--muted);">Compared to \(g\)</div>
+        <div style="color:var(--accent2);font-weight:700;font-size:1.1rem;" id="sim-g-compare">1.63 g</div>
+      </div>
+    </div>
+    <div id="sim-insight" style="margin-top:10px;font-size:0.85rem;color:var(--muted);"></div>
+  </div>
+
+  <div class="fun-fact">
+    Astronauts train in a centrifuge with \(r \approx 8\) m. At just 30 RPM, the centripetal acceleration reaches about 8g — eight times the pull of gravity! That's why \(v^2/r\) matters for rocket scientists.
+  </div>
+
+  <!-- Link to next lesson -->
+  <div class="card green" style="padding:14px;">
+    <strong>🔗 Coming Up Next: Centripetal Force</strong>
+    <p style="margin:6px 0 0;color:var(--text);">Now you know the <em>kinematics</em> of circular motion (how to describe it). In the next lesson, we'll ask: <strong>what force causes this acceleration?</strong> That's where Newton's 2nd Law meets the circle — <a href="../centripetal-force/lesson.html" style="color:var(--accent);">Centripetal Force →</a></p>
+  </div>
+
+  <div class="nav-row">
+    <div></div>
+    <button class="btn btn-primary" onclick="goTo(1)">Check My Understanding →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 1 — Concept Check
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-1">
+<div class="container">
+  <div class="section-tag">Section 2 of 6 — Concept Check</div>
+  <h1>Let's See What <span style="color:var(--accent)">You Know! 🧠</span></h1>
+  <p>Answer these 5 questions before we move to examples. Don't worry — hints are available!</p>
+
+  <div class="cc-grid" id="cc-container"></div>
+
+  <div id="cc-feedback" class="feedback info" style="margin-top:10px;"></div>
+  <div id="cc-result" style="display:none;" class="card green">
+    <h3 id="cc-result-title"></h3>
+    <p id="cc-result-msg"></p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(0)">← Review Concepts</button>
+    <button class="btn btn-primary" id="cc-next-btn" onclick="goTo(2)" disabled>See Worked Example →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 2 — Worked Example
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-2">
+<div class="container">
+  <div class="section-tag">Section 3 of 6 — Worked Example</div>
+  <h1>Example: <span style="color:var(--accent)">The Ferris Wheel 🎡</span></h1>
+
+  <div class="card amber">
+    <h3>Problem Statement</h3>
+    <p style="color:var(--text);">A Ferris wheel has a radius of <strong>38 m</strong>. The carts at the rim move at a constant speed of <strong>1.8 m/s</strong>.</p>
+    <p style="color:var(--text);margin:0;">
+      (a) What is the angular velocity of a cart at the rim?<br>
+      (b) What is the period of one full revolution?<br>
+      (c) What is the centripetal acceleration at the rim?<br>
+      (d) A cart is placed <strong>halfway</strong> from the center (r = 19 m). What are its \(v\) and \(\omega\)?
+    </p>
+  </div>
+
+  <p>Work through each step by clicking the buttons below 👇</p>
+
+  <!-- Step 1 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+      <div>
+        <strong>Part (a): Angular velocity at the rim</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Use \(v = r\omega\), solve for \(\omega\)</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('step1')">Show Step</button>
+    </div>
+    <div class="step-block" id="step1">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ \omega = \frac{v}{r} = \frac{1.8\ m/s}{38\ m} = \boxed{0.0474\ rad/s} \]
+      </div>
+      <p style="font-size:0.88rem;">💡 That's a slow spin — about 0.45 RPM. Makes sense for a Ferris wheel!</p>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+      <div>
+        <strong>Part (b): Period of revolution</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Use \(\omega = 2\pi/T\), solve for \(T\)</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('step2')">Show Step</button>
+    </div>
+    <div class="step-block" id="step2">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ T = \frac{2\pi}{\omega} = \frac{2\pi}{0.0474} = \boxed{132.6\ s \approx 2.2\ min} \]
+      </div>
+      <p style="font-size:0.88rem;">Or directly: \(T = \frac{2\pi r}{v} = \frac{2\pi(38)}{1.8} = 132.6\) s.</p>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+      <div>
+        <strong>Part (c): Centripetal acceleration at the rim</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Use \(a_c = v^2/r\)</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('step3')">Show Step</button>
+    </div>
+    <div class="step-block" id="step3">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ a_c = \frac{v^2}{r} = \frac{(1.8)^2}{38} = \frac{3.24}{38} = \boxed{0.0853\ m/s^2} \]
+      </div>
+      <div class="card green" style="padding:14px;margin-top:12px;">
+        <strong>✅ Compare to gravity:</strong> \(a_c / g = 0.0853 / 9.80 = 0.0087g\)
+        <p style="margin:6px 0 0;font-size:0.88rem;">Less than 1% of g — you'd barely feel it! That's why Ferris wheels feel gentle.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">4</div>
+      <div>
+        <strong>Part (d): Cart halfway from center</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Same \(\omega\), but different \(r\) → different \(v\)</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('step4')">Show Step</button>
+    </div>
+    <div class="step-block" id="step4">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ \omega_{\text{half}} = \omega_{\text{rim}} = 0.0474\ rad/s \quad \text{(same — rigid body!)} \]
+        \[ v_{\text{half}} = r_{\text{half}} \cdot \omega = 19 \times 0.0474 = \boxed{0.90\ m/s} \]
+      </div>
+      <div class="card amber" style="padding:14px;margin-top:12px;">
+        <strong>🔑 Key Insight:</strong>
+        <p style="margin:6px 0 0;color:var(--text);">
+          \(\omega\) is the <strong>same</strong> for every point on a rigid rotating body.
+          But \(v\) is <strong>different</strong> — halving the radius halves the linear speed!
+          This is the power of \(v = r\omega\).
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(1)">← Concept Check</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Your Turn! 🚀 →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 3 — Student Practice
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-3">
+<div class="container">
+  <div class="section-tag">Section 4 of 6 — Your Turn!</div>
+  <h1>Solve It <span style="color:var(--accent)">Yourself 🚀</span></h1>
+
+  <div class="card amber">
+    <h3>Problem: Student Driver on a Rotary</h3>
+    <p style="color:var(--text);">It takes <strong>78 seconds</strong> for a student driver to circle <strong>three times</strong> around a suburban rotary at a constant speed of <strong>12 m/s</strong>.</p>
+    <p style="color:var(--text);margin:0;">
+      <strong>(a)</strong> What is the period? What is the frequency?<br>
+      <strong>(b)</strong> What is the radius of the rotary?<br>
+      <strong>(c)</strong> What is the centripetal acceleration?
+    </p>
+  </div>
+
+  <!-- Part (a) -->
+  <div class="card">
+    <h3>Part (a): Find Period and Frequency</h3>
+    <p>78 seconds for 3 laps. Period = time for <em>one</em> lap.</p>
+    <div class="input-row">
+      <label>Period \(T\) (s):</label>
+      <input type="text" id="ans-T" placeholder="e.g. 78/3">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkAnsT()">Check ✓</button>
+    </div>
+    <div id="feedback-T" class="feedback"></div>
+    <div id="expr-hint-T"></div>
+
+    <div id="freq-section" class="step-block" style="margin-top:12px;">
+      <div class="input-row">
+        <label>Frequency \(f\) (Hz):</label>
+        <input type="text" id="ans-f" placeholder="e.g. 1/26">
+        <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkAnsF()">Check ✓</button>
+      </div>
+      <div id="feedback-f" class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- Part (b) -->
+  <div id="partB-section" style="display:none;">
+  <div class="card">
+    <h3>Part (b): Find the Radius</h3>
+    <p>Use \(v = 2\pi r / T\) and solve for \(r\).</p>
+    <div class="input-row">
+      <label>Radius \(r\) (m):</label>
+      <input type="text" id="ans-r" placeholder="e.g. 12*26/(2*pi)">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkAnsR()">Check ✓</button>
+      <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintR()">Hint 💡</button>
+    </div>
+    <div id="feedback-r" class="feedback"></div>
+    <div id="expr-hint-r"></div>
+    <div id="hint-r" class="step-block"></div>
+  </div>
+  </div>
+
+  <!-- Part (c) -->
+  <div id="partC-section" style="display:none;">
+  <div class="card">
+    <h3>Part (c): Centripetal Acceleration</h3>
+    <p>Use \(a_c = v^2/r\).</p>
+    <div class="input-row">
+      <label>\(a_c\) (m/s²):</label>
+      <input type="text" id="ans-ac" placeholder="e.g. 12^2/49.7">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkAnsAc()">Check ✓</button>
+    </div>
+    <div id="feedback-ac" class="feedback"></div>
+    <div id="expr-hint-ac"></div>
+  </div>
+  </div>
+
+  <div id="practice-done" style="display:none;" class="card green">
+    <h3>🎉 Practice Complete!</h3>
+    <p style="color:var(--text);">Great job! The centripetal acceleration is about 2.9 m/s² — roughly 0.3g. That's definitely noticeable in a car!</p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(2)">← Worked Example</button>
+    <button class="btn btn-primary" id="practice-next" onclick="goTo(4)" disabled>Take the Quiz →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 4 — Quiz
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-4">
+<div class="container">
+  <div class="section-tag">Section 5 of 6 — Quiz</div>
+  <h1>Quiz Time! <span style="color:var(--accent)">⚡ 6 Questions</span></h1>
+  <p>Test your full understanding of circular motion kinematics!</p>
+
+  <div id="quiz-container"></div>
+
+  <div id="quiz-result" style="display:none;">
+    <div class="card glow">
+      <div class="score-final">
+        <div class="score-circle">
+          <div class="num" id="quiz-score-num">0</div>
+          <div class="den" id="quiz-score-den">/ 6</div>
+        </div>
+        <h2 id="quiz-result-title"></h2>
+        <p id="quiz-result-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(3)">← Practice</button>
+    <button class="btn btn-primary" id="quiz-next-btn" onclick="goTo(5)" disabled>Homework →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 5 — Homework
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-5">
+<div class="container">
+  <div class="section-tag">Section 6 of 6 — Homework</div>
+  <h1>Homework <span style="color:var(--accent)">Problems 📝</span></h1>
+  <p>Work through these problems on paper. Show all steps!</p>
+
+  <div class="card amber" style="margin-bottom:20px;">
+    <h3>📋 Key Formulas Reference</h3>
+    <p style="color:var(--text);font-size:0.88rem;margin:0;">
+      \(\theta = s/r\) &nbsp;|&nbsp;
+      \(\omega = \Delta\theta / \Delta t = 2\pi/T = 2\pi f\) &nbsp;|&nbsp;
+      \(v = r\omega = 2\pi r / T\) &nbsp;|&nbsp;
+      \(a_c = v^2/r = \omega^2 r\)
+    </p>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 1</div>
+    <p style="color:var(--text);margin-bottom:12px;">A car follows a curve of radius <strong>500 m</strong> at a speed of <strong>25.0 m/s</strong> (about 90 km/h).
+    (a) What is the centripetal acceleration? (b) Compare it with \(g\).</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw1')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw1" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw1" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(a_c = v^2/r = (25.0)^2/500 = 625/500 = \boxed{1.25\ m/s^2}\)<br>
+      (b) \(a_c/g = 1.25/9.80 = 0.128\). The centripetal acceleration is about <strong>13% of g</strong> — noticeable in a car but not extreme.
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 2</div>
+    <p style="color:var(--text);margin-bottom:12px;">A CD spins at 500 RPM (revolutions per minute).
+    (a) What is the angular velocity in rad/s?
+    (b) A point at \(r = 6.0\) cm from the center — what is its linear speed?
+    (c) A point at the edge, \(r = 6.0\) cm — what is its centripetal acceleration?</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw2')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw2" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw2" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(\omega = 500 \times 2\pi/60 = \boxed{52.4\ rad/s}\)<br>
+      (b) \(v = r\omega = 0.060 \times 52.4 = \boxed{3.14\ m/s}\)<br>
+      (c) \(a_c = \omega^2 r = (52.4)^2(0.060) = \boxed{164.7\ m/s^2}\) — that's about 16.8g!
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 3</div>
+    <p style="color:var(--text);margin-bottom:12px;">Earth orbits the Sun with a period of approximately 365.25 days at a mean radius of \(1.50 \times 10^{11}\) m.
+    (a) What is Earth's angular velocity?
+    (b) What is Earth's orbital speed?
+    (c) What is the centripetal acceleration toward the Sun?</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw3')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw3" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw3" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(T = 365.25 \times 24 \times 3600 = 3.156 \times 10^7\ s\).<br>
+          \(\omega = 2\pi / T = \boxed{1.99 \times 10^{-7}\ rad/s}\)<br>
+      (b) \(v = r\omega = 1.50\!\times\!10^{11} \times 1.99\!\times\!10^{-7} = \boxed{2.99 \times 10^4\ m/s}\) ≈ 30 km/s!<br>
+      (c) \(a_c = v^2/r = (2.99\!\times\!10^4)^2 / (1.50\!\times\!10^{11}) = \boxed{5.95 \times 10^{-3}\ m/s^2}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 4</div>
+    <p style="color:var(--text);margin-bottom:12px;">A bicycle wheel has a radius of 0.33 m and is spinning at \(\omega = 12\) rad/s.
+    (a) What is the linear speed of a point on the rim?
+    (b) Through what angle (in radians) does the wheel turn in 5.0 seconds?
+    (c) What arc length does a point on the rim travel in 5.0 s?</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw4')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw4" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw4" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(v = r\omega = 0.33 \times 12 = \boxed{3.96\ m/s}\)<br>
+      (b) \(\theta = \omega \cdot t = 12 \times 5.0 = \boxed{60\ rad}\) (about 9.5 revolutions)<br>
+      (c) \(s = r\theta = 0.33 \times 60 = \boxed{19.8\ m}\)
+    </div>
+  </div>
+
+  <!-- Final score summary -->
+  <div class="card glow" style="margin-top:30px;text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:8px;">🎡</div>
+    <h2>Lesson Complete!</h2>
+    <p>Total Score: <strong style="color:var(--accent);font-size:1.2rem;" id="final-score-display">—</strong></p>
+    <p style="margin-top:8px;">Now that you understand the <em>kinematics</em> of circular motion, you're ready for the <em>dynamics</em>!</p>
+    <a href="../centripetal-force/lesson.html" class="btn btn-primary" style="margin-top:12px;">Next Lesson: Centripetal Force →</a>
+    <button class="btn btn-secondary" style="margin-top:8px;" onclick="goTo(0)">🔄 Restart Lesson</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(4)">← Quiz</button>
+    <div></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script>
+// ── Circular Motion Animation ────────────────────────────
+var cmc = document.getElementById('cm-canvas');
+var cmctx = cmc.getContext('2d');
+var cmAngle = 0;
+function drawCM() {
+  cmc.width = cmc.offsetWidth; cmc.height = cmc.offsetHeight;
+  var cx = cmc.width/2, cy = cmc.height/2;
+  var R = Math.min(cx,cy)*0.65;
+  cmctx.clearRect(0,0,cmc.width,cmc.height);
+
+  // orbit path
+  cmctx.beginPath(); cmctx.arc(cx,cy,R,0,Math.PI*2);
+  cmctx.strokeStyle='rgba(59,130,246,0.3)'; cmctx.lineWidth=2; cmctx.stroke();
+
+  // center dot
+  cmctx.beginPath(); cmctx.arc(cx,cy,4,0,Math.PI*2);
+  cmctx.fillStyle='rgba(255,255,255,0.3)'; cmctx.fill();
+
+  // radius line
+  var px = cx + R*Math.cos(cmAngle), py = cy + R*Math.sin(cmAngle);
+  cmctx.beginPath(); cmctx.moveTo(cx,cy); cmctx.lineTo(px,py);
+  cmctx.strokeStyle='rgba(245,158,11,0.5)'; cmctx.lineWidth=1.5; cmctx.setLineDash([5,5]); cmctx.stroke();
+  cmctx.setLineDash([]);
+
+  // angle arc
+  cmctx.beginPath(); cmctx.arc(cx,cy,30,0,cmAngle%(Math.PI*2));
+  cmctx.strokeStyle='#f59e0b'; cmctx.lineWidth=2.5; cmctx.stroke();
+  // θ label
+  var la = (cmAngle%(Math.PI*2))/2;
+  cmctx.font='bold 13px system-ui'; cmctx.fillStyle='#fcd34d';
+  cmctx.fillText('θ',cx+40*Math.cos(la),cy+40*Math.sin(la));
+
+  // moving point
+  cmctx.beginPath(); cmctx.arc(px,py,8,0,Math.PI*2);
+  var grad = cmctx.createRadialGradient(px,py,1,px,py,8);
+  grad.addColorStop(0,'#60a5fa'); grad.addColorStop(1,'#3b82f6');
+  cmctx.fillStyle=grad; cmctx.fill();
+
+  // velocity arrow (tangent)
+  var vx = -Math.sin(cmAngle)*50, vy = Math.cos(cmAngle)*50;
+  cmctx.beginPath(); cmctx.moveTo(px,py); cmctx.lineTo(px+vx,py+vy);
+  cmctx.strokeStyle='#22c55e'; cmctx.lineWidth=2.5; cmctx.stroke();
+  // arrowhead
+  var al=8, aa=Math.atan2(vy,vx);
+  cmctx.beginPath();
+  cmctx.moveTo(px+vx,py+vy);
+  cmctx.lineTo(px+vx-al*Math.cos(aa-0.4),py+vy-al*Math.sin(aa-0.4));
+  cmctx.lineTo(px+vx-al*Math.cos(aa+0.4),py+vy-al*Math.sin(aa+0.4));
+  cmctx.closePath(); cmctx.fillStyle='#22c55e'; cmctx.fill();
+
+  // labels
+  cmctx.font='bold 11px system-ui';
+  cmctx.fillStyle='#86efac'; cmctx.fillText('v (tangent)',px+vx+6,py+vy);
+  cmctx.fillStyle='#94a3b8'; cmctx.fillText('r',cx+(px-cx)/2-12,cy+(py-cy)/2-8);
+
+  cmAngle += 0.015;
+  requestAnimationFrame(drawCM);
+}
+drawCM();
+
+// ── Interactive Simulator ────────────────────────────────
+function updateCMSim() {
+  var r = parseFloat(document.getElementById('sim-r').value);
+  var v = parseFloat(document.getElementById('sim-v').value);
+  var omega = v / r;
+  var T = 2*Math.PI / omega;
+  var ac = v*v / r;
+  document.getElementById('sim-r-val').textContent = r.toFixed(1)+' m';
+  document.getElementById('sim-v-val').textContent = v.toFixed(1)+' m/s';
+  document.getElementById('sim-omega').textContent = omega.toFixed(2)+' rad/s';
+  document.getElementById('sim-T').textContent = T.toFixed(2)+' s';
+  document.getElementById('sim-ac').textContent = ac.toFixed(1)+' m/s²';
+  document.getElementById('sim-g-compare').textContent = (ac/9.80).toFixed(2)+' g';
+  var insight = '';
+  if (ac/9.80 > 5) insight = '😰 That\'s over 5g — fighter pilot territory!';
+  else if (ac/9.80 > 1) insight = '💪 More than 1g — you\'d definitely feel that!';
+  else if (ac/9.80 > 0.1) insight = '🚗 Noticeable — like a car turning.';
+  else insight = '😌 Very gentle — barely noticeable.';
+  document.getElementById('sim-insight').textContent = insight;
+}
+updateCMSim();
+
+// ── Concept Check Data ───────────────────────────────────
+window.ccQuestions = [
+  {
+    q: "What does the rotational angle θ represent physically?",
+    opts: [
+      "The linear distance traveled along the arc.",
+      "The ratio of arc length to radius — how much something has rotated (in radians).",
+      "The speed of rotation in degrees per second.",
+      "The total number of revolutions completed."
+    ],
+    ans: 1,
+    explain: "✅ θ = s/r. It's the angle swept, measured in radians. It tells you what fraction of the circle you've covered."
+  },
+  {
+    q: "Two points on a spinning disk — one at the center, one at the edge. Which has a greater angular velocity ω?",
+    opts: [
+      "The point at the edge — it moves faster.",
+      "The point at the center — it's closer to the axis.",
+      "They have the same ω — all points on a rigid body rotate together.",
+      "Neither — angular velocity only applies to the whole disk."
+    ],
+    ans: 2,
+    explain: "✅ Every point on a rigid rotating body has the SAME angular velocity ω. The edge point has a larger LINEAR velocity v = rω because r is bigger."
+  },
+  {
+    q: "If you double the speed v while keeping the radius the same, what happens to centripetal acceleration?",
+    opts: [
+      "It doubles.",
+      "It quadruples (4× bigger).",
+      "It halves.",
+      "It stays the same."
+    ],
+    ans: 1,
+    explain: "✅ a_c = v²/r. Double v → (2v)²/r = 4v²/r. The acceleration quadruples! That's why speeding on a curve is so dangerous."
+  },
+  {
+    q: "A ball on a string swings in a circle with period T = 2 s. What is its frequency?",
+    opts: [
+      "2 Hz",
+      "0.5 Hz",
+      "π Hz",
+      "4π Hz"
+    ],
+    ans: 1,
+    explain: "✅ f = 1/T = 1/2 = 0.5 Hz. Half a revolution per second."
+  },
+  {
+    q: "In uniform circular motion, the centripetal acceleration points:",
+    opts: [
+      "In the direction of motion (tangent to the circle).",
+      "Outward, away from the center.",
+      "Toward the center of the circle.",
+      "In the direction opposite to motion."
+    ],
+    ans: 2,
+    explain: "✅ 'Centripetal' means 'center-seeking.' The acceleration always points inward, toward the center. That's what changes the direction of velocity."
+  }
+];
+
+// ── Practice Problem Logic ───────────────────────────────
+var pTDone=false, pFDone=false, pRDone=false, pAcDone=false;
+
+function checkAnsT() {
+  var ans = parseAnswer(document.getElementById('ans-T').value);
+  var fb = document.getElementById('feedback-T');
+  var expected = 26;
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try: 78/3'; return; }
+  if (Math.abs(ans-expected)/expected<0.03) {
+    document.getElementById('ans-T').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! T = 78/3 = 26 s';
+    if (!pTDone) { pTDone=true; addScore(5); }
+    document.getElementById('freq-section').classList.add('visible');
+    if (window.MathJax) MathJax.typesetPromise();
+  } else {
+    document.getElementById('ans-T').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ Period = total time ÷ number of laps = 78/3';
+  }
+}
+
+function checkAnsF() {
+  var ans = parseAnswer(document.getElementById('ans-f').value);
+  var fb = document.getElementById('feedback-f');
+  var expected = 1/26;
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression.'; return; }
+  if (Math.abs(ans-expected)/expected<0.05) {
+    document.getElementById('ans-f').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! f = 1/26 ≈ 0.0385 Hz';
+    if (!pFDone) { pFDone=true; addScore(5); }
+    document.getElementById('partB-section').style.display='block';
+    if (window.MathJax) MathJax.typesetPromise();
+  } else {
+    document.getElementById('ans-f').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ f = 1/T = 1/26';
+  }
+}
+
+function checkAnsR() {
+  var ans = parseAnswer(document.getElementById('ans-r').value);
+  var fb = document.getElementById('feedback-r');
+  var expected = 12*26/(2*Math.PI);
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression.'; return; }
+  if (Math.abs(ans-expected)/expected<0.05) {
+    document.getElementById('ans-r').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! r = vT/(2π) ≈ '+expected.toFixed(1)+' m';
+    if (!pRDone) { pRDone=true; addScore(5); }
+    document.getElementById('partC-section').style.display='block';
+    if (window.MathJax) MathJax.typesetPromise();
+  } else {
+    document.getElementById('ans-r').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ r = vT/(2π) = 12×26/(2π)';
+  }
+}
+
+function hintR() {
+  var h = document.getElementById('hint-r');
+  h.classList.add('visible');
+  h.innerHTML='<div class="formula-box" style="font-size:0.9rem;text-align:left;">v = 2πr/T → r = vT/(2π) = 12 × 26 / (2π)</div>';
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+function checkAnsAc() {
+  var ans = parseAnswer(document.getElementById('ans-ac').value);
+  var fb = document.getElementById('feedback-ac');
+  var r = 12*26/(2*Math.PI);
+  var expected = 144/r;
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression.'; return; }
+  if (Math.abs(ans-expected)/expected<0.05) {
+    document.getElementById('ans-ac').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! a_c ≈ '+expected.toFixed(2)+' m/s²';
+    if (!pAcDone) { pAcDone=true; addScore(10); }
+    document.getElementById('practice-done').style.display='block';
+    document.getElementById('practice-next').disabled=false;
+    sectionDone[3]=true;
+  } else {
+    document.getElementById('ans-ac').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ a_c = v²/r = (12)²/'+r.toFixed(1);
+  }
+}
+
+// ── Quiz Data ────────────────────────────────────────────
+window.quizData = [
+  {
+    type:'mc',
+    q:'An object moves in a circle of radius 2 m with a period of 4 s. What is its angular velocity?',
+    opts:['0.5 rad/s','π/2 rad/s','2π rad/s','4π rad/s'],
+    ans:1,
+    explain:'ω = 2π/T = 2π/4 = π/2 ≈ 1.57 rad/s.'
+  },
+  {
+    type:'mc',
+    q:'A point near the center of a spinning disk has _____ compared to a point near the edge.',
+    opts:[
+      'the same linear speed and same angular velocity',
+      'smaller linear speed but the same angular velocity',
+      'greater linear speed but the same angular velocity',
+      'smaller linear speed and smaller angular velocity'
+    ],
+    ans:1,
+    explain:'On a rigid body, all points share the same ω. But v = rω, so smaller r → smaller v.'
+  },
+  {
+    type:'mc',
+    q:'Which quantity has units of radians per second?',
+    opts:['Period','Frequency','Angular velocity','Centripetal acceleration'],
+    ans:2,
+    explain:'Angular velocity ω is measured in rad/s. Period is in seconds, frequency in Hz (1/s), acceleration in m/s².'
+  },
+  {
+    type:'mc',
+    q:'You halve the radius but keep the same linear speed. The centripetal acceleration:',
+    opts:['Halves','Doubles','Stays the same','Quadruples'],
+    ans:1,
+    explain:'a_c = v²/r. Halving r doubles the acceleration. Tighter curves = more acceleration at the same speed!'
+  },
+  {
+    type:'calc',
+    q:'A race car goes around a circular track (r = 200 m) at 40 m/s. Calculate the centripetal acceleration (m/s²).',
+    answer:8.0,
+    tolerance:0.05,
+    unit:'m/s²',
+    hint:'a_c = v²/r = (40)²/200',
+    explain:'a_c = v²/r = 1600/200 = 8.0 m/s² (about 0.82g).'
+  },
+  {
+    type:'calc',
+    q:'A wheel spins at 10 rad/s. A point at r = 0.5 m from the center — what is its linear speed (m/s)?',
+    answer:5.0,
+    tolerance:0.05,
+    unit:'m/s',
+    hint:'v = rω = 0.5 × 10',
+    explain:'v = rω = 0.5 × 10 = 5.0 m/s.'
+  }
+];
+
+// ── Homework Step-by-Step Data ───────────────────────────
+window.hwSteps = {
+  hw1: [
+    { title: 'Identify the formula',
+      body: 'We need centripetal acceleration. Use: \\[a_c = \\frac{v^2}{r}\\]' },
+    { title: 'Substitute values',
+      body: '\\[a_c = \\frac{(25.0)^2}{500} = \\frac{625}{500}\\]' },
+    { title: 'Calculate',
+      body: '\\[a_c = \\boxed{1.25\\ m/s^2}\\]' },
+    { title: 'Compare with g',
+      body: '\\[\\frac{a_c}{g} = \\frac{1.25}{9.80} = 0.128\\] That\'s about <strong>13%</strong> of g — a gentle curve at highway speed.' }
+  ],
+  hw2: [
+    { title: 'Convert RPM to rad/s',
+      body: '\\[\\omega = 500\\ \\text{rev/min} \\times \\frac{2\\pi\\ \\text{rad}}{1\\ \\text{rev}} \\times \\frac{1\\ \\text{min}}{60\\ \\text{s}} = \\frac{500 \\times 2\\pi}{60} = \\boxed{52.4\\ rad/s}\\]' },
+    { title: 'Find linear speed (part b)',
+      body: 'Convert: \\(r = 6.0\\ cm = 0.060\\ m\\).<br>\\[v = r\\omega = 0.060 \\times 52.4 = \\boxed{3.14\\ m/s}\\]' },
+    { title: 'Find centripetal acceleration (part c)',
+      body: '\\[a_c = \\omega^2 r = (52.4)^2 \\times 0.060 = 2745.8 \\times 0.060 = \\boxed{164.7\\ m/s^2}\\]<br>That\'s about <strong>16.8g</strong>! 💿' }
+  ],
+  hw3: [
+    { title: 'Convert period to seconds',
+      body: '\\[T = 365.25\\ \\text{days} \\times 24 \\times 3600 = \\boxed{3.156 \\times 10^7\\ s}\\]' },
+    { title: 'Find angular velocity (part a)',
+      body: '\\[\\omega = \\frac{2\\pi}{T} = \\frac{2\\pi}{3.156 \\times 10^7} = \\boxed{1.99 \\times 10^{-7}\\ rad/s}\\]' },
+    { title: 'Find orbital speed (part b)',
+      body: '\\[v = r\\omega = 1.50\\times10^{11} \\times 1.99\\times10^{-7} = \\boxed{2.99 \\times 10^4\\ m/s}\\]<br>That\'s about <strong>30 km/s</strong> — we\'re hurtling through space! 🌍' },
+    { title: 'Find centripetal acceleration (part c)',
+      body: '\\[a_c = \\frac{v^2}{r} = \\frac{(2.99\\times10^4)^2}{1.50\\times10^{11}} = \\boxed{5.95 \\times 10^{-3}\\ m/s^2}\\]<br>Tiny compared to \\(g\\), but it\'s what keeps Earth in orbit!' }
+  ],
+  hw4: [
+    { title: 'Find linear speed (part a)',
+      body: '\\[v = r\\omega = 0.33 \\times 12 = \\boxed{3.96\\ m/s}\\]' },
+    { title: 'Find angle turned in 5.0 s (part b)',
+      body: '\\[\\theta = \\omega \\cdot t = 12 \\times 5.0 = \\boxed{60\\ rad}\\]<br>That\'s \\(60/(2\\pi) \\approx 9.5\\) revolutions.' },
+    { title: 'Find arc length (part c)',
+      body: '\\[s = r\\theta = 0.33 \\times 60 = \\boxed{19.8\\ m}\\]<br>Or equivalently: \\(s = v \\cdot t = 3.96 \\times 5.0 = 19.8\\ m\\). ✅ Same answer!' }
+  ]
+};
+
+// ── Practice input config ────────────────────────────────
+window.practiceInputs = [['ans-T','checkAnsT'],['ans-f','checkAnsF'],['ans-r','checkAnsR'],['ans-ac','checkAnsAc']];
+window.practiceHints  = ['expr-hint-T','expr-hint-r','expr-hint-ac'];
+</script>
+<script src="../common/lesson.js"></script>
+</body>
+</html>
