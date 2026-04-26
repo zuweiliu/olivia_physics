@@ -167,6 +167,29 @@
         </div>
       </div>
       <p style="color:var(--red);font-weight:700;font-size:0.88rem;margin:12px 0 0;">That's it! Only 2 forces. No "centripetal force" arrow. No "centrifugal force."</p>
+      <svg viewBox="0 0 260 220" width="260" height="220" style="display:block;margin:18px auto 0;">
+        <!-- ball -->
+        <circle cx="130" cy="110" r="18" fill="#3b82f6" opacity="0.85"/>
+        <text x="130" y="115" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">m</text>
+        <!-- Tension arrow (left, toward center) -->
+        <line x1="112" y1="110" x2="40" y2="110" stroke="#f59e0b" stroke-width="3" marker-end="url(#ah-y)"/>
+        <text x="52" y="100" fill="#f59e0b" font-size="13" font-weight="700">T</text>
+        <!-- Weight arrow (down) -->
+        <line x1="130" y1="128" x2="130" y2="195" stroke="#ef4444" stroke-width="3" marker-end="url(#ah-r)"/>
+        <text x="140" y="180" fill="#ef4444" font-size="13" font-weight="700">mg</text>
+        <!-- center label -->
+        <circle cx="20" cy="110" r="4" fill="#f59e0b" opacity="0.5"/>
+        <text x="20" y="100" text-anchor="middle" fill="#f59e0b" font-size="10">center</text>
+        <!-- arrowhead defs -->
+        <defs>
+          <marker id="ah-y" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#f59e0b"/></marker>
+          <marker id="ah-r" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#ef4444"/></marker>
+          <marker id="ah-g" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#22c55e"/></marker>
+          <marker id="ah-b" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#3b82f6"/></marker>
+          <marker id="ah-w" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#e2e8f0"/></marker>
+        </defs>
+        <text x="130" y="16" text-anchor="middle" fill="#94a3b8" font-size="11">Free-Body Diagram</text>
+      </svg>
     </div>
 
     <div class="fbd-box">
@@ -211,6 +234,26 @@
           <p style="color:var(--muted);font-size:0.88rem;margin:8px 0 0;"><em>3 forces total. That's it.</em></p>
         </div>
       </div>
+      <svg viewBox="0 0 260 230" width="260" height="230" style="display:block;margin:18px auto 0;">
+        <!-- car box -->
+        <rect x="105" y="105" width="50" height="30" rx="6" fill="#3b82f6" opacity="0.85"/>
+        <text x="130" y="125" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">car</text>
+        <!-- road line -->
+        <line x1="30" y1="135" x2="230" y2="135" stroke="#475569" stroke-width="2" stroke-dasharray="6,4"/>
+        <!-- Normal force (up) -->
+        <line x1="130" y1="105" x2="130" y2="35" stroke="#22c55e" stroke-width="3" marker-end="url(#ah-g)"/>
+        <text x="140" y="50" fill="#22c55e" font-size="13" font-weight="700">N</text>
+        <!-- Weight (down) -->
+        <line x1="130" y1="135" x2="130" y2="205" stroke="#ef4444" stroke-width="3" marker-end="url(#ah-r)"/>
+        <text x="140" y="195" fill="#ef4444" font-size="13" font-weight="700">mg</text>
+        <!-- Friction (left, toward center) -->
+        <line x1="105" y1="120" x2="35" y2="120" stroke="#f59e0b" stroke-width="3" marker-end="url(#ah-y)"/>
+        <text x="48" y="112" fill="#f59e0b" font-size="13" font-weight="700">f<tspan font-size="9" dy="3">s</tspan></text>
+        <!-- center label -->
+        <circle cx="18" cy="120" r="4" fill="#f59e0b" opacity="0.5"/>
+        <text x="18" y="110" text-anchor="middle" fill="#f59e0b" font-size="10">center</text>
+        <text x="130" y="16" text-anchor="middle" fill="#94a3b8" font-size="11">Free-Body Diagram</text>
+      </svg>
     </div>
 
     <div class="fbd-box">
@@ -271,6 +314,30 @@
           <p style="color:var(--muted);font-size:0.88rem;margin:8px 0 0;"><em>Only 2 forces! But \(N\) is tilted — that changes everything.</em></p>
         </div>
       </div>
+      <svg viewBox="0 0 280 250" width="280" height="250" style="display:block;margin:18px auto 0;">
+        <!-- banked road surface -->
+        <line x1="60" y1="180" x2="200" y2="100" stroke="#475569" stroke-width="2.5" stroke-dasharray="6,4"/>
+        <!-- car dot on slope -->
+        <circle cx="140" cy="135" r="16" fill="#3b82f6" opacity="0.85"/>
+        <text x="140" y="140" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">m</text>
+        <!-- N arrow (perpendicular to slope, pointing upper-left) -->
+        <line x1="132" y1="120" x2="80" y2="42" stroke="#22c55e" stroke-width="3" marker-end="url(#ah-g)"/>
+        <text x="70" y="50" fill="#22c55e" font-size="13" font-weight="700">N</text>
+        <!-- N horizontal component (dashed) -->
+        <line x1="80" y1="42" x2="80" y2="120" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+        <line x1="80" y1="120" x2="132" y2="120" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+        <text x="58" y="85" fill="#22c55e" font-size="10" opacity="0.8">Ncosθ</text>
+        <text x="92" y="116" fill="#22c55e" font-size="10" opacity="0.8">Nsinθ</text>
+        <!-- Weight (down) -->
+        <line x1="140" y1="151" x2="140" y2="225" stroke="#ef4444" stroke-width="3" marker-end="url(#ah-r)"/>
+        <text x="152" y="215" fill="#ef4444" font-size="13" font-weight="700">mg</text>
+        <!-- angle arc -->
+        <path d="M175,120 A30,30 0 0,0 185,140" fill="none" stroke="#94a3b8" stroke-width="1.2"/>
+        <text x="192" y="135" fill="#94a3b8" font-size="11">θ</text>
+        <!-- center label -->
+        <text x="30" y="135" fill="#f59e0b" font-size="10">← center</text>
+        <text x="140" y="16" text-anchor="middle" fill="#94a3b8" font-size="11">Free-Body Diagram</text>
+      </svg>
     </div>
 
     <div class="fbd-box">
@@ -336,6 +403,25 @@
         </div>
       </div>
       <p style="color:var(--text);font-weight:700;font-size:0.88rem;margin:12px 0 0;">Key observation: \(T\) and \(mg\) point in <strong>opposite</strong> directions! Tension is toward center, weight is away.</p>
+      <svg viewBox="0 0 220 260" width="220" height="260" style="display:block;margin:18px auto 0;">
+        <!-- circle outline (partial) -->
+        <circle cx="110" cy="110" r="80" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.4"/>
+        <!-- object at bottom -->
+        <circle cx="110" cy="190" r="16" fill="#3b82f6" opacity="0.85"/>
+        <text x="110" y="195" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">m</text>
+        <!-- T arrow (up toward center) -->
+        <line x1="110" y1="174" x2="110" y2="90" stroke="#f59e0b" stroke-width="3" marker-end="url(#ah-y)"/>
+        <text x="120" y="115" fill="#f59e0b" font-size="13" font-weight="700">T</text>
+        <!-- Weight arrow (down, away from center) -->
+        <line x1="110" y1="206" x2="110" y2="250" stroke="#ef4444" stroke-width="3" marker-end="url(#ah-r)"/>
+        <text x="120" y="245" fill="#ef4444" font-size="13" font-weight="700">mg</text>
+        <!-- center dot -->
+        <circle cx="110" cy="110" r="3" fill="#f59e0b" opacity="0.5"/>
+        <text x="125" y="108" fill="#f59e0b" font-size="10">center</text>
+        <!-- bottom label -->
+        <text x="160" y="195" fill="#94a3b8" font-size="10">bottom</text>
+        <text x="110" y="16" text-anchor="middle" fill="#94a3b8" font-size="11">Free-Body Diagram</text>
+      </svg>
     </div>
 
     <div class="fbd-box">
@@ -391,6 +477,27 @@
         </div>
       </div>
       <p style="color:var(--text);font-weight:700;font-size:0.88rem;margin:12px 0 0;">Key observation: At the top, <strong>BOTH</strong> forces point toward the center (both downward)! They work <em>together</em>.</p>
+      <svg viewBox="0 0 220 260" width="220" height="260" style="display:block;margin:18px auto 0;">
+        <!-- circle outline (partial) -->
+        <circle cx="110" cy="140" r="80" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.4"/>
+        <!-- object at top -->
+        <circle cx="110" cy="60" r="16" fill="#3b82f6" opacity="0.85"/>
+        <text x="110" y="65" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">m</text>
+        <!-- N arrow (down toward center) -->
+        <line x1="96" y1="76" x2="96" y2="135" stroke="#22c55e" stroke-width="3" marker-end="url(#ah-g)"/>
+        <text x="78" y="115" fill="#22c55e" font-size="13" font-weight="700">N</text>
+        <!-- Weight arrow (down toward center) -->
+        <line x1="124" y1="76" x2="124" y2="135" stroke="#ef4444" stroke-width="3" marker-end="url(#ah-r)"/>
+        <text x="133" y="115" fill="#ef4444" font-size="13" font-weight="700">mg</text>
+        <!-- center dot -->
+        <circle cx="110" cy="140" r="3" fill="#f59e0b" opacity="0.5"/>
+        <text x="125" y="148" fill="#f59e0b" font-size="10">center</text>
+        <!-- top label -->
+        <text x="150" y="58" fill="#94a3b8" font-size="10">top</text>
+        <!-- brace indicating both point same direction -->
+        <text x="110" y="155" text-anchor="middle" fill="#94a3b8" font-size="10">both forces ↓ toward center</text>
+        <text x="110" y="16" text-anchor="middle" fill="#94a3b8" font-size="11">Free-Body Diagram</text>
+      </svg>
     </div>
 
     <div class="fbd-box">
