@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newton's Second Law — Interactive Lesson</title>
+<link rel="stylesheet" href="../common/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  #accel-canvas, #elevator-canvas {
+    width: 100%; max-width: 600px;
+    border-radius: 12px; border: 1px solid var(--border);
+    margin: 16px auto; display: block; background: var(--deep);
+  }
+  #accel-canvas { height: 200px; }
+  #elevator-canvas { height: 280px; max-width: 360px; }
+  .pillar-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin: 16px 0; }
+  .pillar { background: var(--deep); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+  .pillar .big { font-size: 1.3rem; margin-bottom: 6px; color: var(--accent); }
+  .pillar .lbl { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+  .recipe .r-step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+  .recipe .r-step .n {
+    background: var(--accent); color: #fff; border-radius: 50%;
+    width: 26px; height: 26px; flex-shrink: 0; display: flex;
+    align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;
+  }
+  .recipe .r-step .t { font-size: 0.92rem; color: var(--text); line-height: 1.6; }
+  @media (max-width: 600px) { .pillar-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+
+<div id="progress-bar">
+  <div class="logo">🚀 Newton's 2nd Law</div>
+  <div class="progress-steps">
+    <div class="step-dot active" onclick="goTo(0)" title="Introduction"></div>
+    <div class="step-dot" onclick="goTo(1)" title="Concept Check"></div>
+    <div class="step-dot" onclick="goTo(2)" title="Worked Example"></div>
+    <div class="step-dot" onclick="goTo(3)" title="Your Turn"></div>
+    <div class="step-dot" onclick="goTo(4)" title="Quiz"></div>
+    <div class="step-dot" onclick="goTo(5)" title="Homework"></div>
+  </div>
+  <div id="score-badge">⭐ 0 pts</div>
+</div>
+
+<!-- ════════════ SECTION 0 — Introduction & Core Concepts ════════════ -->
+<div class="section active" id="sec-0">
+<div class="container">
+  <div class="section-tag">Section 1 of 6 — Core Concepts</div>
+  <h1>Newton's Second<br><span style="color:var(--accent)">Law of Motion</span></h1>
+  <p>Why does a <strong>shopping cart</strong> speed up faster when you push harder? Why is a
+     <strong>loaded</strong> cart harder to get moving than an empty one? The answer to <em>both</em>
+     questions is the single most important equation in mechanics. 🛒💨</p>
+
+  <div class="fun-fact">
+    Newton's First Law says a net force is <em>needed</em> to change motion. The Second Law tells you
+    <em>exactly how much</em> motion you get — it turns "force" into a number you can calculate.
+  </div>
+
+  <!-- The Big Idea -->
+  <div class="card glow amber" style="margin-top:24px;">
+    <h3>💡 The Big Idea</h3>
+    <p style="color:var(--text);font-size:1.05rem;margin:0;"><strong>A net force causes acceleration.</strong>
+       Bigger net force → bigger acceleration. Bigger mass → smaller acceleration.</p>
+  </div>
+
+  <!-- The Law formula -->
+  <div class="card">
+    <h2>The Law in One Equation</h2>
+    <p>When a net external force \(\sum \vec{F}\) acts on an object of mass \(m\), it produces an acceleration \(\vec{a}\):</p>
+    <div class="formula-box">
+      \[ \vec{a} = \frac{\sum \vec{F}}{m} \qquad\text{or}\qquad \sum \vec{F} = m\,\vec{a} \]
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px;">
+      <div class="card" style="padding:14px;margin:0;">
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:6px;">SI Unit of Force</div>
+        <div style="color:var(--accent);font-weight:700;">\(1\ \text{N} = 1\ \dfrac{kg \cdot m}{s^2}\)</div>
+      </div>
+      <div class="card" style="padding:14px;margin:0;">
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:6px;">Direction</div>
+        <div style="color:var(--text);font-size:0.9rem;">\(\vec a\) points the <strong>same direction</strong> as the net force \(\sum\vec F\)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three pillars -->
+  <div class="card">
+    <h3>📐 Three Things the Equation Tells You</h3>
+    <div class="pillar-grid">
+      <div class="pillar">
+        <div class="big">\(a \propto F\)</div>
+        <div class="lbl"><strong>Double the net force</strong> → double the acceleration (mass fixed).</div>
+      </div>
+      <div class="pillar">
+        <div class="big">\(a \propto \tfrac{1}{m}\)</div>
+        <div class="lbl"><strong>Double the mass</strong> → half the acceleration (force fixed).</div>
+      </div>
+      <div class="pillar">
+        <div class="big">↗ same way</div>
+        <div class="lbl">The object accelerates in the <strong>direction of the net force</strong>.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive 1: F & m -> a -->
+  <div class="card">
+    <h3>🎛️ Interactive: Push the Block</h3>
+    <p>Change the <strong>net force</strong> and the <strong>mass</strong> and watch the block accelerate.
+       Notice how \(a = \dfrac{\sum F}{m}\) controls how quickly it speeds up.</p>
+    <canvas id="accel-canvas" width="600" height="200"></canvas>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;min-width:90px;">Net Force \(\sum F\):</span>
+      <input type="range" id="force-slider" min="10" max="200" step="5" value="60" oninput="updateAccel()">
+      <span class="sim-val" id="sim-force">60 N</span>
+    </div>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;min-width:90px;">Mass \(m\):</span>
+      <input type="range" id="mass-slider" min="1" max="50" step="1" value="10" oninput="updateAccel()">
+      <span class="sim-val" id="sim-mass">10 kg</span>
+    </div>
+    <div class="formula-box" style="font-size:1rem;">
+      \(a = \dfrac{\sum F}{m} = \) <span id="sim-accel" style="color:var(--accent2);font-weight:700;">6.0 m/s²</span>
+    </div>
+  </div>
+
+  <!-- Net force / FBD -->
+  <div class="card">
+    <h2>It's the <em>Net</em> Force That Matters</h2>
+    <p>The \(\sum\) symbol means <strong>"add up all the forces"</strong> (as vectors). Two people pulling a
+       100 kg crate in opposite directions with 100 N and 85 N give a net force of only
+       \(100 - 85 = 15\ N\), so \(a = 15/100 = 0.15\ m/s^2\).</p>
+    <div class="card amber" style="padding:14px;margin:14px 0 0;">
+      <strong>🧭 Always draw a Free-Body Diagram (FBD):</strong>
+      <p style="margin:6px 0 0;color:var(--text);">Sketch the object as a dot, draw every force as an arrow, then add them up.
+         Forces that cancel (like weight vs. the floor's support) drop out of the net force.</p>
+    </div>
+  </div>
+
+  <!-- Apparent weight / elevator -->
+  <div class="card">
+    <h2>Apparent Weight & Elevators</h2>
+    <p>Stand on a scale in an elevator. The scale reads the <strong>normal force</strong> \(N\), not your true weight.
+       Applying \(\sum F = ma\) in the vertical direction (\(N - mg = ma\)) gives:</p>
+    <div class="formula-box">
+      \[ N = m\,(g + a) \]
+    </div>
+    <p>Accelerating <strong>up</strong> (\(a>0\)) → you feel <strong>heavier</strong>. Accelerating
+       <strong>down</strong> (\(a<0\)) → you feel <strong>lighter</strong>. In free fall (\(a=-g\)) → \(N=0\), weightless!</p>
+    <canvas id="elevator-canvas" width="360" height="280"></canvas>
+    <div class="sim-row">
+      <span style="color:var(--muted);font-size:0.9rem;min-width:120px;">Elevator accel \(a\):</span>
+      <input type="range" id="elev-slider" min="-9.8" max="9.8" step="0.2" value="0" oninput="updateElevator()">
+      <span class="sim-val" id="elev-a">0.0 m/s²</span>
+    </div>
+    <p style="text-align:center;font-size:0.9rem;margin:6px 0 0;">
+      60 kg rider — scale reads <span id="elev-weight" style="color:var(--accent2);font-weight:700;">588 N</span>
+      <span id="elev-feel" style="color:var(--muted);"></span>
+    </p>
+  </div>
+
+  <!-- g's -->
+  <div class="card">
+    <h3>🌀 What is a "g"?</h3>
+    <p style="margin:0;">A "<strong>g</strong>" is a unit of acceleration equal to gravity's pull:
+       \(1\ g = 9.8\ m/s^2\). Fighter pilots pull "6 g's" \(= 6 \times 9.8 = 58.8\ m/s^2\).
+       To convert: <strong>m/s² → g's</strong> divide by 9.8; <strong>g's → m/s²</strong> multiply by 9.8.</p>
+  </div>
+
+  <!-- Recipe -->
+  <div class="card glow">
+    <h3>🍳 How to Solve Any 2nd-Law Problem</h3>
+    <div class="recipe">
+      <div class="r-step"><div class="n">1</div><div class="t"><strong>Draw a free-body diagram</strong> — every force as an arrow.</div></div>
+      <div class="r-step"><div class="n">2</div><div class="t"><strong>Pick a direction as positive</strong> and add the forces to get \(\sum F\).</div></div>
+      <div class="r-step"><div class="n">3</div><div class="t"><strong>Need acceleration first?</strong> Use kinematics (e.g. \(a=\dfrac{\Delta v}{t}\) or \(v^2=v_0^2+2a\Delta x\)).</div></div>
+      <div class="r-step"><div class="n">4</div><div class="t"><strong>Apply</strong> \(\sum F = ma\) — solve for the unknown (\(F\), \(m\), or \(a\)).</div></div>
+      <div class="r-step"><div class="n">5</div><div class="t"><strong>Check units & direction.</strong> A negative answer just means "opposite to positive."</div></div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <div></div>
+    <button class="btn btn-primary" onclick="goTo(1)">Check My Understanding →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════ SECTION 1 — Concept Check ════════════ -->
+<div class="section" id="sec-1">
+<div class="container">
+  <div class="section-tag">Section 2 of 6 — Concept Check</div>
+  <h1>Let's See What <span style="color:var(--accent)">You Know! 🧠</span></h1>
+  <p>Answer these 4 quick questions before we work an example. Explanations appear after each answer!</p>
+
+  <div class="cc-grid" id="cc-container"></div>
+
+  <div id="cc-feedback" class="feedback info" style="margin-top:10px;"></div>
+  <div id="cc-result" style="display:none;" class="card green">
+    <h3 id="cc-result-title"></h3>
+    <p id="cc-result-msg"></p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(0)">← Review Concepts</button>
+    <button class="btn btn-primary" id="cc-next-btn" onclick="goTo(2)" disabled>See Worked Example →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════ SECTION 2 — Worked Example ════════════ -->
+<div class="section" id="sec-2">
+<div class="container">
+  <div class="section-tag">Section 3 of 6 — Worked Example</div>
+  <h1>Example: <span style="color:var(--accent)">Three Forces on a Block 🧱</span></h1>
+
+  <div class="card amber">
+    <h3>Problem Statement</h3>
+    <p style="color:var(--text);">Three forces act on a <strong>10 kg</strong> block:
+       \(F_1 = 60\ N\) pulling <strong>left</strong>, \(F_2 = 30\ N\) pulling <strong>up</strong>,
+       and \(F_3 = 20\ N\) pulling <strong>right</strong>.</p>
+    <p style="color:var(--text);margin:0;">(a) What is the net force on the block?<br>
+       (b) What is its acceleration?<br>
+       (c) If it starts from rest, what is its velocity after 2.0 s?</p>
+  </div>
+
+  <p>Work through each step by clicking the buttons below 👇</p>
+
+  <!-- Step 1 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+      <div><strong>Add the horizontal forces</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Take right as positive</p></div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('w1')">Show Step</button>
+    </div>
+    <div class="step-block" id="w1">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ \sum F_x = F_3 - F_1 = 20 - 60 = -40\ N \;(\text{i.e. }40\ N\text{ left}) \]
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+      <div><strong>Find the total net force</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Combine horizontal & vertical with Pythagoras</p></div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('w2')">Show Step</button>
+    </div>
+    <div class="step-block" id="w2">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ \sum F_y = F_2 = 30\ N\ (\text{up}) \]
+        \[ \sum F = \sqrt{(40)^2 + (30)^2} = \sqrt{1600+900} = \boxed{50\ N} \]
+      </div>
+      <p style="font-size:0.88rem;">💡 A classic 3-4-5 triangle! The net force points up-and-to-the-left.</p>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+      <div><strong>Part (b): acceleration</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Apply \(a = \sum F / m\)</p></div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('w3')">Show Step</button>
+    </div>
+    <div class="step-block" id="w3">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ a = \frac{\sum F}{m} = \frac{50\ N}{10\ kg} = \boxed{5.0\ m/s^2} \]
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">4</div>
+      <div><strong>Part (c): velocity after 2.0 s</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Kinematics, starting from rest</p></div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('w4')">Show Step</button>
+    </div>
+    <div class="step-block" id="w4">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ v = v_0 + a t = 0 + (5.0)(2.0) = \boxed{10\ m/s} \]
+      </div>
+      <div class="card green" style="padding:14px;margin-top:12px;">
+        <strong>✅ Recap:</strong> Net force 50 N → a = 5.0 m/s² → after 2 s the block moves at 10 m/s,
+        in the direction of the net force.
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(1)">← Concept Check</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Your Turn! 🚀 →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════ SECTION 3 — Student Practice ════════════ -->
+<div class="section" id="sec-3">
+<div class="container">
+  <div class="section-tag">Section 4 of 6 — Your Turn!</div>
+  <h1>Solve It <span style="color:var(--accent)">Yourself 🚓</span></h1>
+
+  <div class="card amber">
+    <h3>Problem: The Police Car</h3>
+    <p style="color:var(--text);">A <strong>1000 kg</strong> police car accelerates from
+       <strong>0 m/s to 25 m/s</strong> in <strong>6.0 seconds</strong>.</p>
+    <p style="color:var(--text);margin:0;">
+      <strong>(a)</strong> What is the acceleration of the car?<br>
+      <strong>(b)</strong> What net force was required?
+    </p>
+  </div>
+
+  <!-- Part (a) -->
+  <div class="card">
+    <h3>Part (a): Acceleration</h3>
+    <p>Choose the correct formula (we know change in velocity and time):</p>
+    <div class="options" id="formula-choice">
+      <button class="option-btn" onclick="checkFormulaChoice(this,'wrong')"><span class="icon">📐</span> \(a = \sum F \cdot m\)</button>
+      <button class="option-btn" onclick="checkFormulaChoice(this,'correct')"><span class="icon">📐</span> \(a = \dfrac{\Delta v}{t} = \dfrac{v - v_0}{t}\)</button>
+      <button class="option-btn" onclick="checkFormulaChoice(this,'wrong')"><span class="icon">📐</span> \(a = \dfrac{t}{\Delta v}\)</button>
+    </div>
+    <div id="formula-feedback" class="feedback"></div>
+
+    <div id="partA-calc" class="step-block" style="margin-top:16px;">
+      <p>Now calculate \(a = \dfrac{25 - 0}{6.0}\) (in m/s²):</p>
+      <div class="input-row">
+        <label>\(a\) (m/s²):</label>
+        <input type="text" id="ans-a" placeholder="e.g. 25/6">
+        <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkAnsA()">Check ✓</button>
+        <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintA()">Hint 💡</button>
+      </div>
+      <div id="feedback-a" class="feedback"></div>
+      <div id="expr-hint-a"></div>
+      <div id="hint-a" class="step-block"></div>
+    </div>
+  </div>
+
+  <!-- Part (b) -->
+  <div id="partB-section" style="display:none;">
+  <div class="card">
+    <h3>Part (b): Net Force</h3>
+    <p>Use Newton's 2nd Law: \(\sum F = m \, a\) with \(m = 1000\ kg\) and your acceleration from part (a).</p>
+    <div class="input-row">
+      <label>\(\sum F\) (N):</label>
+      <input type="text" id="ans-b" placeholder="e.g. 1000*25/6">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkAnsB()">Check ✓</button>
+      <button class="btn btn-secondary" style="padding:10px 16px;font-size:0.85rem;" onclick="hintB()">Hint 💡</button>
+    </div>
+    <div id="feedback-b" class="feedback"></div>
+    <div id="expr-hint-b"></div>
+    <div id="hint-b" class="step-block"></div>
+  </div>
+  </div>
+
+  <div id="practice-done" style="display:none;" class="card green">
+    <h3>🎉 Practice Complete!</h3>
+    <p style="color:var(--text);">Nicely done! a ≈ 4.17 m/s² (about 0.43 g's) and the net force ≈ 4170 N —
+       roughly the weight of a small car pushing it forward.</p>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(2)">← Worked Example</button>
+    <button class="btn btn-primary" id="practice-next" onclick="goTo(4)" disabled>Take the Quiz →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════ SECTION 4 — Quiz ════════════ -->
+<div class="section" id="sec-4">
+<div class="container">
+  <div class="section-tag">Section 5 of 6 — Quiz</div>
+  <h1>Quiz Time! <span style="color:var(--accent)">⚡ 6 Questions</span></h1>
+  <p>Test your full understanding. You'll earn points for each correct answer!</p>
+
+  <div id="quiz-container"></div>
+
+  <div id="quiz-result" style="display:none;">
+    <div class="card glow">
+      <div class="score-final">
+        <div class="score-circle">
+          <div class="num" id="quiz-score-num">0</div>
+          <div class="den" id="quiz-score-den">/ 6</div>
+        </div>
+        <h2 id="quiz-result-title"></h2>
+        <p id="quiz-result-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(3)">← Practice</button>
+    <button class="btn btn-primary" id="quiz-next-btn" onclick="goTo(5)" disabled>Homework →</button>
+  </div>
+</div>
+</div>
+
+<!-- ════════════ SECTION 5 — Homework ════════════ -->
+<div class="section" id="sec-5">
+<div class="container">
+  <div class="section-tag">Section 6 of 6 — Homework</div>
+  <h1>Homework <span style="color:var(--accent)">Problems 📝</span></h1>
+  <p>Work these on paper, then use "Guide Me" for step-by-step help. Use \(g = 9.8\ m/s^2\) where needed. Show all steps!</p>
+
+  <div class="card amber" style="margin-bottom:20px;">
+    <h3>📋 Key Formulas</h3>
+    <p style="color:var(--text);font-size:0.9rem;margin:0;">
+      \(\sum F = ma\) &nbsp;|&nbsp; \(a = \dfrac{\Delta v}{t}\) &nbsp;|&nbsp; \(v^2 = v_0^2 + 2a\Delta x\) &nbsp;|&nbsp;
+      \(\Delta x = v_0 t + \tfrac12 a t^2\) &nbsp;|&nbsp; \(N = m(g+a)\) &nbsp;|&nbsp; \(1\,g = 9.8\ m/s^2\)
+    </p>
+  </div>
+
+  <h2 style="margin-bottom:14px;">Group A — Force, Mass & Acceleration</h2>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 1</div>
+    <p style="color:var(--text);margin-bottom:12px;">Skelly the skater (total mass <strong>25 kg</strong>) is propelled by rocket power.<br>
+      <strong>(a)</strong> Neglecting resistance, find the acceleration for a thrust of 100 N and of 200 N. What thrust gives a = 10 m/s²?<br>
+      <strong>(b)</strong> Now with a constant 50 N of resistance, find the acceleration for thrusts of 50 N, 100 N, and 200 N.</p>
+    <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw1')">📋 Guide Me Step by Step</button>
+    <div id="hw-steps-hw1" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw1" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(a = F/m\): 100 N → \(\boxed{4\ m/s^2}\); 200 N → \(\boxed{8\ m/s^2}\); for \(a=10\): \(F = ma = 25\times10 = \boxed{250\ N}\)<br>
+      (b) Net \(= F - 50\): 50 N → \(\boxed{0\ m/s^2}\); 100 N → \(50/25=\boxed{2\ m/s^2}\); 200 N → \(150/25=\boxed{6\ m/s^2}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 2</div>
+    <p style="color:var(--text);margin-bottom:12px;">Al and Bea pull a <strong>100.0 kg</strong> crate across a frictionless floor in
+      <strong>opposite</strong> directions: \(F_A = 100\ N\) right, \(F_B = 85\ N\) left.<br>
+      <strong>(a)</strong> Net force? &nbsp; <strong>(b)</strong> Acceleration?</p>
+    <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw2')">📋 Guide Me Step by Step</button>
+    <div id="hw-steps-hw2" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw2" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(\sum F = 100 - 85 = \boxed{15\ N}\) to the right<br>
+      (b) \(a = \sum F/m = 15/100 = \boxed{0.15\ m/s^2}\) to the right
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 3</div>
+    <p style="color:var(--text);margin-bottom:12px;">A net force of <strong>255 N</strong> causes a cart to accelerate at <strong>4.20 m/s²</strong>.
+      What is the mass of the cart?</p>
+    <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw3')">📋 Guide Me Step by Step</button>
+    <div id="hw-steps-hw3" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw3" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      \(m = \dfrac{\sum F}{a} = \dfrac{255}{4.20} \approx \boxed{60.7\ kg}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 4</div>
+    <p style="color:var(--text);margin-bottom:12px;">A <strong>1000 kg</strong> car traveling at <strong>30.0 m/s</strong> slows to
+      <strong>10.0 m/s</strong> at a steady rate over <strong>60.0 m</strong>.<br>
+      <strong>(a)</strong> Acceleration? &nbsp; <strong>(b)</strong> Net force to slow it? &nbsp;
+      <strong>(c)</strong> After it reaches 10.0 m/s and cruises steadily, what is the net force?</p>
+    <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw4')">📋 Guide Me Step by Step</button>
+    <div id="hw-steps-hw4" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw4" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(v^2=v_0^2+2a\Delta x\): \(a = \dfrac{10^2-30^2}{2(60)} = \dfrac{-800}{120} \approx \boxed{-6.67\ m/s^2}\)<br>
+      (b) \(\sum F = ma = 1000(-6.67) \approx \boxed{-6670\ N}\) (opposite the motion)<br>
+      (c) Constant velocity → \(a=0\) → \(\boxed{\sum F = 0}\)
+    </div>
+  </div>
+
+  <h2 style="margin-bottom:14px;margin-top:30px;">Group B — Rockets, Elevators & Apparent Weight</h2>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 5</div>
+    <p style="color:var(--text);margin-bottom:12px;">A <strong>20 kg</strong> rocket is accelerating straight <strong>up at +30.0 m/s²</strong>.
+      It feels its weight \(F_g\) (down) and thrust \(F_{th}\) (up).<br>
+      <strong>(a)</strong> Net force? &nbsp; <strong>(b)</strong> Its weight \(F_g\)? &nbsp;
+      <strong>(c)</strong> The thrust \(F_{th}\)?</p>
+    <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw5')">📋 Guide Me Step by Step</button>
+    <div id="hw-steps-hw5" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw5" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(\sum F = ma = 20\times30 = \boxed{600\ N}\) up<br>
+      (b) \(F_g = mg = 20\times9.8 = \boxed{196\ N}\) down<br>
+      (c) \(F_{th} - F_g = ma \Rightarrow F_{th} = m(g+a) = 20(9.8+30) = \boxed{796\ N}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 6</div>
+    <p style="color:var(--text);margin-bottom:12px;">A <strong>10 kg</strong> box rides in an elevator.<br>
+      <strong>(a)</strong> The elevator accelerates <strong>up at +2.0 m/s²</strong>. What is the net force on the box?<br>
+      <strong>(b)</strong> A <strong>60 kg</strong> woman in that elevator (accelerating up at +3.0 m/s²) — does she feel heavier, lighter, or normal, and what does a scale read?</p>
+    <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw6')">📋 Guide Me Step by Step</button>
+    <div id="hw-steps-hw6" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw6" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) \(\sum F = ma = 10\times2.0 = \boxed{20\ N}\) up<br>
+      (b) Accelerating up → <strong>heavier</strong>. Scale reads \(N = m(g+a) = 60(9.8+3.0) = \boxed{768\ N}\) (vs. 588 N normally)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 7</div>
+    <p style="color:var(--text);margin-bottom:12px;">Block A sits on a frictionless table, connected by a string over a pulley to Block B, which hangs and falls,
+      dragging A. Both blocks have the same mass \(m\).<br>
+      <strong>(a)</strong> What is the mass of the system? &nbsp; <strong>(b)</strong> What force accelerates the system? &nbsp;
+      <strong>(c)</strong> Show the acceleration is \(g/2\).</p>
+    <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw7')">📋 Guide Me Step by Step</button>
+    <div id="hw-steps-hw7" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw7" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) System mass \(= 2m\) (both blocks move together)<br>
+      (b) Only the <strong>weight of B</strong>, \(F = mg\), pulls the system forward<br>
+      (c) \(a = \dfrac{F}{m_{sys}} = \dfrac{mg}{2m} = \boxed{\dfrac{g}{2} = 4.9\ m/s^2}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 8 — Conceptual</div>
+    <p style="color:var(--text);margin-bottom:12px;">Shirley pushes a heavy crate across a <strong>frictionless</strong> floor.
+      True or False:<br>
+      <strong>(a)</strong> She needs a force to <em>get it moving</em>.<br>
+      <strong>(b)</strong> She needs a force to <em>keep it moving</em> at constant velocity.<br>
+      <strong>(c)</strong> She needs a force to <em>stop it</em>.</p>
+    <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw8')">📋 Guide Me Step by Step</button>
+    <div id="hw-steps-hw8" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw8" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      (a) <strong>True</strong> — to accelerate from rest needs a net force.<br>
+      (b) <strong>False</strong> — at constant velocity \(a=0\), so \(\sum F = 0\). No force needed (inertia keeps it going).<br>
+      (c) <strong>True</strong> — stopping is a change in velocity (negative acceleration), which needs a net force.
+    </div>
+  </div>
+
+  <!-- Final score summary -->
+  <div class="card glow" style="margin-top:30px;text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:8px;">🚀</div>
+    <h2>Lesson Complete!</h2>
+    <p>Total Score: <strong style="color:var(--accent);font-size:1.2rem;" id="final-score-display">—</strong></p>
+    <p style="margin-top:8px;">Remember: <em>"A net force causes acceleration — \(\sum F = ma\)."</em></p>
+    <button class="btn btn-primary" style="margin-top:12px;" onclick="goTo(0)">🔄 Restart Lesson</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(4)">← Quiz</button>
+    <div></div>
+  </div>
+</div>
+</div>
+
+<script>
+// ── Interactive 1: Force & Mass → acceleration block ──────
+const ac = document.getElementById('accel-canvas');
+const actx = ac.getContext('2d');
+let blkX = 0, blkV = 0;
+function updateAccel() {
+  const F = parseFloat(document.getElementById('force-slider').value);
+  const m = parseFloat(document.getElementById('mass-slider').value);
+  document.getElementById('sim-force').textContent = F + ' N';
+  document.getElementById('sim-mass').textContent = m + ' kg';
+  document.getElementById('sim-accel').textContent = (F/m).toFixed(1) + ' m/s²';
+}
+function drawAccel() {
+  ac.width = ac.offsetWidth; ac.height = ac.offsetHeight;
+  const w = ac.width, h = ac.height;
+  const F = parseFloat(document.getElementById('force-slider').value);
+  const m = parseFloat(document.getElementById('mass-slider').value);
+  const a = F / m;
+  actx.clearRect(0,0,w,h);
+  const groundY = h - 40;
+  actx.strokeStyle = 'rgba(148,163,184,0.4)'; actx.lineWidth = 2;
+  actx.beginPath(); actx.moveTo(0,groundY); actx.lineTo(w,groundY); actx.stroke();
+  blkV += a * 0.12; blkX += blkV * 0.02;
+  const size = Math.max(28, Math.min(70, 24 + m*1.0));
+  if (blkX > w - size - 20) { blkX = 0; blkV = 0; }
+  const bx = 10 + blkX, by = groundY - size;
+  actx.fillStyle = '#1d4ed8'; actx.strokeStyle = '#60a5fa'; actx.lineWidth = 2;
+  actx.fillRect(bx, by, size, size); actx.strokeRect(bx, by, size, size);
+  actx.fillStyle = '#dbeafe'; actx.font = 'bold 12px system-ui'; actx.textAlign='center';
+  actx.fillText(m + ' kg', bx + size/2, by + size/2 + 4);
+  const aLen = 20 + F * 0.4, ay = by + size/2;
+  actx.strokeStyle = '#f59e0b'; actx.lineWidth = 4;
+  actx.beginPath(); actx.moveTo(bx + size, ay); actx.lineTo(bx + size + aLen, ay); actx.stroke();
+  actx.fillStyle = '#f59e0b'; actx.beginPath();
+  actx.moveTo(bx + size + aLen + 10, ay);
+  actx.lineTo(bx + size + aLen, ay - 7);
+  actx.lineTo(bx + size + aLen, ay + 7); actx.closePath(); actx.fill();
+  actx.font = 'bold 11px system-ui'; actx.textAlign='left';
+  actx.fillText('F = ' + F + ' N', bx + size + 4, ay - 12);
+  actx.fillStyle = '#94a3b8'; actx.textAlign = 'right';
+  actx.fillText('a = ' + a.toFixed(1) + ' m/s²', w - 12, 24);
+  requestAnimationFrame(drawAccel);
+}
+updateAccel(); drawAccel();
+</script>
+
+<script>
+// ── Interactive 2: Elevator apparent weight ───────────────
+const ec = document.getElementById('elevator-canvas');
+const ectx = ec.getContext('2d');
+const ELEV_MASS = 60, GRAV = 9.8;
+function updateElevator() {
+  const a = parseFloat(document.getElementById('elev-slider').value);
+  document.getElementById('elev-a').textContent = a.toFixed(1) + ' m/s²';
+  const N = ELEV_MASS * (GRAV + a);
+  document.getElementById('elev-weight').textContent = N.toFixed(0) + ' N';
+  const feel = document.getElementById('elev-feel');
+  if (Math.abs(a + GRAV) < 0.3) feel.textContent = ' — WEIGHTLESS! 🪶';
+  else if (a > 0.2) feel.textContent = ' — feels HEAVIER 🔺';
+  else if (a < -0.2) feel.textContent = ' — feels lighter 🔻';
+  else feel.textContent = ' — normal weight';
+}
+function drawElevator() {
+  ec.width = ec.offsetWidth; ec.height = ec.offsetHeight;
+  const w = ec.width, h = ec.height;
+  const a = parseFloat(document.getElementById('elev-slider').value);
+  ectx.clearRect(0,0,w,h);
+  const cw = w*0.5, ch = h*0.72, cx = (w-cw)/2, cy = h*0.13;
+  ectx.strokeStyle = '#334155'; ectx.lineWidth = 2; ectx.strokeRect(cx, cy, cw, ch);
+  ectx.beginPath(); ectx.moveTo(w/2, 0); ectx.lineTo(w/2, cy); ectx.stroke();
+  const px = w/2, feetY = cy + ch - 8;
+  ectx.strokeStyle = '#e2e8f0'; ectx.lineWidth = 3; ectx.fillStyle = '#e2e8f0';
+  ectx.beginPath(); ectx.arc(px, cy + ch*0.3, 10, 0, Math.PI*2); ectx.fill();
+  ectx.beginPath(); ectx.moveTo(px, cy + ch*0.3 + 10); ectx.lineTo(px, feetY - 28); ectx.stroke();
+  ectx.beginPath(); ectx.moveTo(px, feetY-28); ectx.lineTo(px-12, feetY); ectx.moveTo(px, feetY-28); ectx.lineTo(px+12, feetY); ectx.stroke();
+  ectx.beginPath(); ectx.moveTo(px, cy+ch*0.46); ectx.lineTo(px-15, cy+ch*0.62); ectx.moveTo(px, cy+ch*0.46); ectx.lineTo(px+15, cy+ch*0.62); ectx.stroke();
+  // scale platform
+  ectx.fillStyle = '#475569'; ectx.fillRect(px-22, feetY, 44, 6);
+  // accel arrow
+  if (Math.abs(a) > 0.15) {
+    const up = a > 0, arrX = cx + cw + 18;
+    const arrLen = Math.min(ch*0.35, 14 + Math.abs(a)*5);
+    const midY = cy + ch/2;
+    const y1 = up ? midY + arrLen/2 : midY - arrLen/2;
+    const y2 = up ? midY - arrLen/2 : midY + arrLen/2;
+    ectx.strokeStyle = '#f59e0b'; ectx.lineWidth = 4;
+    ectx.beginPath(); ectx.moveTo(arrX, y1); ectx.lineTo(arrX, y2); ectx.stroke();
+    ectx.fillStyle = '#f59e0b'; ectx.beginPath();
+    ectx.moveTo(arrX, y2 + (up?-1:1)*10);
+    ectx.lineTo(arrX-6, y2); ectx.lineTo(arrX+6, y2); ectx.closePath(); ectx.fill();
+    ectx.fillStyle = '#fcd34d'; ectx.font = 'bold 11px system-ui'; ectx.textAlign='left';
+    ectx.fillText('a', arrX + 8, midY);
+  }
+  // weight readout color
+  const N = ELEV_MASS * (GRAV + a);
+  ectx.fillStyle = a > 0.2 ? '#fca5a5' : (a < -0.2 ? '#93c5fd' : '#cbd5e1');
+  ectx.font = 'bold 13px system-ui'; ectx.textAlign = 'center';
+  ectx.fillText(N.toFixed(0) + ' N', px, feetY + 22);
+}
+updateElevator();
+(function loopElev(){ drawElevator(); requestAnimationFrame(loopElev); })();
+</script>
+
+<script>
+// ── Concept Check Data ────────────────────────────────────
+window.ccQuestions = [
+  {
+    q: "What does Newton's Second Law state?",
+    opts: [
+      "An object in motion stays in motion unless acted on by a force.",
+      "The acceleration of an object is proportional to the net force and inversely proportional to its mass.",
+      "For every action there is an equal and opposite reaction.",
+      "Heavier objects always fall faster than lighter ones."
+    ],
+    ans: 1,
+    explain: "✅ ΣF = ma — acceleration grows with net force and shrinks with mass. (Option A is the 1st Law, C is the 3rd Law.)"
+  },
+  {
+    q: "You keep the mass the same but double the net force on a cart. Its acceleration:",
+    opts: ["Stays the same.", "Doubles.", "Is cut in half.", "Becomes four times larger."],
+    ans: 1,
+    explain: "✅ Since a = ΣF/m and m is fixed, doubling ΣF doubles a."
+  },
+  {
+    q: "You keep the net force the same but triple the mass. Its acceleration:",
+    opts: ["Triples.", "Stays the same.", "Becomes one-third as large.", "Becomes nine times larger."],
+    ans: 2,
+    explain: "✅ a ∝ 1/m, so tripling the mass makes the acceleration 1/3 as big."
+  },
+  {
+    q: "A box slides across a frictionless floor at a constant 5 m/s. What is the net force on it?",
+    opts: ["5 N forward.", "Zero.", "Equal to its weight.", "Whatever force started it moving."],
+    ans: 1,
+    explain: "✅ Constant velocity means a = 0, so ΣF = ma = 0. No net force is needed to keep it moving (inertia!)."
+  }
+];
+
+// ── Practice Problem (police car) ─────────────────────────
+let partADone=false, partBDone=false;
+function checkFormulaChoice(btn, type) {
+  document.querySelectorAll('#formula-choice .option-btn').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('formula-feedback');
+  if(type==='correct'){
+    btn.classList.add('correct');
+    fb.className='feedback ok show'; fb.textContent='✅ Correct! Acceleration = change in velocity ÷ time.';
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('#formula-choice .option-btn')[1].classList.add('correct');
+    fb.className='feedback bad show'; fb.textContent='❌ Not quite. Use a = Δv / t.';
+  }
+  document.getElementById('partA-calc').classList.add('visible');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+function checkAnsA() {
+  const ans=parseAnswer(document.getElementById('ans-a').value);
+  const fb=document.getElementById('feedback-a');
+  const expected=25/6;
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try: 25/6'; return; }
+  if (Math.abs(ans-expected)/expected<0.02) {
+    document.getElementById('ans-a').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! a = 25 ÷ 6 ≈ 4.17 m/s²';
+    if (!partADone) { partADone=true; addScore(10); }
+    document.getElementById('partB-section').style.display='block';
+    if (window.MathJax) MathJax.typesetPromise();
+  } else {
+    document.getElementById('ans-a').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ Not quite. a = (25 − 0) / 6.0';
+  }
+}
+function hintA() {
+  const h=document.getElementById('hint-a'); h.classList.add('visible');
+  h.innerHTML='<div class="formula-box" style="font-size:0.9rem;text-align:left;">a = Δv / t = (25 − 0) / 6.0</div>';
+  if (window.MathJax) MathJax.typesetPromise();
+}
+function checkAnsB() {
+  const ans=parseAnswer(document.getElementById('ans-b').value);
+  const expected=1000*(25/6);
+  const fb=document.getElementById('feedback-b');
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression. Try: 1000*25/6'; return; }
+  if (Math.abs(ans-expected)/expected<0.03) {
+    document.getElementById('ans-b').className='correct-ans';
+    fb.className='feedback ok show'; fb.textContent='🎉 Correct! ΣF = 1000 × 4.17 ≈ 4170 N';
+    if (!partBDone) { partBDone=true; addScore(15); }
+    document.getElementById('practice-done').style.display='block';
+    document.getElementById('practice-next').disabled=false;
+    sectionDone[3]=true;
+  } else {
+    document.getElementById('ans-b').className='wrong-ans';
+    fb.className='feedback bad show'; fb.textContent='❌ Try ΣF = m × a = 1000 × 4.17';
+  }
+}
+function hintB() {
+  const h=document.getElementById('hint-b'); h.classList.add('visible');
+  h.innerHTML='<p style="font-size:0.88rem;">ΣF = m × a = 1000 kg × 4.17 m/s² ≈ 4170 N</p>';
+}
+</script>
+
+<script>
+// ── Quiz Data ─────────────────────────────────────────────
+window.quizData = [
+  {
+    type:'mc',
+    q:'A constant net force acts on a block. Which change would DOUBLE its acceleration?',
+    opts:['Double the mass','Double the net force','Halve the net force','Triple the mass'],
+    ans:1,
+    explain:'a = ΣF/m. With mass fixed, doubling the net force doubles the acceleration.'
+  },
+  {
+    type:'mc',
+    q:'An airplane cruises in a straight line at a constant 250 m/s. The net force on it is:',
+    opts:['250 N forward','Zero','Equal to its weight','Pointing backward'],
+    ans:1,
+    explain:'Constant velocity → a = 0 → ΣF = 0. Thrust balances drag, lift balances weight.'
+  },
+  {
+    type:'mc',
+    q:'A stuntman hangs from a rope under a helicopter. In which case is the rope tension GREATEST?',
+    opts:['Helicopter rising at a steady 5 m/s','Helicopter descending at a steady 5 m/s','Helicopter accelerating upward','Tension is the same in all cases'],
+    ans:2,
+    explain:'Steady speed → tension = mg. Accelerating upward needs T = m(g+a) > mg, so tension is greatest then.'
+  },
+  {
+    type:'calc',
+    q:'What net force is needed to give a 20 kg puppy an acceleration of 1.85 m/s²?',
+    answer:37, tolerance:0.03, unit:'N',
+    hint:'ΣF = m × a = 20 × 1.85',
+    explain:'ΣF = 20 × 1.85 = 37 N.'
+  },
+  {
+    type:'calc',
+    q:'A net force of 255 N causes a cart to accelerate at 4.20 m/s². What is the cart\u2019s mass?',
+    answer:60.71, tolerance:0.03, unit:'kg',
+    hint:'m = ΣF / a = 255 / 4.20',
+    explain:'m = 255 / 4.20 ≈ 60.7 kg.'
+  },
+  {
+    type:'calc',
+    q:'A 60 kg woman stands on a scale in an elevator accelerating UP at 3.0 m/s². What does the scale read (use g = 9.8)?',
+    answer:768, tolerance:0.03, unit:'N',
+    hint:'N = m(g + a) = 60 × (9.8 + 3.0)',
+    explain:'N = 60 × 12.8 = 768 N — she feels heavier than her usual 588 N.'
+  }
+];
+</script>
+
+<script>
+// ── Homework Step-by-Step Data ────────────────────────────
+window.hwSteps = {
+  hw1: [
+    { title:'Use a = F/m (no resistance)', body:'Mass is 25 kg. \\[a=\\frac{F}{m}\\]100 N → \\(100/25=4\\ m/s^2\\); 200 N → \\(200/25=8\\ m/s^2\\).' },
+    { title:'Find the thrust for a = 10 m/s²', body:'Rearrange: \\(F=ma=25\\times10=\\boxed{250\\ N}\\).' },
+    { title:'Add 50 N of resistance', body:'Now the NET force is \\(F-50\\): \\[a=\\frac{F-50}{25}\\]' },
+    { title:'Compute each case', body:'50 N → \\((50-50)/25=\\boxed{0}\\); 100 N → \\(50/25=\\boxed{2\\ m/s^2}\\); 200 N → \\(150/25=\\boxed{6\\ m/s^2}\\).' }
+  ],
+  hw2: [
+    { title:'Add the forces (they oppose)', body:'Take right as positive: \\[\\sum F = F_A - F_B = 100 - 85 = \\boxed{15\\ N}\\text{ right}\\]' },
+    { title:'Apply ΣF = ma', body:'\\[a=\\frac{\\sum F}{m}=\\frac{15}{100}=\\boxed{0.15\\ m/s^2}\\] to the right.' }
+  ],
+  hw3: [
+    { title:'Rearrange ΣF = ma for mass', body:'We know force and acceleration: \\[m=\\frac{\\sum F}{a}\\]' },
+    { title:'Substitute', body:'\\[m=\\frac{255}{4.20}\\approx\\boxed{60.7\\ kg}\\]' }
+  ],
+  hw4: [
+    { title:'Pick the kinematics equation', body:'We know \\(v_0, v, \\Delta x\\) (no time), so use \\[v^2=v_0^2+2a\\Delta x\\]' },
+    { title:'Solve for a (part a)', body:'\\[a=\\frac{v^2-v_0^2}{2\\Delta x}=\\frac{10^2-30^2}{2(60)}=\\frac{-800}{120}\\approx\\boxed{-6.67\\ m/s^2}\\]' },
+    { title:'Net force while slowing (part b)', body:'\\[\\sum F=ma=1000(-6.67)\\approx\\boxed{-6670\\ N}\\] The minus sign means it points opposite to the motion (braking).' },
+    { title:'Cruising at constant speed (part c)', body:'Constant velocity → \\(a=0\\) → \\[\\boxed{\\sum F = 0}\\] (the brakes/engine balance friction).' }
+  ],
+  hw5: [
+    { title:'Net force from ΣF = ma (part a)', body:'\\[\\sum F = ma = 20\\times30 = \\boxed{600\\ N}\\] directed up (same as the acceleration).' },
+    { title:'The rocket\u2019s weight (part b)', body:'\\[F_g = mg = 20\\times9.8 = \\boxed{196\\ N}\\] directed down.' },
+    { title:'Solve for the thrust (part c)', body:'Up is positive: \\(F_{th} - F_g = ma\\), so \\[F_{th} = m(g+a) = 20(9.8+30) = \\boxed{796\\ N}\\]' }
+  ],
+  hw6: [
+    { title:'Box: net force (part a)', body:'\\[\\sum F = ma = 10\\times2.0 = \\boxed{20\\ N}\\] directed up.' },
+    { title:'Woman: heavier or lighter? (part b)', body:'Accelerating <strong>up</strong> means the floor must push harder than gravity → she feels <strong>heavier</strong>.' },
+    { title:'Scale reading = normal force', body:'\\[N = m(g+a) = 60(9.8+3.0) = \\boxed{768\\ N}\\] compared with \\(60\\times9.8=588\\ N\\) at rest.' }
+  ],
+  hw7: [
+    { title:'Mass of the system (part a)', body:'Both blocks move together on the same string, so the moving mass is \\[m_{sys}=m+m=\\boxed{2m}\\]' },
+    { title:'What force drives the system? (part b)', body:'The table is frictionless and A\u2019s weight is balanced by the table. Only the <strong>weight of B</strong> pulls the system: \\[F = mg\\]' },
+    { title:'Acceleration (part c)', body:'\\[a=\\frac{F}{m_{sys}}=\\frac{mg}{2m}=\\boxed{\\frac{g}{2}=4.9\\ m/s^2}\\]' }
+  ],
+  hw8: [
+    { title:'(a) Get it moving', body:'Starting from rest is a change in velocity → it needs acceleration → a net force IS required. <strong>True</strong>.' },
+    { title:'(b) Keep it moving', body:'Constant velocity means \\(a=0\\), so \\(\\sum F=0\\). On a frictionless floor, NO force is needed. <strong>False</strong>.' },
+    { title:'(c) Stop it', body:'Stopping changes the velocity (slows it) → that is acceleration → a net force IS required. <strong>True</strong>.' }
+  ]
+};
+
+// ── Practice input wiring (Enter key + expression hints) ──
+window.practiceInputs = [['ans-a','checkAnsA'],['ans-b','checkAnsB']];
+window.practiceHints  = ['expr-hint-a','expr-hint-b'];
+</script>
+
+<script src="../common/lesson.js"></script>
+</body>
+</html>

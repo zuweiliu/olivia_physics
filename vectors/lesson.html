@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vectors &amp; Components — Interactive Lesson</title>
+<link rel="stylesheet" href="../common/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  canvas.interactive {
+    width: 100%; max-width: 540px; height: 340px;
+    border-radius: 12px; border: 1px solid var(--border);
+    margin: 16px auto; display: block; background: var(--deep);
+    cursor: crosshair;
+  }
+  canvas.wide { max-width: 620px; height: 360px; }
+  .slider-group { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 10px 0; }
+  .slider-group label { color: var(--muted); font-size: 0.9rem; min-width: 90px; }
+  .slider-group input[type=range] { flex: 1; min-width: 140px; accent-color: var(--accent); }
+  .slider-group .val { color: var(--accent); font-weight: 700; min-width: 70px; font-size: 1rem; }
+  .component-readout { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+  .comp-box { background: var(--deep); border-radius: 10px; padding: 14px 18px; border: 1.5px solid var(--border); text-align: center; }
+  .comp-box.x-comp { border-color: #f97316; }
+  .comp-box.y-comp { border-color: #22d3ee; }
+  .comp-box .comp-label { font-size: 0.82rem; color: var(--muted); margin-bottom: 4px; }
+  .comp-box .comp-val { font-size: 1.15rem; font-weight: 700; }
+  .comp-box.x-comp .comp-val { color: #f97316; }
+  .comp-box.y-comp .comp-val { color: #22d3ee; }
+  .vis-table { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 16px 0; }
+  .vis-cell { background: var(--deep); border: 1px solid var(--border); border-radius: 10px; padding: 12px 8px; text-align: center; }
+  .vis-cell .angle-label { font-weight: 700; color: var(--accent); font-size: 1rem; margin-bottom: 6px; }
+  .vis-cell canvas { width: 100%; height: 80px; display: block; margin: 4px auto; }
+  .vis-cell .trig-vals { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
+  .quad-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; max-width: 360px; margin: 16px auto; }
+  .quad-cell { padding: 18px; text-align: center; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-weight: 600; }
+  .quad-cell:hover { transform: scale(1.04); }
+  .q2 { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); }
+  .q1 { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); }
+  .q3 { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); }
+  .q4 { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) {
+    .vis-table { grid-template-columns: repeat(3, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .component-readout { grid-template-columns: 1fr; }
+    canvas.interactive { height: 280px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+
+<!-- ── Progress Bar ── -->
+<div id="progress-bar">
+  <div class="logo">📐 Vectors</div>
+  <div class="progress-steps">
+    <div class="step-dot active" onclick="goTo(0)" title="Introduction"></div>
+    <div class="step-dot" onclick="goTo(1)" title="Concept Check"></div>
+    <div class="step-dot" onclick="goTo(2)" title="Worked Example"></div>
+    <div class="step-dot" onclick="goTo(3)" title="Your Turn"></div>
+    <div class="step-dot" onclick="goTo(4)" title="Quiz"></div>
+    <div class="step-dot" onclick="goTo(5)" title="Homework"></div>
+  </div>
+  <div id="score-badge">⭐ 0 pts</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 0 — Introduction & Core Concepts
+     ═══════════════════════════════════════ -->
+<div class="section active" id="sec-0">
+<div class="container">
+  <div class="section-tag">Section 1 of 6 — Core Concepts</div>
+  <h1>Vectors: Direction <span style="color:var(--accent)">Matters!</span></h1>
+  <p>When you say a car goes <strong>60 km/h</strong>, that's <em>speed</em> — just a number.
+     But when you say it goes <strong>60 km/h north</strong>, that's <em>velocity</em> — a number <strong>plus</strong> a direction.
+     This difference is the key to understanding <strong>vectors</strong>.</p>
+
+  <!-- Scalar vs Vector -->
+  <div class="card glow amber" style="margin-top:24px;">
+    <h3>💡 Scalar vs Vector</h3>
+    <div class="two-col" style="margin-top:12px;">
+      <div>
+        <p style="color:var(--accent2);font-weight:700;margin-bottom:6px;">Scalars (magnitude only)</p>
+        <p style="color:var(--text);font-size:0.92rem;">Speed, mass, distance, time, energy, temperature</p>
+        <p style="font-size:0.88rem;">Example: "The box weighs <strong>5 kg</strong>"</p>
+      </div>
+      <div>
+        <p style="color:var(--accent);font-weight:700;margin-bottom:6px;">Vectors (magnitude + direction)</p>
+        <p style="color:var(--text);font-size:0.92rem;">Velocity, force, acceleration, displacement</p>
+        <p style="font-size:0.88rem;">Example: "Push with <strong>10 N at 30° above horizontal</strong>"</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- How We Draw Vectors -->
+  <div class="card">
+    <h2>How We Draw Vectors</h2>
+    <p>A vector is drawn as an <strong>arrow</strong>:</p>
+    <ul style="color:var(--text);margin:8px 0 16px 24px;line-height:2;">
+      <li><strong>Length</strong> of the arrow = <strong>magnitude</strong> (how big)</li>
+      <li><strong>Direction</strong> the arrow points = <strong>direction</strong> of the vector</li>
+      <li>The <strong>tail</strong> is where it starts; the <strong>tip</strong> is the arrowhead</li>
+    </ul>
+    <canvas id="cvs-anatomy" class="interactive" style="height:220px;"></canvas>
+    <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-top:-8px;">
+      🎮 Drag the arrowhead to change the vector! Watch magnitude and angle update.
+    </p>
+  </div>
+
+  <!-- ★ THE KEY SECTION: Vector Components -->
+  <div class="card glow">
+    <h2>⭐ Breaking a Vector into Components</h2>
+    <p>This is the <strong>most important skill</strong> in this lesson.
+       Any vector can be split into an <strong style="color:#f97316;">x-component</strong>
+       and a <strong style="color:#22d3ee;">y-component</strong>.</p>
+    <div class="formula-box">
+      \[ \vec{V} = V_x\,\hat{x} + V_y\,\hat{y} \]
+    </div>
+    <p>If the vector makes angle \(\theta\) with the <strong>positive x-axis</strong>:</p>
+    <div class="formula-box" style="display:flex;justify-content:center;gap:40px;flex-wrap:wrap;">
+      <span style="color:#f97316;font-weight:700;">\( V_x = V \cos\theta \)</span>
+      <span style="color:#22d3ee;font-weight:700;">\( V_y = V \sin\theta \)</span>
+    </div>
+    <div class="fun-fact">
+      Think of it this way: <strong>cos</strong> goes with the <strong>adjacent</strong> side (along x),
+      and <strong>sin</strong> goes with the <strong>opposite</strong> side (along y).
+      SOH-CAH-TOA!
+    </div>
+    <canvas id="cvs-components" class="interactive wide"></canvas>
+    <div class="slider-group">
+      <label>Angle θ:</label>
+      <input type="range" id="angle-slider" min="0" max="360" step="1" value="37" oninput="updateComponents()">
+      <span class="val" id="angle-val">37°</span>
+    </div>
+    <div class="slider-group">
+      <label>Magnitude:</label>
+      <input type="range" id="mag-slider" min="1" max="100" step="1" value="50" oninput="updateComponents()">
+      <span class="val" id="mag-val">50</span>
+    </div>
+    <div class="component-readout">
+      <div class="comp-box x-comp">
+        <div class="comp-label">\(V_x = V\cos\theta\)</div>
+        <div class="comp-val" id="vx-val">39.93</div>
+      </div>
+      <div class="comp-box y-comp">
+        <div class="comp-label">\(V_y = V\sin\theta\)</div>
+        <div class="comp-val" id="vy-val">30.09</div>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:0.82rem;color:var(--muted);">
+      🎮 Drag the sliders! Watch how the <strong style="color:#f97316;">orange x-component</strong>
+      and <strong style="color:#22d3ee;">cyan y-component</strong> change with angle.
+    </p>
+  </div>
+
+  <!-- Common Angles Visual Table -->
+  <div class="card">
+    <h2>Common Angles — Visual Reference</h2>
+    <p>Memorize these patterns! When \(V = 1\):</p>
+    <div class="vis-table" id="angle-table"></div>
+    <div class="card amber" style="padding:14px;margin:14px 0 0;">
+      <strong>⚠️ Key Pattern:</strong>
+      <p style="margin:6px 0 0; color:var(--text);">
+        As θ goes from 0° → 90°, <strong style="color:#f97316;">\(V_x\) shrinks</strong>
+        (cos goes 1 → 0) while <strong style="color:#22d3ee;">\(V_y\) grows</strong>
+        (sin goes 0 → 1). At 45° they're equal!</p>
+    </div>
+  </div>
+
+  <!-- Quadrant Signs -->
+  <div class="card">
+    <h2>Signs in Each Quadrant</h2>
+    <p>The <strong>sign</strong> of each component depends on which quadrant the vector points into:</p>
+    <div class="quad-grid">
+      <div class="quad-cell q2">
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:4px;">Quadrant II (90°–180°)</div>
+        <span style="color:#f97316;">Vx &lt; 0</span> &nbsp;
+        <span style="color:#22d3ee;">Vy &gt; 0</span>
+      </div>
+      <div class="quad-cell q1">
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:4px;">Quadrant I (0°–90°)</div>
+        <span style="color:#f97316;">Vx &gt; 0</span> &nbsp;
+        <span style="color:#22d3ee;">Vy &gt; 0</span>
+      </div>
+      <div class="quad-cell q3">
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:4px;">Quadrant III (180°–270°)</div>
+        <span style="color:#f97316;">Vx &lt; 0</span> &nbsp;
+        <span style="color:#22d3ee;">Vy &lt; 0</span>
+      </div>
+      <div class="quad-cell q4">
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:4px;">Quadrant IV (270°–360°)</div>
+        <span style="color:#f97316;">Vx &gt; 0</span> &nbsp;
+        <span style="color:#22d3ee;">Vy &lt; 0</span>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:0.88rem;margin-top:10px;">
+      <strong>Tip:</strong> Using \(\cos\theta\) and \(\sin\theta\) with the <em>standard angle</em> (from +x axis)
+      automatically gives you the correct sign. No need to memorize!</p>
+  </div>
+
+  <!-- Inclined Plane -->
+  <div class="card">
+    <h2>🏔️ Forces on an Inclined Plane</h2>
+    <p>This is where many students get confused! On a slope, we <strong>rotate our coordinate system</strong>
+       so that x is <em>along</em> the slope and y is <em>perpendicular</em> to it.</p>
+    <p>Gravity \(mg\) always points straight down, but in the rotated coordinates:</p>
+    <div class="formula-box" style="display:flex;justify-content:center;gap:40px;flex-wrap:wrap;">
+      <span style="color:#f97316;font-weight:700;">\( F_{\parallel} = mg\sin\theta \)</span>
+      <span style="color:#22d3ee;font-weight:700;">\( F_{\perp} = mg\cos\theta \)</span>
+    </div>
+    <div class="card amber" style="padding:14px;margin:8px 0 16px;">
+      <strong>⚠️ Notice the SWAP!</strong>
+      <p style="margin:6px 0 0; color:var(--text);">
+        On a flat surface: \(F_x = F\cos\theta\), \(F_y = F\sin\theta\).<br>
+        On a slope: \(F_{\parallel} = mg\sin\theta\), \(F_{\perp} = mg\cos\theta\).<br>
+        This is because the angle θ of the slope is measured <strong>from the horizontal</strong>,
+        but gravity points <strong>vertically</strong>. The angle between gravity
+        and the perpendicular-to-slope direction equals the slope angle θ.</p>
+    </div>
+    <canvas id="cvs-incline" class="interactive wide"></canvas>
+    <div class="slider-group">
+      <label>Slope θ:</label>
+      <input type="range" id="incline-slider" min="5" max="75" step="1" value="30" oninput="updateIncline()">
+      <span class="val" id="incline-val">30°</span>
+    </div>
+    <div class="component-readout">
+      <div class="comp-box x-comp">
+        <div class="comp-label">\(F_{\parallel} = mg\sin\theta\)</div>
+        <div class="comp-val" id="f-para-val">0.50 mg</div>
+      </div>
+      <div class="comp-box y-comp">
+        <div class="comp-label">\(F_{\perp} = mg\cos\theta\)</div>
+        <div class="comp-val" id="f-perp-val">0.87 mg</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vector Addition -->
+  <div class="card">
+    <h2>Adding Vectors: The Component Method</h2>
+    <p>To add two vectors \(\vec{A}\) and \(\vec{B}\):</p>
+    <ol style="color:var(--text);margin:8px 0 16px 24px;line-height:2.2;">
+      <li>Find components: \(A_x, A_y\) and \(B_x, B_y\)</li>
+      <li>Add components: \(R_x = A_x + B_x\), \(R_y = A_y + B_y\)</li>
+      <li>Find resultant magnitude: \(R = \sqrt{R_x^2 + R_y^2}\)</li>
+      <li>Find resultant angle: \(\theta = \tan^{-1}\!\left(\frac{R_y}{R_x}\right)\)</li>
+    </ol>
+    <canvas id="cvs-addition" class="interactive wide"></canvas>
+    <div class="slider-group">
+      <label>A angle:</label>
+      <input type="range" id="addA-angle" min="0" max="360" step="1" value="30" oninput="updateAddition()">
+      <span class="val" id="addA-angle-val">30°</span>
+    </div>
+    <div class="slider-group">
+      <label>A magnitude:</label>
+      <input type="range" id="addA-mag" min="5" max="80" step="1" value="50" oninput="updateAddition()">
+      <span class="val" id="addA-mag-val">50</span>
+    </div>
+    <div class="slider-group">
+      <label>B angle:</label>
+      <input type="range" id="addB-angle" min="0" max="360" step="1" value="120" oninput="updateAddition()">
+      <span class="val" id="addB-angle-val">120°</span>
+    </div>
+    <div class="slider-group">
+      <label>B magnitude:</label>
+      <input type="range" id="addB-mag" min="5" max="80" step="1" value="40" oninput="updateAddition()">
+      <span class="val" id="addB-mag-val">40</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0;">
+      <div class="comp-box" style="border-color:var(--green);">
+        <div class="comp-label" style="color:var(--muted);">Vector A</div>
+        <div class="comp-val" style="color:var(--green);font-size:0.95rem;" id="add-a-info">50 at 30°</div>
+      </div>
+      <div class="comp-box" style="border-color:#a78bfa;">
+        <div class="comp-label" style="color:var(--muted);">Vector B</div>
+        <div class="comp-val" style="color:#a78bfa;font-size:0.95rem;" id="add-b-info">40 at 120°</div>
+      </div>
+      <div class="comp-box" style="border-color:var(--accent2);">
+        <div class="comp-label" style="color:var(--muted);">Resultant R</div>
+        <div class="comp-val" style="color:var(--accent2);font-size:0.95rem;" id="add-r-info">—</div>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:0.82rem;color:var(--muted);">
+      🎮 Change angles and magnitudes. The <strong style="color:var(--accent2);">yellow dashed resultant</strong> updates automatically.</p>
+  </div>
+
+  <div class="nav-row">
+    <div></div>
+    <button class="btn btn-primary" onclick="goTo(1)">Check My Understanding →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 1 — Concept Check
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-1">
+<div class="container">
+  <div class="section-tag">Section 2 of 6 — Concept Check</div>
+  <h1>Let's See What <span style="color:var(--accent)">You Know! 🧠</span></h1>
+  <p>Answer these questions before we move to examples.</p>
+  <div class="cc-grid" id="cc-container"></div>
+  <div id="cc-feedback" class="feedback info" style="margin-top:10px;"></div>
+  <div id="cc-result" style="display:none;" class="card green">
+    <h3 id="cc-result-title"></h3>
+    <p id="cc-result-msg"></p>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(0)">← Review Concepts</button>
+    <button class="btn btn-primary" id="cc-next-btn" onclick="goTo(2)" disabled>See Worked Example →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 2 — Worked Example
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-2">
+<div class="container">
+  <div class="section-tag">Section 3 of 6 — Worked Example</div>
+  <h1>Example: <span style="color:var(--accent)">Force Components 🔧</span></h1>
+
+  <div class="card amber">
+    <h3>Problem 1</h3>
+    <p style="color:var(--text);">A person pushes a box with a force of <strong>50 N</strong> at an angle of
+      <strong>37° above the horizontal</strong>. Find the horizontal and vertical components of this force.</p>
+  </div>
+
+  <canvas id="cvs-ex1" class="interactive" style="height:260px;"></canvas>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+      <div>
+        <strong>Draw the picture & identify the angle</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Label the force, angle, and axes</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex1-s1')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex1-s1">
+      <p style="color:var(--text);font-size:0.92rem;">The force \(\vec{F} = 50\) N points at \(\theta = 37°\) above the positive x-axis.
+        Since the angle is measured from the horizontal (x-axis), we use the <strong>standard formulas</strong> directly.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+      <div>
+        <strong>Find \(F_x\) using cosine</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Horizontal component</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex1-s2')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex1-s2">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ F_x = F\cos\theta = 50 \times \cos(37°) = 50 \times 0.7986 = \boxed{39.9\ \text{N}} \]
+      </div>
+      <p style="color:var(--muted);font-size:0.88rem;"><strong style="color:#f97316;">Cos</strong> gives the <strong>adjacent</strong> (horizontal) component.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+      <div>
+        <strong>Find \(F_y\) using sine</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Vertical component</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex1-s3')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex1-s3">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ F_y = F\sin\theta = 50 \times \sin(37°) = 50 \times 0.6018 = \boxed{30.1\ \text{N}} \]
+      </div>
+      <p style="color:var(--muted);font-size:0.88rem;"><strong style="color:#22d3ee;">Sin</strong> gives the <strong>opposite</strong> (vertical) component.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">4</div>
+      <div>
+        <strong>Verify with Pythagorean theorem</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">Should get back 50 N</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex1-s4')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex1-s4">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ F = \sqrt{F_x^2 + F_y^2} = \sqrt{39.9^2 + 30.1^2} = \sqrt{2498} \approx 50.0\ \text{N}\ \checkmark \]
+      </div>
+    </div>
+  </div>
+
+  <!-- Problem 2: Inclined plane -->
+  <div class="card amber" style="margin-top:32px;">
+    <h3>Problem 2: Block on a Slope</h3>
+    <p style="color:var(--text);">A 10 kg block sits on a 30° inclined plane. Find the component of gravity
+      <strong>along the slope</strong> and <strong>perpendicular to the slope</strong>.</p>
+  </div>
+
+  <canvas id="cvs-ex2" class="interactive" style="height:280px;"></canvas>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+      <div>
+        <strong>Set up the rotated coordinate system</strong>
+        <p style="margin:0;font-size:0.88rem;color:var(--muted);">x along slope, y perpendicular to slope</p>
+      </div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex2-s1')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex2-s1">
+      <p style="color:var(--text);font-size:0.92rem;">
+        Weight: \(mg = 10 \times 9.80 = 98\ \text{N}\) pointing straight down.<br>
+        On a slope, the angle between \(\vec{mg}\) and the perpendicular-to-slope direction equals the slope angle \(\theta = 30°\).<br>
+        <strong>This is why the formulas swap!</strong></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="background:var(--accent);color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+      <div><strong>Calculate both components</strong></div>
+      <button class="btn btn-secondary" style="margin-left:auto;padding:8px 16px;font-size:0.85rem;" onclick="revealStep('ex2-s2')">Show Step</button>
+    </div>
+    <div class="step-block" id="ex2-s2">
+      <div class="formula-box" style="text-align:left;font-size:0.95rem;">
+        \[ F_{\parallel} = mg\sin\theta = 98 \times \sin(30°) = 98 \times 0.5 = \boxed{49\ \text{N}} \]
+        \[ F_{\perp} = mg\cos\theta = 98 \times \cos(30°) = 98 \times 0.866 = \boxed{84.9\ \text{N}} \]
+      </div>
+      <p style="color:var(--muted);font-size:0.88rem;">Check: \(\sqrt{49^2 + 84.9^2} \approx 98\ \text{N}\) ✓</p>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(1)">← Concept Check</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Your Turn! 🚀 →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 3 — Student Practice
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-3">
+<div class="container">
+  <div class="section-tag">Section 4 of 6 — Your Turn!</div>
+  <h1>Solve It <span style="color:var(--accent)">Yourself 🚀</span></h1>
+
+  <div class="card amber">
+    <h3>Problem</h3>
+    <p style="color:var(--text);">A ball is launched with an initial velocity of <strong>25 m/s</strong> at an angle of
+      <strong>53° above the horizontal</strong>. What is the <strong>horizontal component</strong> \(v_x\) of the velocity?</p>
+  </div>
+
+  <canvas id="cvs-practice" class="interactive" style="height:240px;"></canvas>
+
+  <div class="card">
+    <h3>Calculate \(v_x\)</h3>
+    <p style="color:var(--muted);font-size:0.88rem;">Hint: The angle is measured from the horizontal, so \(v_x = v\cos\theta\).</p>
+    <div class="input-row">
+      <label>\(v_x\) (m/s):</label>
+      <input type="text" id="ans-practice" placeholder="e.g. 25*cos(53*pi/180)">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkPractice()">Check ✓</button>
+    </div>
+    <div id="feedback-practice" class="feedback"></div>
+    <div id="expr-hint-practice"></div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <h3>Bonus: Calculate \(v_y\)</h3>
+    <p style="color:var(--muted);font-size:0.88rem;">What is the vertical component?</p>
+    <div class="input-row">
+      <label>\(v_y\) (m/s):</label>
+      <input type="text" id="ans-practice2" placeholder="e.g. 25*sin(53*pi/180)">
+      <button class="btn btn-primary" style="padding:10px 18px;" onclick="checkPractice2()">Check ✓</button>
+    </div>
+    <div id="feedback-practice2" class="feedback"></div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(2)">← Worked Example</button>
+    <button class="btn btn-primary" id="practice-next" onclick="goTo(4)" disabled>Take the Quiz →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 4 — Quiz
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-4">
+<div class="container">
+  <div class="section-tag">Section 5 of 6 — Quiz</div>
+  <h1>Quiz Time! <span style="color:var(--accent)">⚡</span></h1>
+  <p>Test your full understanding of vectors and components!</p>
+  <div id="quiz-container"></div>
+  <div id="quiz-result" style="display:none;">
+    <div class="card glow">
+      <div class="score-final">
+        <div class="score-circle">
+          <div class="num" id="quiz-score-num">0</div>
+          <div class="den" id="quiz-score-den">/ 0</div>
+        </div>
+        <h2 id="quiz-result-title"></h2>
+        <p id="quiz-result-msg"></p>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(3)">← Practice</button>
+    <button class="btn btn-primary" id="quiz-next-btn" onclick="goTo(5)" disabled>Homework →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 5 — Homework
+     ═══════════════════════════════════════ -->
+<div class="section" id="sec-5">
+<div class="container">
+  <div class="section-tag">Section 6 of 6 — Homework</div>
+  <h1>Homework <span style="color:var(--accent)">Problems 📝</span></h1>
+  <p>Work through these problems. Use the step-by-step guide!</p>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 1</div>
+    <p style="color:var(--text);margin-bottom:12px;">
+      A rope pulls a sled with a force of <strong>120 N</strong> at <strong>25° above the horizontal</strong>.
+      Find the horizontal and vertical components of the tension force.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw1')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw1" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw1" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      \(T_x = 120\cos(25°) = 108.7\ \text{N}\), \(T_y = 120\sin(25°) = 50.7\ \text{N}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 2</div>
+    <p style="color:var(--text);margin-bottom:12px;">
+      A 5 kg box slides down a <strong>40° incline</strong>.
+      Find the component of gravity <strong>along the slope</strong> and <strong>perpendicular to the slope</strong>.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw2')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw2" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw2" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      \(F_{\parallel} = 49\sin(40°) = 31.5\ \text{N}\), \(F_{\perp} = 49\cos(40°) = 37.5\ \text{N}\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 3</div>
+    <p style="color:var(--text);margin-bottom:12px;">
+      Two forces act on an object: \(\vec{F_1} = 80\) N at 0° and \(\vec{F_2} = 60\) N at 90°.
+      Find the <strong>magnitude</strong> and <strong>direction</strong> of the resultant force.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw3')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw3" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw3" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      \(R = \sqrt{80^2+60^2} = 100\ \text{N}\), \(\theta = \tan^{-1}(60/80) = 36.9°\)
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 4</div>
+    <p style="color:var(--text);margin-bottom:12px;">
+      A velocity vector has components \(v_x = -12\) m/s and \(v_y = 16\) m/s.
+      Find the <strong>magnitude</strong> and <strong>direction</strong> (angle from +x axis).</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw4')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw4" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw4" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      \(v = 20\ \text{m/s}\), \(\theta = 126.9°\) from +x axis (Quadrant II).
+    </div>
+  </div>
+
+  <div class="hw-item">
+    <div class="hw-num">Problem 5</div>
+    <p style="color:var(--text);margin-bottom:12px;">
+      A car on a banked curve (bank angle <strong>20°</strong>). The normal force is <strong>12,000 N</strong>.
+      Find the horizontal and vertical components of the normal force.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="padding:6px 16px;font-size:0.82rem;" onclick="startHW('hw5')">📋 Guide Me Step by Step</button>
+    </div>
+    <div id="hw-steps-hw5" style="display:none;margin-top:14px;"></div>
+    <div id="hw-ans-hw5" style="display:none;margin-top:12px;padding:14px;background:rgba(34,197,94,0.07);border-radius:8px;border:1px solid var(--green);font-size:0.88rem;color:#86efac;">
+      \(N_x = 12000\sin(20°) = 4104\ \text{N}\), \(N_y = 12000\cos(20°) = 11276\ \text{N}\)
+    </div>
+  </div>
+
+  <div class="card glow" style="margin-top:30px;text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:8px;">📐</div>
+    <h2>Lesson Complete!</h2>
+    <p>Total Score: <strong style="color:var(--accent);font-size:1.2rem;" id="final-score-display">—</strong></p>
+    <button class="btn btn-primary" style="margin-top:12px;" onclick="goTo(0)">🔄 Restart Lesson</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-secondary" onclick="goTo(4)">← Quiz</button>
+    <div></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script>
+// ═══════════════════════════════════════════════════════════
+// LESSON DATA
+// ═══════════════════════════════════════════════════════════
+
+window.ccQuestions = [
+  {
+    q: "Which of these is a <strong>vector</strong> quantity?",
+    opts: ["Temperature", "Mass", "Velocity", "Energy"],
+    ans: 2,
+    explain: "✅ Velocity has both magnitude and direction, making it a vector. The others are scalars."
+  },
+  {
+    q: "A force of 100 N acts at 60° above the horizontal. The horizontal component \\(F_x\\) is:",
+    opts: ["\\(100\\sin(60°)\\)", "\\(100\\cos(60°)\\)", "\\(100\\tan(60°)\\)", "\\(100 / \\cos(60°)\\)"],
+    ans: 1,
+    explain: "✅ When the angle is from the x-axis, use cos for the x-component: \\(F_x = F\\cos\\theta\\)."
+  },
+  {
+    q: "A vector points into <strong>Quadrant III</strong> (down-left). The signs of its components are:",
+    opts: ["\\(V_x > 0,\\ V_y > 0\\)", "\\(V_x < 0,\\ V_y > 0\\)", "\\(V_x < 0,\\ V_y < 0\\)", "\\(V_x > 0,\\ V_y < 0\\)"],
+    ans: 2,
+    explain: "✅ In Quadrant III (180°–270°), both x and y components are negative."
+  },
+  {
+    q: "As angle θ increases from 0° to 90°, what happens to \\(F_x = F\\cos\\theta\\)?",
+    opts: ["Increases from 0 to F", "Stays constant at F", "Decreases from F to 0", "First increases then decreases"],
+    ans: 2,
+    explain: "✅ cos(0°)=1 and cos(90°)=0, so Fx decreases from F to 0. Try the slider in Section 1!"
+  }
+];
+
+window.quizData = [
+  {
+    type: 'mc',
+    q: 'A vector of magnitude 40 points at 90° from +x axis. Its components are:',
+    opts: ['\\(V_x=40,\\ V_y=0\\)', '\\(V_x=0,\\ V_y=40\\)', '\\(V_x=0,\\ V_y=-40\\)', '\\(V_x=-40,\\ V_y=0\\)'],
+    ans: 1,
+    explain: 'At 90°: cos(90°)=0 → Vx=0, sin(90°)=1 → Vy=40.'
+  },
+  {
+    type: 'calc',
+    q: 'A force of 200 N acts at 45° above horizontal. What is \\(F_x\\) in newtons?',
+    answer: 141.42,
+    tolerance: 0.03,
+    unit: 'N',
+    hint: 'Fx = F cos(45°). cos(45°) = √2/2 ≈ 0.707',
+    explain: 'Fx = 200 × cos(45°) = 200 × 0.7071 ≈ 141.4 N'
+  },
+  {
+    type: 'mc',
+    q: 'On a 30° inclined plane, the component of gravity <strong>along the slope</strong> is:',
+    opts: ['\\(mg\\cos(30°)\\)', '\\(mg\\sin(30°)\\)', '\\(mg\\tan(30°)\\)', '\\(mg / \\sin(30°)\\)'],
+    ans: 1,
+    explain: 'On an incline, along-slope = mg sin(θ) because θ is between gravity and the perpendicular.'
+  },
+  {
+    type: 'calc',
+    q: '\\(\\vec{A}\\) = 30 N at 0° and \\(\\vec{B}\\) = 40 N at 90°. Resultant magnitude (N)?',
+    answer: 50,
+    tolerance: 0.03,
+    unit: 'N',
+    hint: 'R = √(30² + 40²). Classic 3-4-5 triangle!',
+    explain: 'R = √(900+1600) = √2500 = 50 N'
+  },
+  {
+    type: 'calc',
+    q: 'Velocity = 60 m/s at 120° from +x. What is \\(v_x\\) in m/s?',
+    answer: -30,
+    tolerance: 0.05,
+    unit: 'm/s',
+    hint: 'vx = 60 cos(120°). cos(120°) is negative!',
+    explain: 'vx = 60 × cos(120°) = 60 × (−0.5) = −30 m/s'
+  },
+  {
+    type: 'mc',
+    q: 'To find the angle of a resultant from components \\(R_x\\) and \\(R_y\\), you use:',
+    opts: ['\\(\\theta = \\sin^{-1}(R_y/R)\\)', '\\(\\theta = \\cos^{-1}(R_x/R)\\)', '\\(\\theta = \\tan^{-1}(R_y/R_x)\\)', 'All of the above can work'],
+    ans: 3,
+    explain: 'All three can work, but tan⁻¹(Ry/Rx) is most common. Watch out for quadrant!'
+  }
+];
+
+window.hwSteps = {
+  hw1: [
+    { title: 'Step 1: Identify known values',
+      body: 'Force \\(F = 120\\) N, angle \\(\\theta = 25°\\) above horizontal.' },
+    { title: 'Step 2: Choose the right trig function',
+      body: 'Angle is from the horizontal (x-axis):<br>\\(T_x = F\\cos\\theta\\) and \\(T_y = F\\sin\\theta\\).' },
+    { title: 'Step 3: Calculate Tx',
+      body: '\\[T_x = 120\\cos(25°) = 120 \\times 0.906 = \\boxed{108.7\\ \\text{N}}\\]' },
+    { title: 'Step 4: Calculate Ty',
+      body: '\\[T_y = 120\\sin(25°) = 120 \\times 0.423 = \\boxed{50.7\\ \\text{N}}\\]' },
+    { title: 'Step 5: Verify',
+      body: '\\[\\sqrt{108.7^2 + 50.7^2} \\approx 120\\ \\text{N}\\ \\checkmark\\]' }
+  ],
+  hw2: [
+    { title: 'Step 1: Find the weight',
+      body: '\\(mg = 5 \\times 9.80 = 49\\ \\text{N}\\)' },
+    { title: 'Step 2: Remember the incline formulas',
+      body: 'On an incline:<br>Along slope: \\(F_{\\parallel} = mg\\sin\\theta\\)<br>Perpendicular: \\(F_{\\perp} = mg\\cos\\theta\\)<br><strong>sin with parallel, cos with perpendicular</strong> (the swap!).' },
+    { title: 'Step 3: Calculate F parallel',
+      body: '\\[F_{\\parallel} = 49\\sin(40°) = 49 \\times 0.643 = \\boxed{31.5\\ \\text{N}}\\]' },
+    { title: 'Step 4: Calculate F perpendicular',
+      body: '\\[F_{\\perp} = 49\\cos(40°) = 49 \\times 0.766 = \\boxed{37.5\\ \\text{N}}\\]' }
+  ],
+  hw3: [
+    { title: 'Step 1: Find components',
+      body: '\\(F_{1x}=80, F_{1y}=0\\)&emsp;\\(F_{2x}=0, F_{2y}=60\\)' },
+    { title: 'Step 2: Add components',
+      body: '\\(R_x = 80\\), \\(R_y = 60\\)' },
+    { title: 'Step 3: Find magnitude',
+      body: '\\[R = \\sqrt{80^2 + 60^2} = \\sqrt{10000} = \\boxed{100\\ \\text{N}}\\]' },
+    { title: 'Step 4: Find direction',
+      body: '\\[\\theta = \\tan^{-1}(60/80) = \\boxed{36.9°}\\]' }
+  ],
+  hw4: [
+    { title: 'Step 1: Identify components',
+      body: '\\(v_x = -12\\) m/s (left), \\(v_y = 16\\) m/s (up) → <strong>Quadrant II</strong>.' },
+    { title: 'Step 2: Find magnitude',
+      body: '\\[v = \\sqrt{(-12)^2 + 16^2} = \\sqrt{400} = \\boxed{20\\ \\text{m/s}}\\]' },
+    { title: 'Step 3: Reference angle',
+      body: '\\[\\alpha = \\tan^{-1}(16/12) = 53.1°\\]' },
+    { title: 'Step 4: Adjust for Quadrant II',
+      body: '\\[\\theta = 180° - 53.1° = \\boxed{126.9°}\\]' }
+  ],
+  hw5: [
+    { title: 'Step 1: Visualize',
+      body: 'Normal force is perpendicular to the banked road, making 20° with the vertical.' },
+    { title: 'Step 2: Identify geometry',
+      body: 'The angle between N and vertical = bank angle = 20°.<br>\\(N_x = N\\sin(20°)\\), \\(N_y = N\\cos(20°)\\).' },
+    { title: 'Step 3: Horizontal component',
+      body: '\\[N_x = 12000\\sin(20°) = \\boxed{4104\\ \\text{N}}\\]<br>This provides centripetal force!' },
+    { title: 'Step 4: Vertical component',
+      body: '\\[N_y = 12000\\cos(20°) = \\boxed{11276\\ \\text{N}}\\]<br>This balances the car\'s weight.' }
+  ]
+};
+
+window.practiceInputs = [['ans-practice', 'checkPractice'], ['ans-practice2', 'checkPractice2']];
+window.practiceHints  = ['expr-hint-practice'];
+
+// ═══════════════════════════════════════════════════════════
+// LESSON-SPECIFIC FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+
+var DEG = Math.PI / 180;
+var practice1Done = false, practice2Done = false;
+
+function checkPractice() {
+  var ans = parseAnswer(document.getElementById('ans-practice').value);
+  var fb = document.getElementById('feedback-practice');
+  var expected = 25 * Math.cos(53 * DEG);
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression.'; return; }
+  if (Math.abs(ans - expected) / Math.abs(expected) < 0.05) {
+    document.getElementById('ans-practice').className = 'correct-ans';
+    fb.className = 'feedback ok show'; fb.textContent = '🎉 Correct! vx = 25 cos(53°) ≈ 15.0 m/s';
+    if (!practice1Done) { addScore(10); practice1Done = true; }
+    checkPracticeDone();
+  } else {
+    document.getElementById('ans-practice').className = 'wrong-ans';
+    fb.className = 'feedback bad show'; fb.textContent = '❌ Not quite. vx = v cos(θ). Try again!';
+  }
+}
+function checkPractice2() {
+  var ans = parseAnswer(document.getElementById('ans-practice2').value);
+  var fb = document.getElementById('feedback-practice2');
+  var expected = 25 * Math.sin(53 * DEG);
+  if (isNaN(ans)) { fb.className='feedback bad show'; fb.textContent='Invalid expression.'; return; }
+  if (Math.abs(ans - expected) / Math.abs(expected) < 0.05) {
+    document.getElementById('ans-practice2').className = 'correct-ans';
+    fb.className = 'feedback ok show'; fb.textContent = '🎉 Correct! vy = 25 sin(53°) ≈ 20.0 m/s';
+    if (!practice2Done) { addScore(5); practice2Done = true; }
+    checkPracticeDone();
+  } else {
+    document.getElementById('ans-practice2').className = 'wrong-ans';
+    fb.className = 'feedback bad show'; fb.textContent = '❌ Not quite. vy = v sin(θ).';
+  }
+}
+function checkPracticeDone() {
+  if (practice1Done) {
+    document.getElementById('practice-next').disabled = false;
+    sectionDone[3] = true;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// CANVAS HELPERS
+// ═══════════════════════════════════════════════════════════
+
+function getCS(canvas) {
+  var rect = canvas.getBoundingClientRect();
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return { ctx: ctx, w: rect.width, h: rect.height };
+}
+
+function drawArrow(ctx, x1, y1, x2, y2, color, lw, hl) {
+  hl = hl || 12; lw = lw || 2.5;
+  var a = Math.atan2(y2 - y1, x2 - x1);
+  ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color;
+  ctx.lineWidth = lw; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - hl * Math.cos(a - 0.4), y2 - hl * Math.sin(a - 0.4));
+  ctx.lineTo(x2 - hl * Math.cos(a + 0.4), y2 - hl * Math.sin(a + 0.4));
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+
+function drawDashed(ctx, x1, y1, x2, y2, color, lw) {
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  ctx.setLineDash([]); ctx.restore();
+}
+
+function drawArc(ctx, cx, cy, r, sa, ea, color) {
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(cx, cy, r, -ea, -sa); ctx.stroke(); ctx.restore();
+}
+
+function drawAxes(ctx, ox, oy, w, h, lx, ly) {
+  ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(20, oy); ctx.lineTo(w - 10, oy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ox, h - 10); ctx.lineTo(ox, 10); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.beginPath(); ctx.moveTo(w - 10, oy); ctx.lineTo(w - 18, oy - 4); ctx.lineTo(w - 18, oy + 4); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(ox, 10); ctx.lineTo(ox - 4, 18); ctx.lineTo(ox + 4, 18); ctx.closePath(); ctx.fill();
+  ctx.font = '13px system-ui'; ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillText(lx || 'x', w - 22, oy + 18);
+  ctx.fillText(ly || 'y', ox + 10, 22);
+  ctx.restore();
+}
+
+// ══════════════════════════════════════════════════
+// 1. VECTOR ANATOMY CANVAS (draggable)
+// ══════════════════════════════════════════════════
+var aTip = { x: 160, y: -100 }, aDrag = false;
+
+function drawAnatomy() {
+  var c = document.getElementById('cvs-anatomy'); if (!c) return;
+  var s = getCS(c), ctx = s.ctx, w = s.w, h = s.h;
+  var ox = 80, oy = h - 50;
+  ctx.clearRect(0, 0, w, h);
+  drawAxes(ctx, ox, oy, w, h);
+  var tx = ox + aTip.x, ty = oy + aTip.y;
+  var mag = Math.sqrt(aTip.x * aTip.x + aTip.y * aTip.y);
+  var ang = Math.atan2(-aTip.y, aTip.x) / DEG;
+  if (ang < 0) ang += 360;
+  drawArrow(ctx, ox, oy, tx, ty, '#3b82f6', 3, 14);
+  ctx.save(); ctx.font = 'bold 14px system-ui'; ctx.fillStyle = '#3b82f6';
+  ctx.fillText('|V| = ' + mag.toFixed(0), (ox + tx) / 2 + 10, (oy + ty) / 2 - 8);
+  ctx.restore();
+  if (mag > 30) {
+    drawArc(ctx, ox, oy, 30, 0, ang * DEG, '#f59e0b');
+    var la = ang * DEG / 2;
+    ctx.save(); ctx.font = '13px system-ui'; ctx.fillStyle = '#f59e0b';
+    ctx.fillText('θ=' + ang.toFixed(0) + '°', ox + 40 * Math.cos(-la), oy + 40 * Math.sin(-la) + 4);
+    ctx.restore();
+  }
+  ctx.save(); ctx.font = '11px system-ui'; ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillText('tail', ox - 6, oy + 18);
+  ctx.fillText('tip ← drag me!', tx + 6, ty - 8);
+  ctx.restore();
+}
+
+(function() {
+  var c = document.getElementById('cvs-anatomy'); if (!c) return;
+  function gp(e) { var r = c.getBoundingClientRect(); return { x: (e.touches ? e.touches[0].clientX : e.clientX) - r.left, y: (e.touches ? e.touches[0].clientY : e.clientY) - r.top }; }
+  c.addEventListener('mousedown', function(e) { var p = gp(e), ox = 80, oy = c.getBoundingClientRect().height - 50; if (Math.abs(p.x - ox - aTip.x) < 30 && Math.abs(p.y - oy - aTip.y) < 30) { aDrag = true; e.preventDefault(); } });
+  c.addEventListener('mousemove', function(e) { if (!aDrag) return; e.preventDefault(); var p = gp(e), ox = 80, oy = c.getBoundingClientRect().height - 50; aTip.x = p.x - ox; aTip.y = p.y - oy; drawAnatomy(); });
+  c.addEventListener('mouseup', function() { aDrag = false; });
+  c.addEventListener('mouseleave', function() { aDrag = false; });
+  c.addEventListener('touchstart', function(e) { var p = gp(e), ox = 80, oy = c.getBoundingClientRect().height - 50; if (Math.abs(p.x - ox - aTip.x) < 40 && Math.abs(p.y - oy - aTip.y) < 40) { aDrag = true; e.preventDefault(); } }, { passive: false });
+  c.addEventListener('touchmove', function(e) { if (!aDrag) return; e.preventDefault(); var p = gp(e), ox = 80, oy = c.getBoundingClientRect().height - 50; aTip.x = p.x - ox; aTip.y = p.y - oy; drawAnatomy(); }, { passive: false });
+  c.addEventListener('touchend', function() { aDrag = false; });
+})();
+
+// ══════════════════════════════════════════════════
+// 2. VECTOR COMPONENT EXPLORER
+// ══════════════════════════════════════════════════
+function updateComponents() {
+  var ad = parseFloat(document.getElementById('angle-slider').value);
+  var mg = parseFloat(document.getElementById('mag-slider').value);
+  var ar = ad * DEG, vx = mg * Math.cos(ar), vy = mg * Math.sin(ar);
+  document.getElementById('angle-val').textContent = ad + '°';
+  document.getElementById('mag-val').textContent = mg;
+  document.getElementById('vx-val').textContent = vx.toFixed(2);
+  document.getElementById('vy-val').textContent = vy.toFixed(2);
+  drawCompCanvas(ad, mg, vx, vy);
+}
+
+function drawCompCanvas(ad, mg, vx, vy) {
+  var c = document.getElementById('cvs-components'); if (!c) return;
+  var s = getCS(c), ctx = s.ctx, w = s.w, h = s.h;
+  var ox = w * 0.35, oy = h * 0.65;
+  var sc = Math.min((w - 80) / 120, (h - 80) / 120);
+  var ex = ox + vx * sc, ey = oy - vy * sc;
+  ctx.clearRect(0, 0, w, h);
+  drawAxes(ctx, ox, oy, w, h);
+  // dashed projections
+  drawDashed(ctx, ex, ey, ex, oy, '#22d3ee', 2);
+  drawDashed(ctx, ex, ey, ox, ey, '#f97316', 2);
+  // x-component
+  if (Math.abs(vx) > 0.5) drawArrow(ctx, ox, oy, ex, oy, '#f97316', 2.5, 10);
+  // y-component
+  if (Math.abs(vy) > 0.5) drawArrow(ctx, ox, oy, ox, ey, '#22d3ee', 2.5, 10);
+  // main vector
+  drawArrow(ctx, ox, oy, ex, ey, '#3b82f6', 3, 14);
+  // angle arc
+  var ar2 = Math.min(40, mg * sc * 0.3);
+  if (ar2 > 10) drawArc(ctx, ox, oy, ar2, 0, ad * DEG, '#f59e0b');
+  // labels
+  ctx.save(); ctx.font = 'bold 13px system-ui';
+  if (ar2 > 15) { var la = ad * DEG / 2; ctx.fillStyle = '#f59e0b'; ctx.fillText('θ=' + ad + '°', ox + (ar2 + 14) * Math.cos(-la), oy + (ar2 + 14) * Math.sin(-la) + 4); }
+  ctx.fillStyle = '#3b82f6'; ctx.fillText('V=' + mg, (ox + ex) / 2 + 8, (oy + ey) / 2 - 8);
+  ctx.fillStyle = '#f97316'; ctx.fillText('Vx=' + vx.toFixed(1), (ox + ex) / 2, oy + 20);
+  ctx.fillStyle = '#22d3ee'; ctx.fillText('Vy=' + vy.toFixed(1), ox - 70, (oy + ey) / 2 + 4);
+  ctx.restore();
+  // right-angle indicator
+  if (Math.abs(vx) > 3 && Math.abs(vy) > 3) {
+    var sz = 8, sx = vx > 0 ? -sz : sz, sy = vy > 0 ? sz : -sz;
+    ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(ex + sx, oy); ctx.lineTo(ex + sx, oy + sy); ctx.lineTo(ex, oy + sy); ctx.stroke(); ctx.restore();
+  }
+}
+
+// ══════════════════════════════════════════════════
+// 3. COMMON ANGLES TABLE
+// ══════════════════════════════════════════════════
+function buildAngleTable() {
+  var ct = document.getElementById('angle-table'); if (!ct) return;
+  var angs = [0, 30, 45, 60, 90];
+  var cosV = ['1', '√3/2≈0.87', '√2/2≈0.71', '1/2=0.50', '0'];
+  var sinV = ['0', '1/2=0.50', '√2/2≈0.71', '√3/2≈0.87', '1'];
+  angs.forEach(function(a, i) {
+    var d = document.createElement('div'); d.className = 'vis-cell';
+    var cv = document.createElement('canvas'); cv.width = 160; cv.height = 160;
+    cv.style.width = '100%'; cv.style.height = '80px';
+    d.innerHTML = '<div class="angle-label">' + a + '°</div>';
+    d.appendChild(cv);
+    d.innerHTML += '<div class="trig-vals"><span style="color:#f97316;">cos=' + cosV[i] + '</span><br><span style="color:#22d3ee;">sin=' + sinV[i] + '</span></div>';
+    ct.appendChild(d);
+    var cx = cv.getContext('2d'), cw = 160, ch = 160, ocx = 30, ocy = ch - 30, r = 90;
+    var rad = a * DEG, ex = ocx + r * Math.cos(rad), ey = ocy - r * Math.sin(rad);
+    cx.strokeStyle = 'rgba(255,255,255,0.15)'; cx.lineWidth = 1;
+    cx.beginPath(); cx.moveTo(10, ocy); cx.lineTo(cw - 5, ocy); cx.stroke();
+    cx.beginPath(); cx.moveTo(ocx, ch - 5); cx.lineTo(ocx, 5); cx.stroke();
+    if (Math.abs(Math.cos(rad)) > 0.01) { cx.strokeStyle = '#f97316'; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(ocx, ocy); cx.lineTo(ex, ocy); cx.stroke(); }
+    if (Math.abs(Math.sin(rad)) > 0.01) { cx.strokeStyle = '#22d3ee'; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(ocx, ocy); cx.lineTo(ocx, ey); cx.stroke(); }
+    cx.strokeStyle = '#3b82f6'; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(ocx, ocy); cx.lineTo(ex, ey); cx.stroke();
+    var aa = Math.atan2(ocy - ey, ex - ocx);
+    cx.fillStyle = '#3b82f6'; cx.beginPath(); cx.moveTo(ex, ey);
+    cx.lineTo(ex - 10 * Math.cos(aa - 0.5), ey + 10 * Math.sin(aa - 0.5));
+    cx.lineTo(ex - 10 * Math.cos(aa + 0.5), ey + 10 * Math.sin(aa + 0.5));
+    cx.closePath(); cx.fill();
+  });
+}
+
+// ══════════════════════════════════════════════════
+// 4. INCLINED PLANE CANVAS
+// ══════════════════════════════════════════════════
+function updateIncline() {
+  var ad = parseFloat(document.getElementById('incline-slider').value);
+  document.getElementById('incline-val').textContent = ad + '°';
+  var rad = ad * DEG;
+  document.getElementById('f-para-val').textContent = Math.sin(rad).toFixed(2) + ' mg';
+  document.getElementById('f-perp-val').textContent = Math.cos(rad).toFixed(2) + ' mg';
+  drawIncline(ad);
+}
+
+function drawIncline(ad) {
+  var c = document.getElementById('cvs-incline'); if (!c) return;
+  var s = getCS(c), ctx = s.ctx, w = s.w, h = s.h;
+  var rad = ad * DEG;
+  ctx.clearRect(0, 0, w, h);
+
+  var bX = 60, bY = h - 60;
+  var tX = w - 60, tY = bY - (tX - bX) * Math.tan(rad);
+  tY = Math.max(40, tY);
+  // slope triangle
+  ctx.save(); ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(bX, bY); ctx.lineTo(tX, tY); ctx.lineTo(tX, bY); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+  // ground
+  ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(20, bY); ctx.lineTo(w - 20, bY); ctx.stroke(); ctx.restore();
+  // angle arc
+  drawArc(ctx, tX, bY, 45, Math.PI - rad, Math.PI, '#f59e0b');
+  ctx.save(); ctx.font = 'bold 13px system-ui'; ctx.fillStyle = '#f59e0b';
+  ctx.fillText('θ=' + ad + '°', tX - 80, bY - 14); ctx.restore();
+
+  // block position
+  var bp = 0.45;
+  var bx = bX + (tX - bX) * bp, by = bY + (tY - bY) * bp;
+  var bs = 26;
+  // draw block rotated
+  ctx.save(); ctx.translate(bx, by); ctx.rotate(-rad);
+  ctx.fillStyle = 'rgba(59,130,246,0.3)'; ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2;
+  ctx.fillRect(-bs / 2, -bs, bs, bs); ctx.strokeRect(-bs / 2, -bs, bs, bs);
+  ctx.restore();
+
+  // mg arrow (straight down)
+  var mgL = 100;
+  var bcy = by - bs * Math.cos(rad) / 2;
+  var bcx = bx + bs * Math.sin(rad) / 2;
+  drawArrow(ctx, bx, bcy, bx, bcy + mgL, '#e2e8f0', 3, 12);
+  ctx.save(); ctx.font = 'bold 14px system-ui'; ctx.fillStyle = '#e2e8f0';
+  ctx.fillText('mg', bx + 8, bcy + mgL - 5); ctx.restore();
+
+  // slope direction (downhill unit vector)
+  var sdx = bX - tX, sdy = bY - tY;
+  var sl = Math.sqrt(sdx * sdx + sdy * sdy); sdx /= sl; sdy /= sl;
+  // F parallel along slope
+  var fpL = mgL * Math.sin(rad);
+  drawArrow(ctx, bx, bcy, bx + sdx * fpL, bcy + sdy * fpL, '#f97316', 2.5, 10);
+  ctx.save(); ctx.font = 'bold 12px system-ui'; ctx.fillStyle = '#f97316';
+  ctx.fillText('mg sinθ', bx + sdx * fpL + 6, bcy + sdy * fpL - 4); ctx.restore();
+
+  // F perp (into slope)
+  var fnL = mgL * Math.cos(rad);
+  var px = Math.sin(rad), py = Math.cos(rad);
+  drawArrow(ctx, bx, bcy, bx + px * fnL, bcy + py * fnL, '#22d3ee', 2.5, 10);
+  ctx.save(); ctx.font = 'bold 12px system-ui'; ctx.fillStyle = '#22d3ee';
+  ctx.fillText('mg cosθ', bx + px * fnL + 6, bcy + py * fnL - 4); ctx.restore();
+
+  // dashed lines from mg tip to component tips
+  drawDashed(ctx, bx + sdx * fpL, bcy + sdy * fpL, bx, bcy + mgL, 'rgba(249,115,22,0.4)', 1);
+  drawDashed(ctx, bx + px * fnL, bcy + py * fnL, bx, bcy + mgL, 'rgba(34,211,238,0.4)', 1);
+
+  // label rotated axes
+  ctx.save(); ctx.font = '12px system-ui'; ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillText('x\' (along slope)', bX + 10, bY - 16);
+  ctx.fillText('y\' (⊥ slope)', tX - 20, tY - 10); ctx.restore();
+}
+
+// ══════════════════════════════════════════════════
+// 5. VECTOR ADDITION CANVAS
+// ══════════════════════════════════════════════════
+function updateAddition() {
+  var aA = parseFloat(document.getElementById('addA-angle').value);
+  var aM = parseFloat(document.getElementById('addA-mag').value);
+  var bA = parseFloat(document.getElementById('addB-angle').value);
+  var bM = parseFloat(document.getElementById('addB-mag').value);
+  document.getElementById('addA-angle-val').textContent = aA + '°';
+  document.getElementById('addA-mag-val').textContent = aM;
+  document.getElementById('addB-angle-val').textContent = bA + '°';
+  document.getElementById('addB-mag-val').textContent = bM;
+  var ax = aM * Math.cos(aA * DEG), ay = aM * Math.sin(aA * DEG);
+  var bx = bM * Math.cos(bA * DEG), by = bM * Math.sin(bA * DEG);
+  var rx = ax + bx, ry = ay + by;
+  var rM = Math.sqrt(rx * rx + ry * ry);
+  var rA = Math.atan2(ry, rx) / DEG; if (rA < 0) rA += 360;
+  document.getElementById('add-a-info').textContent = aM + ' at ' + aA + '°';
+  document.getElementById('add-b-info').textContent = bM + ' at ' + bA + '°';
+  document.getElementById('add-r-info').textContent = rM.toFixed(1) + ' at ' + rA.toFixed(1) + '°';
+  drawAddCanvas(ax, ay, bx, by, rx, ry);
+}
+
+function drawAddCanvas(ax, ay, bx, by, rx, ry) {
+  var c = document.getElementById('cvs-addition'); if (!c) return;
+  var s = getCS(c), ctx = s.ctx, w = s.w, h = s.h;
+  var ox = w * 0.4, oy = h * 0.55;
+  var pts = [Math.abs(ax), Math.abs(ay), Math.abs(ax + bx), Math.abs(ay + by), Math.abs(bx), Math.abs(by), Math.abs(rx), Math.abs(ry)];
+  var mv = Math.max.apply(null, pts.concat([1]));
+  var sc = Math.min((w - 100) / (mv * 2.4), (h - 80) / (mv * 2.4));
+  ctx.clearRect(0, 0, w, h);
+  drawAxes(ctx, ox, oy, w, h);
+
+  var aEx = ox + ax * sc, aEy = oy - ay * sc;
+  var bEx = aEx + bx * sc, bEy = aEy - by * sc;
+
+  // A from origin
+  drawArrow(ctx, ox, oy, aEx, aEy, '#22c55e', 3, 12);
+  // B from tip of A
+  drawArrow(ctx, aEx, aEy, bEx, bEy, '#a78bfa', 3, 12);
+  // Resultant
+  drawDashed(ctx, ox, oy, bEx, bEy, '#f59e0b', 2);
+  drawArrow(ctx, ox, oy, bEx, bEy, '#f59e0b', 2.5, 12);
+
+  ctx.save(); ctx.font = 'bold 14px system-ui';
+  ctx.fillStyle = '#22c55e'; ctx.fillText('A', (ox + aEx) / 2 - 16, (oy + aEy) / 2 - 8);
+  ctx.fillStyle = '#a78bfa'; ctx.fillText('B', (aEx + bEx) / 2 + 8, (aEy + bEy) / 2 - 8);
+  ctx.fillStyle = '#f59e0b'; ctx.fillText('R = A + B', (ox + bEx) / 2 + 8, (oy + bEy) / 2 + 18);
+  ctx.restore();
+
+  // Tip-to-tail label
+  ctx.save(); ctx.font = '11px system-ui'; ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillText('tip-to-tail method', ox + 6, oy + 24); ctx.restore();
+}
+
+// ══════════════════════════════════════════════════
+// 6. WORKED EXAMPLE CANVASES
+// ══════════════════════════════════════════════════
+function drawEx1() {
+  var c = document.getElementById('cvs-ex1'); if (!c) return;
+  var s = getCS(c), ctx = s.ctx, w = s.w, h = s.h;
+  var ox = 80, oy = h - 60;
+  ctx.clearRect(0, 0, w, h);
+  drawAxes(ctx, ox, oy, w, h);
+  var mag = 50, ang = 37, rad = ang * DEG;
+  var sc = (w - 160) / 60;
+  var vx = mag * Math.cos(rad) * sc, vy = mag * Math.sin(rad) * sc;
+  var ex = ox + vx, ey = oy - vy;
+  // dashed
+  drawDashed(ctx, ex, ey, ex, oy, '#22d3ee', 2);
+  drawDashed(ctx, ex, ey, ox, ey, '#f97316', 2);
+  // components
+  drawArrow(ctx, ox, oy, ex, oy, '#f97316', 2.5, 10);
+  drawArrow(ctx, ox, oy, ox, ey, '#22d3ee', 2.5, 10);
+  // main
+  drawArrow(ctx, ox, oy, ex, ey, '#3b82f6', 3, 14);
+  // labels
+  drawArc(ctx, ox, oy, 35, 0, rad, '#f59e0b');
+  ctx.save(); ctx.font = 'bold 13px system-ui';
+  ctx.fillStyle = '#f59e0b'; ctx.fillText('37°', ox + 42, oy - 14);
+  ctx.fillStyle = '#3b82f6'; ctx.fillText('F = 50 N', (ox + ex) / 2 + 6, (oy + ey) / 2 - 10);
+  ctx.fillStyle = '#f97316'; ctx.fillText('Fx = 39.9 N', (ox + ex) / 2, oy + 20);
+  ctx.fillStyle = '#22d3ee'; ctx.fillText('Fy = 30.1 N', ox - 80, (oy + ey) / 2 + 4);
+  ctx.restore();
+  // right-angle
+  ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(ex - 8, oy); ctx.lineTo(ex - 8, oy + 8); ctx.lineTo(ex, oy + 8); ctx.stroke(); ctx.restore();
+  // box
+  ctx.save(); ctx.fillStyle = 'rgba(59,130,246,0.2)'; ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2;
+  ctx.fillRect(ox - 30, oy - 20, 30, 20); ctx.strokeRect(ox - 30, oy - 20, 30, 20);
+  ctx.font = '10px system-ui'; ctx.fillStyle = '#3b82f6'; ctx.fillText('box', ox - 24, oy - 6);
+  ctx.restore();
+}
+
+function drawEx2() {
+  var c = document.getElementById('cvs-ex2'); if (!c) return;
+  drawInclineStatic(c, 30, 10);
+}
+
+function drawInclineStatic(canvas, angleDeg, mass) {
+  var s = getCS(canvas), ctx = s.ctx, w = s.w, h = s.h;
+  var rad = angleDeg * DEG;
+  ctx.clearRect(0, 0, w, h);
+  var bX = 60, bY = h - 60, tX = w - 60, tY = bY - (tX - bX) * Math.tan(rad);
+  tY = Math.max(40, tY);
+  ctx.save(); ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(bX, bY); ctx.lineTo(tX, tY); ctx.lineTo(tX, bY); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+  drawArc(ctx, tX, bY, 45, Math.PI - rad, Math.PI, '#f59e0b');
+  ctx.save(); ctx.font = 'bold 13px system-ui'; ctx.fillStyle = '#f59e0b';
+  ctx.fillText(angleDeg + '°', tX - 75, bY - 14); ctx.restore();
+  var bp = 0.45, bx = bX + (tX - bX) * bp, by = bY + (tY - bY) * bp, bs = 26;
+  ctx.save(); ctx.translate(bx, by); ctx.rotate(-rad);
+  ctx.fillStyle = 'rgba(59,130,246,0.3)'; ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2;
+  ctx.fillRect(-bs / 2, -bs, bs, bs); ctx.strokeRect(-bs / 2, -bs, bs, bs);
+  ctx.font = '10px system-ui'; ctx.fillStyle = '#3b82f6'; ctx.fillText(mass + ' kg', -bs / 2 + 2, -bs / 2 + 4);
+  ctx.restore();
+  var mgL = 100, bcy = by - bs * Math.cos(rad) / 2;
+  drawArrow(ctx, bx, bcy, bx, bcy + mgL, '#e2e8f0', 3, 12);
+  ctx.save(); ctx.font = 'bold 14px system-ui'; ctx.fillStyle = '#e2e8f0';
+  ctx.fillText('mg = 98 N', bx + 8, bcy + mgL - 5); ctx.restore();
+  var sdx = bX - tX, sdy = bY - tY, sl = Math.sqrt(sdx * sdx + sdy * sdy); sdx /= sl; sdy /= sl;
+  var fpL = mgL * Math.sin(rad);
+  drawArrow(ctx, bx, bcy, bx + sdx * fpL, bcy + sdy * fpL, '#f97316', 2.5, 10);
+  ctx.save(); ctx.font = 'bold 12px system-ui'; ctx.fillStyle = '#f97316';
+  ctx.fillText('49 N', bx + sdx * fpL + 6, bcy + sdy * fpL - 4); ctx.restore();
+  var fnL = mgL * Math.cos(rad), px = Math.sin(rad), py = Math.cos(rad);
+  drawArrow(ctx, bx, bcy, bx + px * fnL, bcy + py * fnL, '#22d3ee', 2.5, 10);
+  ctx.save(); ctx.font = 'bold 12px system-ui'; ctx.fillStyle = '#22d3ee';
+  ctx.fillText('84.9 N', bx + px * fnL + 6, bcy + py * fnL - 4); ctx.restore();
+  drawDashed(ctx, bx + sdx * fpL, bcy + sdy * fpL, bx, bcy + mgL, 'rgba(249,115,22,0.4)', 1);
+  drawDashed(ctx, bx + px * fnL, bcy + py * fnL, bx, bcy + mgL, 'rgba(34,211,238,0.4)', 1);
+}
+
+// Practice canvas
+function drawPractice() {
+  var c = document.getElementById('cvs-practice'); if (!c) return;
+  var s = getCS(c), ctx = s.ctx, w = s.w, h = s.h;
+  var ox = 80, oy = h - 50;
+  ctx.clearRect(0, 0, w, h);
+  drawAxes(ctx, ox, oy, w, h);
+  var mag = 25, ang = 53, rad = ang * DEG, sc = (w - 160) / 30;
+  var vx = mag * Math.cos(rad) * sc, vy = mag * Math.sin(rad) * sc;
+  var ex = ox + vx, ey = oy - vy;
+  drawDashed(ctx, ex, ey, ex, oy, '#22d3ee', 2);
+  drawDashed(ctx, ex, ey, ox, ey, '#f97316', 2);
+  drawArrow(ctx, ox, oy, ex, oy, '#f97316', 2.5, 10);
+  drawArrow(ctx, ox, oy, ox, ey, '#22d3ee', 2.5, 10);
+  drawArrow(ctx, ox, oy, ex, ey, '#3b82f6', 3, 14);
+  drawArc(ctx, ox, oy, 30, 0, rad, '#f59e0b');
+  ctx.save(); ctx.font = 'bold 13px system-ui';
+  ctx.fillStyle = '#f59e0b'; ctx.fillText('53°', ox + 36, oy - 20);
+  ctx.fillStyle = '#3b82f6'; ctx.fillText('v = 25 m/s', (ox + ex) / 2 + 6, (oy + ey) / 2 - 10);
+  ctx.fillStyle = '#f97316'; ctx.fillText('vx = ?', (ox + ex) / 2, oy + 20);
+  ctx.fillStyle = '#22d3ee'; ctx.fillText('vy = ?', ox - 50, (oy + ey) / 2 + 4);
+  ctx.restore();
+}
+
+// ══════════════════════════════════════════════════
+// INITIALIZE ALL CANVASES
+// ══════════════════════════════════════════════════
+function initCanvases() {
+  drawAnatomy();
+  updateComponents();
+  buildAngleTable();
+  updateIncline();
+  updateAddition();
+  drawEx1();
+  drawEx2();
+  drawPractice();
+}
+
+// Run on load and resize
+window.addEventListener('load', function() { setTimeout(initCanvases, 100); });
+window.addEventListener('resize', function() { setTimeout(initCanvases, 50); });
+</script>
+<script src="../common/lesson.js"></script>
+</body>
+</html>
